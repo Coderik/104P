@@ -52,6 +52,8 @@ void OpticalFlowContainer::set_flow(float *flow_x, float *flow_y, int size_x, in
 	_flow_y = flow_y;
 	_size_x = size_x;
 	_size_y = size_y;
+
+	internal_update();
 }
 
 

@@ -8,6 +8,8 @@
 #ifndef IMAGE_H_
 #define IMAGE_H_
 
+#include <algorithm>
+
 class Image
 {
 public:
@@ -19,6 +21,7 @@ public:
 	int GetYSize();
 	float GetPixelValue(int x, int y);
 	void SetPixelValue(int x, int y, double value);
+	void fill(float value);
 	Image* GetPatchBetweenPoints(int a_x, int a_y, int b_x, int b_y);
 	Image* GetPatchArountPoint(int center_x, int center_y, int x_size, int y_size);
 	Image* GetPatchArountPoint(int center_x, int center_y, int size);

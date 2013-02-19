@@ -7,6 +7,18 @@
 
 #include "headers/sequence.h"
 
+Sequence::Sequence(int x_size, int y_size, int t_size, float value)
+{
+	_x_size = x_size;
+	_y_size = y_size;
+	_t_size = t_size;
+
+	_frames = vector<Image* >(_t_size);
+
+	fill(value);
+}
+
+
 Sequence::Sequence(int x_size,int y_size,int t_size)
 {
 	_x_size = x_size;
@@ -16,6 +28,7 @@ Sequence::Sequence(int x_size,int y_size,int t_size)
 	_frames = vector<Image* >(_t_size);
 }
 
+
 Sequence::Sequence(int x_size,int y_size)
 {
 	_x_size = x_size;
@@ -24,6 +37,7 @@ Sequence::Sequence(int x_size,int y_size)
 
 	_frames = vector<Image* >();
 }
+
 
 Sequence::Sequence(Image *first_frame)
 {
@@ -54,6 +68,7 @@ int Sequence::GetTSize()
 	return _t_size;
 }
 
+
 double Sequence::GetPixelValue(int x, int y, int t)
 {
 	if (t < 0 || t > _t_size || !_frames[t])
@@ -61,6 +76,7 @@ double Sequence::GetPixelValue(int x, int y, int t)
 
 	return _frames[t]->GetPixelValue(x, y);
 }
+
 
 void Sequence::SetPixelValue(int x, int y, int t, double value)
 {
@@ -73,6 +89,20 @@ void Sequence::SetPixelValue(int x, int y, int t, double value)
 
 	_frames[t]->SetPixelValue(x, y, value);
 }
+
+
+void Sequence::fill(float value)
+{
+	for (int t = 0; t < _t_size; t++ ) {
+		if (!_frames[t]) {
+			_frames[t] = new Image(_x_size, _y_size);
+		}
+
+		_frames[t]->fill(value);
+	}
+}
+
+
 Image* Sequence::GetFrame(int t)
 {
 	if (t < 0 || t >= _t_size)

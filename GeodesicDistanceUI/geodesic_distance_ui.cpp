@@ -22,6 +22,7 @@ Geodesic_Distance_UI::Geodesic_Distance_UI()
 	_ui.background_work_infobar->signal_response().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::perceive_background_worker) );
 
 	_ui.patch_zoom_slider->signal_value_changed().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::set_patch_zoom) );
+	_ui.distance_mode_picker->signal_changed().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::set_distance_mode) );
 	_ui.patch_size_picker->signal_changed().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::set_patch_size) );
 	_ui.patch_duration_picker->signal_changed().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::set_patch_duration) );
 	_ui.image_control->signal_point_selected().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::set_patch_location) );
@@ -37,7 +38,7 @@ Geodesic_Distance_UI::Geodesic_Distance_UI()
 	_portion_ready_dispatcher.connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::take_optical_flow_frame) );
 
 	_sequence = 0;
-	_patch = 0;
+	_distances = 0;
 	_patch_scale = 1;
 
 	_ui.background_work_infobar->hide();
@@ -48,6 +49,10 @@ Geodesic_Distance_UI::Geodesic_Distance_UI()
 
 	_ui.patch_zoom_slider->set_range(1, MAX_PATCH_SCALE);
 	_ui.patch_zoom_slider->set_digits(0);
+
+	_ui.distance_mode_picker->append("patch_limit", "Use only patch points");
+	_ui.distance_mode_picker->append("extended_limit", "Use extended range (2x)");
+	_ui.distance_mode_picker->set_active(0);
 
 	for ( int i=5; i<=15; i+=2 ) {
 		_ui.patch_size_picker->append(Glib::ustring::compose("%1",i));
@@ -107,10 +112,10 @@ void Geodesic_Distance_UI::open_image()
 		_ui.time_slider->set_range(0, 0);
 
 		// Set initial coordinates
-		_patch_center_x = image->GetXSize() / 2;
-		_patch_center_y = image->GetYSize() / 2;
+		_patch_center.x = image->GetXSize() / 2;
+		_patch_center.y = image->GetYSize() / 2;
+		_patch_center.t = 0;
 		_current_time = 0;
-		_patch_time_offset = 0;
 		UpdateCoordinates();
 
 		// Replace single image with sequence of the only element for computational uniformity.
@@ -120,8 +125,9 @@ void Geodesic_Distance_UI::open_image()
 		update_image_control(_current_time);
 
 		// Get patch, then color representation of distances, then pixmap for the only time point and finally show it
-		_patch = _sequence->GetPatchArountPoint(_patch_center_x, _patch_center_y, 0, _patch_size, _patch_duration);
-		_color_representations = DrawDistanceRepresentaton(_patch, _distance_weight, _color_weight, _gamma);
+		Shape patch_size = Shape(_patch_size, _patch_size, _patch_duration);
+		_distances = calculate_distances(*_sequence,_patch_center, patch_size, 0, _distance_mode, _distance_weight, _color_weight);
+		_color_representations = draw_distances_with_color(*_distances, _gamma);
 		_patch_slice = _color_representations[0];
 		ShowPatchPixbuf(_patch_slice, _patch_scale);
 	}
@@ -197,10 +203,10 @@ void Geodesic_Distance_UI::open_sequence()
 
 		// Set initial coordinates
 		_sequence_folder = sequence_folder;
-		_patch_center_x = first_frame->GetXSize() / 2;
-		_patch_center_y = first_frame->GetYSize() / 2;
+		_patch_center.x = first_frame->GetXSize() / 2;
+		_patch_center.y = first_frame->GetYSize() / 2;
+		_patch_center.t = 0;
 		_current_time = 0;
-		_patch_time_offset = 0;
 		_optical_flow_list.clear();
 		_optical_flow_list = std::vector<OpticalFlow>(_sequence->GetTSize() - 1);
 		UpdateCoordinates();
@@ -209,9 +215,41 @@ void Geodesic_Distance_UI::open_sequence()
 		update_image_control(_current_time);
 
 		// Get patch, then color representation of distances, then pixmap for current time point and finally show it
-		_patch = _sequence->GetPatchArountPoint(_patch_center_x, _patch_center_y, _patch_time_offset + 1, _patch_size, _patch_duration);
-		_color_representations = DrawDistanceRepresentaton(_patch, _distance_weight, _color_weight, _gamma);
-		_patch_slice = GetDistanceRepresentatonByTime(_color_representations, _patch_time_offset, _current_time, _empty_pixmap);
+		Shape patch_size = Shape(_patch_size, _patch_size, _patch_duration);
+		_distances = calculate_distances(*_sequence,_patch_center, patch_size, 0, _distance_mode, _distance_weight, _color_weight);
+		_color_representations = draw_distances_with_color(*_distances, _gamma);
+		_patch_slice = GetDistanceRepresentatonByTime(_color_representations, _patch_center.t, _current_time, _empty_pixmap);
+		ShowPatchPixbuf(_patch_slice, _patch_scale);
+	}
+}
+
+
+void Geodesic_Distance_UI::set_distance_mode()
+{
+	// get new distance mode value
+	Glib::ustring id = _ui.distance_mode_picker->get_active_id();
+	DistanceMode mode;
+	if (id == "extended_limit") {
+		mode = extended_space;
+	} else if (id == "patch_limit") {
+		mode = patch_space;
+	} else {
+		mode = patch_space;
+	}
+
+	// check if new and old value differs
+	if (mode != _distance_mode) {
+		_distance_mode = mode;
+	} else {
+		return;
+	}
+
+	// update distances using new distance mode
+	if (_sequence) {
+		Shape patch_size = Shape(_patch_size, _patch_size, _patch_duration);
+		_distances = calculate_distances(*_sequence,_patch_center, patch_size, 0, _distance_mode, _distance_weight, _color_weight);
+		_color_representations = draw_distances_with_color(*_distances, _gamma);
+		_patch_slice = GetDistanceRepresentatonByTime(_color_representations, _patch_center.t, _current_time, _empty_pixmap);
 		ShowPatchPixbuf(_patch_slice, _patch_scale);
 	}
 }
@@ -241,10 +279,10 @@ void Geodesic_Distance_UI::set_patch_size()
 	_empty_pixmap = CreateEmptyPixbuf(_patch_size, _patch_size);
 
 	if (_sequence) {
-		int patch_time_center = _patch_time_offset + (int)(_patch_duration / 2);
-		_patch = _sequence->GetPatchArountPoint(_patch_center_x, _patch_center_y, patch_time_center, _patch_size, _patch_duration);
-		_color_representations = DrawDistanceRepresentaton(_patch, _distance_weight, _color_weight, _gamma);
-		_patch_slice = GetDistanceRepresentatonByTime(_color_representations, _patch_time_offset, _current_time, _empty_pixmap);
+		Shape patch_size = Shape(_patch_size, _patch_size, _patch_duration);
+		_distances = calculate_distances(*_sequence,_patch_center, patch_size, 0, _distance_mode, _distance_weight, _color_weight);
+		_color_representations = draw_distances_with_color(*_distances, _gamma);
+		_patch_slice = GetDistanceRepresentatonByTime(_color_representations, _patch_center.t, _current_time, _empty_pixmap);
 		ShowPatchPixbuf(_patch_slice, _patch_scale);
 	}
 }
@@ -265,8 +303,7 @@ void Geodesic_Distance_UI::set_patch_duration()
 	if (int_value == _patch_duration)
 		return;
 
-	int patch_time_center = _patch_time_offset + (int)(_patch_duration / 2);
-	int patch_time_offset = patch_time_center - (int)(int_value / 2);
+	int patch_time_offset = _patch_center.t - (int)(int_value / 2);
 
 	if (patch_time_offset < 0 || (_sequence && patch_time_offset + int_value >= _sequence->GetTSize() )) {
 		_ui.patch_duration_picker->set_active(0);
@@ -275,12 +312,12 @@ void Geodesic_Distance_UI::set_patch_duration()
 	}
 
 	_patch_duration = int_value;
-	_patch_time_offset = patch_time_offset;
 
 	if (_sequence) {
-		_patch = _sequence->GetPatchArountPoint(_patch_center_x, _patch_center_y, patch_time_center, _patch_size, _patch_duration);
-		_color_representations = DrawDistanceRepresentaton(_patch, _distance_weight, _color_weight, _gamma);
-		_patch_slice = GetDistanceRepresentatonByTime(_color_representations, _patch_time_offset, _current_time, _empty_pixmap);
+		Shape patch_size = Shape(_patch_size, _patch_size, _patch_duration);
+		_distances = calculate_distances(*_sequence,_patch_center, patch_size, 0, _distance_mode, _distance_weight, _color_weight);
+		_color_representations = draw_distances_with_color(*_distances, _gamma);
+		_patch_slice = GetDistanceRepresentatonByTime(_color_representations, _patch_center.t, _current_time, _empty_pixmap);
 		ShowPatchPixbuf(_patch_slice, _patch_scale);
 	}
 }
@@ -299,15 +336,14 @@ void Geodesic_Distance_UI::set_patch_location(int patch_center_x, int patch_cent
 			return;
 		}
 
-		_patch_center_x = patch_center_x;
-		_patch_center_y = patch_center_y;
+		_patch_center.x = patch_center_x;
+		_patch_center.y = patch_center_y;
+		_patch_center.t = _current_time;
 
-		int patch_time_center = _current_time;
-		_patch_time_offset= patch_time_center - (int)(_patch_duration / 2);
-		_patch = _sequence->GetPatchArountPoint(_patch_center_x, _patch_center_y, patch_time_center, _patch_size, _patch_duration);
-
-		_color_representations = DrawDistanceRepresentaton(_patch, _distance_weight, _color_weight, _gamma);
-		_patch_slice = GetDistanceRepresentatonByTime(_color_representations, _patch_time_offset, _current_time, _empty_pixmap);
+		Shape patch_size = Shape(_patch_size, _patch_size, _patch_duration);
+		_distances = calculate_distances(*_sequence,_patch_center, patch_size, 0, _distance_mode, _distance_weight, _color_weight);
+		_color_representations = draw_distances_with_color(*_distances, _gamma);
+		_patch_slice = GetDistanceRepresentatonByTime(_color_representations, _patch_center.t, _current_time, _empty_pixmap);
 		ShowPatchPixbuf(_patch_slice, _patch_scale);
 
 		UpdateCoordinates();
@@ -319,9 +355,11 @@ void Geodesic_Distance_UI::set_distance_weight()
 {
 	_distance_weight =_ui.distance_weight_slider->get_value();
 
-	if (_patch) {
-		_color_representations = DrawDistanceRepresentaton(_patch, _distance_weight, _color_weight, _gamma);
-		_patch_slice = GetDistanceRepresentatonByTime(_color_representations, _patch_time_offset, _current_time, _empty_pixmap);
+	if (_sequence) {
+		Shape patch_size = Shape(_patch_size, _patch_size, _patch_duration);
+		_distances = calculate_distances(*_sequence,_patch_center, patch_size, 0, _distance_mode, _distance_weight, _color_weight);
+		_color_representations = draw_distances_with_color(*_distances, _gamma);
+		_patch_slice = GetDistanceRepresentatonByTime(_color_representations, _patch_center.t, _current_time, _empty_pixmap);
 		ShowPatchPixbuf(_patch_slice, _patch_scale);
 	}
 }
@@ -331,9 +369,11 @@ void Geodesic_Distance_UI::set_color_weight()
 {
 	_color_weight = _ui.color_weight_slider->get_value();
 
-	if (_patch) {
-		_color_representations = DrawDistanceRepresentaton(_patch, _distance_weight, _color_weight, _gamma);
-		_patch_slice = GetDistanceRepresentatonByTime(_color_representations, _patch_time_offset, _current_time, _empty_pixmap);
+	if (_sequence) {
+		Shape patch_size = Shape(_patch_size, _patch_size, _patch_duration);
+		_distances = calculate_distances(*_sequence,_patch_center, patch_size, 0, _distance_mode, _distance_weight, _color_weight);
+		_color_representations = draw_distances_with_color(*_distances, _gamma);
+		_patch_slice = GetDistanceRepresentatonByTime(_color_representations, _patch_center.t, _current_time, _empty_pixmap);
 		ShowPatchPixbuf(_patch_slice, _patch_scale);
 	}
 }
@@ -343,9 +383,9 @@ void Geodesic_Distance_UI::set_gamma()
 {
 	_gamma = _ui.gamma_slider->get_value();
 
-	if (_patch) {
-		_color_representations = DrawDistanceRepresentaton(_patch, _distance_weight, _color_weight, _gamma);
-		_patch_slice = GetDistanceRepresentatonByTime(_color_representations, _patch_time_offset, _current_time, _empty_pixmap);
+	if (_distances) {
+		_color_representations = draw_distances_with_color(*_distances, _gamma);
+		_patch_slice = GetDistanceRepresentatonByTime(_color_representations, _patch_center.t, _current_time, _empty_pixmap);
 		ShowPatchPixbuf(_patch_slice, _patch_scale);
 	}
 }
@@ -358,7 +398,7 @@ void Geodesic_Distance_UI::set_time()
 	update_image_control(_current_time);
 
 	if (_color_representations.size() > 0) {
-		_patch_slice = GetDistanceRepresentatonByTime(_color_representations, _patch_time_offset, _current_time, _empty_pixmap);
+		_patch_slice = GetDistanceRepresentatonByTime(_color_representations, _patch_center.t, _current_time, _empty_pixmap);
 		ShowPatchPixbuf(_patch_slice, _patch_scale);
 	}
 }
@@ -369,20 +409,20 @@ bool Geodesic_Distance_UI::move_selected_point(GdkEventKey* event)
 	std::string key = event->string;
 
 	if (key.compare("w") == 0) {
-		if (_sequence && _patch_center_y > 1)
-			set_patch_location(_patch_center_x, _patch_center_y - 1);
+		if (_sequence && _patch_center.y > 1)
+			set_patch_location(_patch_center.x, _patch_center.y - 1);
 	}
 	if (key.compare("a") == 0) {
-		if (_sequence && _patch_center_x > 1)
-			set_patch_location(_patch_center_x - 1, _patch_center_y);
+		if (_sequence && _patch_center.x > 1)
+			set_patch_location(_patch_center.x - 1, _patch_center.y);
 	}
 	if (key.compare("s") == 0) {
-		if (_sequence && _patch_center_y < _sequence->GetYSize() - 1)
-			set_patch_location(_patch_center_x, _patch_center_y + 1);
+		if (_sequence && _patch_center.y < _sequence->GetYSize() - 1)
+			set_patch_location(_patch_center.x, _patch_center.y + 1);
 	}
 	if (key.compare("d") == 0) {
-		if (_sequence && _patch_center_x < _sequence->GetXSize() - 1)
-			set_patch_location(_patch_center_x + 1, _patch_center_y);
+		if (_sequence && _patch_center.x < _sequence->GetXSize() - 1)
+			set_patch_location(_patch_center.x + 1, _patch_center.y);
 	}
 
 	return false;
@@ -404,11 +444,11 @@ void Geodesic_Distance_UI::store_optical_flow(OpticalFlow &flow, int index)
 	std::string file_name = _sequence_folder;
 	file_name.append("optical_flow_data");
 
-	int x_size = _sequence->GetXSize();
-	int y_size = _sequence->GetYSize();
 	int chunks_count = _sequence->GetTSize() - 1;
-	float *flow_x = flow.get_flow_x();
-	float *flow_y = flow.get_flow_y();
+	//int x_size = _sequence->GetXSize();
+	//int y_size = _sequence->GetYSize();
+	//float *flow_x = flow.get_flow_x();
+	//float *flow_y = flow.get_flow_y();
 
 	//update_or_overwrite_flow(file_name, flow_x, flow_y, x_size, y_size, index, chunks_count);
 	update_or_overwrite_flow(file_name, flow, index, chunks_count);
@@ -504,39 +544,70 @@ Glib::RefPtr<Gdk::Pixbuf> Geodesic_Distance_UI::WrapRawImageData(Image *image)
 }
 
 
-Image* Geodesic_Distance_UI::DrawDistanceRepresentaton(Image* image, float alpha, float beta, float gamma)
+Sequence* Geodesic_Distance_UI::calculate_distances( Sequence &sequence,
+													const Point &patch_center,
+													const Shape &patch_size,
+													float distance_threshold,
+													DistanceMode mode,
+													float distance_weight,
+													float color_weight)
 {
-	IDistanceCalculation *distanceCalc = new SimpleDistanceCalculation(alpha, beta);
-	AbstractMarchingAlgorithm *marching = new DijkstraAlgorithm(distanceCalc);
+	//TODO: use refs instead of pointers
+	IDistanceCalculation *distanceCalc = new SimpleDistanceCalculation(distance_weight, color_weight);
+	DijkstraAlgorithm marching = DijkstraAlgorithm(distanceCalc);
 
-	vector<vector<float> > distances = marching->CalculateDistanceMatrix(image);
-	Image *distanceRepresentation =
-			marching->BuildColorDistanceRepresentation(distances, gamma);
+	Sequence *distances = 0;
+	switch(mode) {
+		case extended_space: {
+			float factor = 2.0;	// Note: hardcoded for the moment
+			int half_width = patch_size.size_x * factor / 2;
+			int half_height = patch_size.size_y * factor / 2;
+			int half_duration = patch_size.size_t * factor / 2;
+			int a_x = std::max(patch_center.x - half_width, 0);
+			int a_y = std::max(patch_center.y - half_height, 0);
+			int a_t = std::max(patch_center.t - half_duration, 0);
+			int b_x = std::min(patch_center.x + half_width, sequence.GetXSize());
+			int b_y = std::min(patch_center.y + half_height, sequence.GetYSize());
+			int b_t = std::min(patch_center.t + half_duration, sequence.GetTSize());
+			Sequence *extended_patch = sequence.GetPatchBetweenPoints(a_x, a_y, a_t, b_x, b_y, b_t);
+			Point center;
+			center.x = patch_center.x - a_x;
+			center.y = patch_center.y - a_y;
+			center.t = patch_center.t - a_t;
+			Sequence* buffer = marching.CalculateDistance(*extended_patch, patch_size, center);
+			distances = buffer->GetPatchArountPoint(center.x, center.y, center.t, patch_size.size_x, patch_size.size_t);
+			break;
+		}
+		case patch_space: {
+			Sequence *patch = sequence.GetPatchArountPoint(patch_center.x, patch_center.y, patch_center.t, patch_size.size_x, patch_size.size_t);
+			distances = marching.CalculateDistance(*patch);
+			break;
+		}
+		case threshold: {
+			distances = marching.CalculateDistance(sequence);
+			// TODO: implement. Use some kind of crop
+			break;
+		}
+	}
 
-	return distanceRepresentation;
+	return distances;
 }
 
 
-/**
- * Calculates distances for given sequence, then draws colored representation of distance values
- */
-vector<Glib::RefPtr<Gdk::Pixbuf> > Geodesic_Distance_UI::DrawDistanceRepresentaton(Sequence* sequence,
-																float distance_weight,
-																float color_weight,
-																float gamma)
+vector<Glib::RefPtr<Gdk::Pixbuf> > Geodesic_Distance_UI::draw_distances_with_color(Sequence &distances, float gamma)
 {
-	IDistanceCalculation *distanceCalc = new SimpleDistanceCalculation(distance_weight, color_weight);
-	AbstractMarchingAlgorithm *marching = new DijkstraAlgorithm(distanceCalc);
+	DijkstraAlgorithm marching = DijkstraAlgorithm(0);
 
-	vector<vector<vector<float> > > distances = marching->CalculateDistanceMatrix(sequence);
 	Sequence *distanceRepresentation =
-			marching->BuildColorDistanceRepresentation(distances, gamma);
+				marching.BuildColorDistanceRepresentation(distances, gamma);
 
-	int patch_duration = sequence->GetTSize();
+	int patch_duration = distances.GetTSize();
 	vector<Glib::RefPtr<Gdk::Pixbuf> > color_representations = vector<Glib::RefPtr<Gdk::Pixbuf> >(patch_duration);
 	for (int i=0; i<patch_duration; i++) {
 		color_representations[i] = WrapRawImageData(distanceRepresentation->GetFrame(i));
 	}
+
+	delete distanceRepresentation;
 
 	return color_representations;
 }
@@ -545,10 +616,11 @@ vector<Glib::RefPtr<Gdk::Pixbuf> > Geodesic_Distance_UI::DrawDistanceRepresentat
 /*
  * From colored representation selects one for corresponding time point
  */
-Glib::RefPtr<Gdk::Pixbuf> Geodesic_Distance_UI::GetDistanceRepresentatonByTime(vector<Glib::RefPtr<Gdk::Pixbuf> > representation, int patch_time_offset, int current_time, Glib::RefPtr<Gdk::Pixbuf> empty_pixbuf)
+Glib::RefPtr<Gdk::Pixbuf> Geodesic_Distance_UI::GetDistanceRepresentatonByTime(vector<Glib::RefPtr<Gdk::Pixbuf> > representation, int patch_time_center, int current_time, Glib::RefPtr<Gdk::Pixbuf> empty_pixbuf)
 {
-	int patch_time = current_time - patch_time_offset;
 	int patch_duration = representation.size();
+	int patch_time = current_time - patch_time_center + (int)(patch_duration / 2);
+
 
 	Glib::RefPtr<Gdk::Pixbuf> patch_pixbuf;
 	if (patch_time < 0 || patch_time >= patch_duration) {
@@ -584,7 +656,7 @@ void Geodesic_Distance_UI::update_image_control(int current_time)
 
 	if (show_optical_flow && _optical_flow_list.size() > 0) {
 		if (current_time < _optical_flow_list.size() && _optical_flow_list[current_time].contains_data()) {
-			buffer = _optical_flow_list[current_time].get_magnitudes_view();
+			buffer = _optical_flow_list[current_time].get_color_code_view();
 		} else {
 			buffer = CreateEmptyPixbuf(_sequence->GetXSize(), _sequence->GetYSize());
 		}
@@ -613,8 +685,7 @@ void Geodesic_Distance_UI::ShowStatusMessage(std::string message)
 
 void Geodesic_Distance_UI::UpdateCoordinates()
 {
-	int patch_time_center = _patch_time_offset + (int)(_patch_duration / 2);
-	Glib::ustring coordinates = Glib::ustring::compose("x: %1; y: %2; t: %3", _patch_center_x, _patch_center_y, patch_time_center);
+	Glib::ustring coordinates = Glib::ustring::compose("x: %1; y: %2; t: %3", _patch_center.x, _patch_center.y, _patch_center.t);
 	_ui.coordinates_label->set_label(coordinates);
 }
 

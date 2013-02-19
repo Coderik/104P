@@ -22,6 +22,8 @@ public:
 	bool contains_data();
 
 protected:
+	virtual void internal_update() { };
+
 	float *_flow_x, *_flow_y;
 	int _size_x, _size_y;
 };

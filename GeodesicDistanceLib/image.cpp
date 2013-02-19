@@ -55,6 +55,12 @@ void Image::SetPixelValue(int x, int y, double value)
 }
 
 
+void Image::fill(float value)
+{
+	std::fill_n(_points, _x_size*_y_size, value);
+}
+
+
 int Image::GetXSize()
 {
 	return _x_size;

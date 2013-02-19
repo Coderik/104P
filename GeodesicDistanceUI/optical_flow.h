@@ -13,6 +13,9 @@
 #include <math.h>
 
 #include "optical_flow_container.h"
+#include "color_code.h"
+#include "intensity_code.h"
+#include "i_optical_flow_code.h"
 
 /**
  * Class extends simple container for optical flow with specific processing methods.
@@ -21,9 +24,19 @@ class OpticalFlow : public OpticalFlowContainer
 {
 public:
 	OpticalFlow();
-	~OpticalFlow();
+	virtual ~OpticalFlow();
 	Glib::RefPtr<Gdk::Pixbuf> get_magnitudes_view();
+	Glib::RefPtr<Gdk::Pixbuf> get_color_code_view();
 
+private:
+	virtual void internal_update();
+	int get_max_length();
+	Glib::RefPtr<Gdk::Pixbuf> get_view(IOptivalFlowCode *optical_flow_code);
+
+	static ColorCode s_color_code;
+	static IntensityCode s_intensity_code;
+	static const int BITS_PER_CHANNEL = 8;
+	float _max_length;
 };
 
 

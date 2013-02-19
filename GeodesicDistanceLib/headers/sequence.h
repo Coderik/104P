@@ -16,8 +16,9 @@ using namespace std;
 class Sequence
 {
 public:
-	Sequence(int x_size,int y_size,int t_size);
-	Sequence(int x_size,int y_size);
+	Sequence(int x_size, int y_size, int t_size, float value);
+	Sequence(int x_size, int y_size, int t_size);
+	Sequence(int x_size, int y_size);
 	Sequence(Image *first_frame);
 	~Sequence();
 
@@ -26,6 +27,7 @@ public:
 	int GetTSize();
 	double GetPixelValue(int x, int y, int t);
 	void SetPixelValue(int x, int y, int t, double value);
+	void fill(float value);
 	Image* GetFrame(int t);
 	bool SetFrame(int t, Image *frame);
 	bool AddFrame(Image *frame);

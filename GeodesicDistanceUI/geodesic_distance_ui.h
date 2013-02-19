@@ -32,10 +32,21 @@
 #include "optical_flow.h"
 #include "optical_flow_container.h"
 #include "signal_watchdog.h"
+#include "point.h"
+#include "shape.h"
+
+
 
 class Geodesic_Distance_UI : public Gtk::Window
 {
 public:
+	enum DistanceMode
+	{
+		extended_space,
+		patch_space,
+		threshold
+	};
+
 	Geodesic_Distance_UI();
 	~Geodesic_Distance_UI();
 
@@ -43,6 +54,7 @@ protected:
 	/* slots */
 	void open_image();
 	void open_sequence();
+	void set_distance_mode();
 	void set_patch_zoom();
 	void set_patch_size();
 	void set_patch_duration();
@@ -61,7 +73,7 @@ protected:
 private:
 	static const int MAX_PATCH_SCALE = 8;
 
-	Sequence *_sequence, *_patch;
+	Sequence *_sequence, *_distances;
 	vector<Glib::RefPtr<Gdk::Pixbuf> > _color_representations;
 	Glib::RefPtr<Gdk::Pixbuf> _patch_slice, _empty_pixmap;
 	Glib::RefPtr<Gdk::Pixbuf> _optical_flow_view;
@@ -69,10 +81,11 @@ private:
 	std::string _sequence_folder;
 	float _distance_weight, _color_weight, _gamma;
 	int _current_time;
-	int _patch_time_offset;
-	int _patch_center_x, _patch_center_y, _patch_size, _patch_duration;
+	int _patch_size, _patch_duration;
+	Point _patch_center;
 	int _patch_scale;
 	int _progress_counter;
+	DistanceMode _distance_mode;
 	Glib::Threads::Thread *_background_worker;
 	Glib::Dispatcher _work_done_dispatcher;
 	Glib::Dispatcher _portion_ready_dispatcher;
@@ -85,9 +98,10 @@ private:
 
 	UI_Container _ui;
 
+	Sequence* calculate_distances(Sequence &sequence, const Point &patch_center, const Shape &patch_size, float distance_threshold, DistanceMode mode, float distance_weight, float color_weight);
+	vector<Glib::RefPtr<Gdk::Pixbuf> > draw_distances_with_color(Sequence &distances, float gamma);
+
 	Glib::RefPtr<Gdk::Pixbuf> WrapRawImageData(Image *image);
-	Image* DrawDistanceRepresentaton(Image* image, float alpha, float beta, float gamma);
-	vector<Glib::RefPtr<Gdk::Pixbuf> > DrawDistanceRepresentaton(Sequence* sequence, float distance_weight, float color_weight, float gamma);
 	Glib::RefPtr<Gdk::Pixbuf> GetDistanceRepresentatonByTime(vector<Glib::RefPtr<Gdk::Pixbuf> > representation, int patch_time_offset, int current_time, Glib::RefPtr<Gdk::Pixbuf> empty_pixbuf);
 	void ShowPatchPixbuf(Glib::RefPtr<Gdk::Pixbuf> pixmap, int scale);
 	void update_image_control(int current_time);

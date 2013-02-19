@@ -34,6 +34,7 @@ public:
 	Selectable_Image *image_control;
 	Selectable_Image *patch_control;
 	Gtk::Scale *patch_zoom_slider;
+	Gtk::ComboBoxText *distance_mode_picker;
 	Gtk::ComboBoxText *patch_size_picker;
 	Gtk::ComboBoxText *patch_duration_picker;
 	Gtk::Scale *distance_weight_slider;
@@ -50,7 +51,7 @@ public:
 	{
 		// adjust main window
 		window->set_title("Geodesic Distance test app");
-		window->set_default_size(800, 600);
+		window->set_default_size(800, 700);
 
 		// set up menu
 		Glib::RefPtr<Gtk::UIManager> menu_manager = Gtk::UIManager::create();
@@ -177,6 +178,12 @@ public:
 		patch_zoom_slider = new Gtk::Scale(Gtk::ORIENTATION_HORIZONTAL);
 		//patch_zoom_slider->set_draw_value(false);
 		patch_view_box->pack_start(*patch_zoom_slider, Gtk::PACK_SHRINK);
+
+		Gtk::Frame *distance_mode_frame = new Gtk::Frame("Distance calc. mode:");
+		distance_mode_frame->set_shadow_type(Gtk::SHADOW_NONE);
+		distance_mode_picker = new Gtk::ComboBoxText();
+		distance_mode_frame->add(*distance_mode_picker);
+		parameters_box->pack_start(*distance_mode_frame, Gtk::PACK_SHRINK);
 
 		Gtk::Frame *patch_size_frame = new Gtk::Frame("Patch size:");
 		patch_size_frame->set_shadow_type(Gtk::SHADOW_NONE);
