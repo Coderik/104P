@@ -15,6 +15,7 @@ class Image
 public:
 	Image();
 	Image(int x_size,int y_size);
+	Image(Image &source);
 	~Image();
 
 	int GetXSize();

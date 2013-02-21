@@ -27,6 +27,19 @@ Image::Image(int x_size, int y_size)
 }
 
 
+Image::Image(Image &source)
+{
+	_x_size = source._x_size;
+	_y_size = source._y_size;
+	_points = (float *)malloc(sizeof(float) * _x_size * _y_size);
+
+	// TODO: rewrite copying
+	for (int i = 0; i < _x_size * _y_size; i++) {
+		_points[i] = source._points[i];
+	}
+}
+
+
 Image::~Image()
 {
 	if (_points) {

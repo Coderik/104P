@@ -23,6 +23,7 @@ Geodesic_Distance_UI::Geodesic_Distance_UI()
 
 	_ui.patch_zoom_slider->signal_value_changed().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::set_patch_zoom) );
 	_ui.distance_mode_picker->signal_changed().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::set_distance_mode) );
+	_ui.motion_compensation_picker->signal_changed().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::set_motion_compensation_mode) );
 	_ui.patch_size_picker->signal_changed().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::set_patch_size) );
 	_ui.patch_duration_picker->signal_changed().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::set_patch_duration) );
 	_ui.image_control->signal_point_selected().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::set_patch_location) );
@@ -53,6 +54,10 @@ Geodesic_Distance_UI::Geodesic_Distance_UI()
 	_ui.distance_mode_picker->append("patch_limit", "Use only patch points");
 	_ui.distance_mode_picker->append("extended_limit", "Use extended range (2x)");
 	_ui.distance_mode_picker->set_active(0);
+
+	_ui.motion_compensation_picker->append("no", "No tracking");
+	_ui.motion_compensation_picker->append("pixelwise", "Pixelwise tracking");
+	_ui.motion_compensation_picker->set_active(0);
 
 	for ( int i=5; i<=15; i+=2 ) {
 		_ui.patch_size_picker->append(Glib::ustring::compose("%1",i));
@@ -199,7 +204,9 @@ void Geodesic_Distance_UI::open_sequence()
 		bool is_optical_flow_calculated =
 				check_optical_flow(optical_flow_file_name, _sequence->GetXSize(), _sequence->GetYSize(), _sequence->GetTSize() - 1);
 		_ui.restore_optical_flow_action->set_sensitive(is_optical_flow_calculated);
-		_ui.toggle_optical_flow_action->set_sensitive(false);	// no auto restore, so menu item could be shaded
+		// NOTE: no auto restore, so menu item could be shaded and motion compensation denied
+		_ui.toggle_optical_flow_action->set_sensitive(false);
+		_ui.motion_compensation_picker->set_sensitive(false);
 
 		// Set initial coordinates
 		_sequence_folder = sequence_folder;
@@ -208,7 +215,10 @@ void Geodesic_Distance_UI::open_sequence()
 		_patch_center.t = 0;
 		_current_time = 0;
 		_optical_flow_list.clear();
-		_optical_flow_list = std::vector<OpticalFlow>(_sequence->GetTSize() - 1);
+		_optical_flow_list = std::vector<OpticalFlowContainer*>(_sequence->GetTSize() - 1);
+		for (int i = 0; i < _optical_flow_list.size(); i++) {
+			_optical_flow_list[i] = new OpticalFlow();
+		}
 		UpdateCoordinates();
 
 		// Show first frame
@@ -245,6 +255,43 @@ void Geodesic_Distance_UI::set_distance_mode()
 	}
 
 	// update distances using new distance mode
+	if (_sequence) {
+		Shape patch_size = Shape(_patch_size, _patch_size, _patch_duration);
+		_distances = calculate_distances(*_sequence,_patch_center, patch_size, 0, _distance_mode, _distance_weight, _color_weight);
+		_color_representations = draw_distances_with_color(*_distances, _gamma);
+		_patch_slice = GetDistanceRepresentatonByTime(_color_representations, _patch_center.t, _current_time, _empty_pixmap);
+		ShowPatchPixbuf(_patch_slice, _patch_scale);
+	}
+}
+
+
+void Geodesic_Distance_UI::set_motion_compensation_mode()
+{
+	// get new motion compensation mode value
+	Glib::ustring id = _ui.motion_compensation_picker->get_active_id();
+	MotionCompensationMode mode;
+	if (id == "no") {
+		mode = no_compensation;
+	} else if (id == "pixelwise") {
+		mode = pixelwise;
+	} else {
+		mode = no_compensation;
+	}
+
+	// check if new and old value differs
+	if (mode != _motion_compensation_mode) {
+		_motion_compensation_mode = mode;
+	} else {
+		return;
+	}
+
+	//TODO: update using new motion compensation mode
+	/*if (_motion_compensation_mode == pixelwise) {
+		Sequence* compensated = _sequence->compensate_motion_pixelwise(_optical_flow_list, _current_time, _current_time + 1, false);
+		Glib::RefPtr<Gdk::Pixbuf> buffer = WrapRawImageData(compensated->GetFrame(_current_time));
+		_ui.image_control->set_pixbuf(buffer);
+		_ui.image_control->queue_draw();
+	}*/
 	if (_sequence) {
 		Shape patch_size = Shape(_patch_size, _patch_size, _patch_duration);
 		_distances = calculate_distances(*_sequence,_patch_center, patch_size, 0, _distance_mode, _distance_weight, _color_weight);
@@ -436,7 +483,7 @@ void Geodesic_Distance_UI::perceive_background_worker(int responce_id)
 }
 
 
-void Geodesic_Distance_UI::store_optical_flow(OpticalFlow &flow, int index)
+void Geodesic_Distance_UI::store_optical_flow(OpticalFlowContainer &flow, int index)
 {
 	if (_sequence_folder.empty())
 		return;
@@ -472,7 +519,7 @@ void Geodesic_Distance_UI::restore_optical_flow()
 	for (int i = 0; i <  chunks_count; i++) {
 		if (read_flow(file_name, buf_x, buf_y, size_x, size_y, i)) {
 			if (size_x ==_sequence->GetXSize() && size_y == _sequence->GetYSize()) {
-				_optical_flow_list[i].set_flow(buf_x, buf_y, size_x, size_y);
+				_optical_flow_list[i]->set_flow(buf_x, buf_y, size_x, size_y);
 				has_some_data = true;
 			}
 		}
@@ -480,6 +527,7 @@ void Geodesic_Distance_UI::restore_optical_flow()
 
 	if (has_some_data) {
 		_ui.toggle_optical_flow_action->set_sensitive(true);
+		_ui.motion_compensation_picker->set_sensitive(true);
 	}
 
 }
@@ -556,31 +604,29 @@ Sequence* Geodesic_Distance_UI::calculate_distances( Sequence &sequence,
 	IDistanceCalculation *distanceCalc = new SimpleDistanceCalculation(distance_weight, color_weight);
 	DijkstraAlgorithm marching = DijkstraAlgorithm(distanceCalc);
 
+	//TODO: rewrite
 	Sequence *distances = 0;
 	switch(mode) {
 		case extended_space: {
 			float factor = 2.0;	// Note: hardcoded for the moment
-			int half_width = patch_size.size_x * factor / 2;
-			int half_height = patch_size.size_y * factor / 2;
-			int half_duration = patch_size.size_t * factor / 2;
-			int a_x = std::max(patch_center.x - half_width, 0);
-			int a_y = std::max(patch_center.y - half_height, 0);
-			int a_t = std::max(patch_center.t - half_duration, 0);
-			int b_x = std::min(patch_center.x + half_width, sequence.GetXSize());
-			int b_y = std::min(patch_center.y + half_height, sequence.GetYSize());
-			int b_t = std::min(patch_center.t + half_duration, sequence.GetTSize());
-			Sequence *extended_patch = sequence.GetPatchBetweenPoints(a_x, a_y, a_t, b_x, b_y, b_t);
-			Point center;
-			center.x = patch_center.x - a_x;
-			center.y = patch_center.y - a_y;
-			center.t = patch_center.t - a_t;
-			Sequence* buffer = marching.CalculateDistance(*extended_patch, patch_size, center);
-			distances = buffer->GetPatchArountPoint(center.x, center.y, center.t, patch_size.size_x, patch_size.size_t);
+			Shape lookup_limits;
+			lookup_limits.size_x = patch_size.size_x * factor;
+			lookup_limits.size_y = patch_size.size_y * factor;
+			lookup_limits.size_t = patch_size.size_t * factor;
+			if (_motion_compensation_mode == pixelwise) {
+				distances = marching.CalculateDistance(sequence, _optical_flow_list, lookup_limits, patch_size, patch_center);
+			} else {
+				distances = marching.CalculateDistance(sequence, lookup_limits, patch_size, patch_center);
+			}
 			break;
 		}
 		case patch_space: {
-			Sequence *patch = sequence.GetPatchArountPoint(patch_center.x, patch_center.y, patch_center.t, patch_size.size_x, patch_size.size_t);
-			distances = marching.CalculateDistance(*patch);
+			// TODO: maybe get patch first
+			if (_motion_compensation_mode == pixelwise) {
+				distances = marching.CalculateDistance(sequence, _optical_flow_list, patch_size, patch_size, patch_center);
+			} else {
+				distances = marching.CalculateDistance(sequence, patch_size, patch_size, patch_center);
+			}
 			break;
 		}
 		case threshold: {
@@ -655,8 +701,8 @@ void Geodesic_Distance_UI::update_image_control(int current_time)
 	Glib::RefPtr<Gdk::Pixbuf> buffer;
 
 	if (show_optical_flow && _optical_flow_list.size() > 0) {
-		if (current_time < _optical_flow_list.size() && _optical_flow_list[current_time].contains_data()) {
-			buffer = _optical_flow_list[current_time].get_color_code_view();
+		if (current_time < _optical_flow_list.size() && _optical_flow_list[current_time]->contains_data()) {
+			buffer = static_cast<OpticalFlow*>(_optical_flow_list[current_time])->get_color_code_view();
 		} else {
 			buffer = CreateEmptyPixbuf(_sequence->GetXSize(), _sequence->GetYSize());
 		}
@@ -699,7 +745,10 @@ void Geodesic_Distance_UI::begin_calculate_optical_flow()
 
 	try
 	{
-		_background_worker = Glib::Threads::Thread::create( sigc::mem_fun(*this, &Geodesic_Distance_UI::calculate_optical_flow) );
+		// NOTE: if specify no tasks, optical flow for all frame pairs will be computed
+		std::vector<int> empty_task_list;
+		_background_worker = Glib::Threads::Thread::create( sigc::bind<std::vector<int> >( sigc::mem_fun(*this, &Geodesic_Distance_UI::calculate_optical_flow), empty_task_list));
+		//_background_worker = Glib::Threads::Thread::create( sigc::mem_fun(*this, &Geodesic_Distance_UI::calculate_optical_flow));
 	}
 	catch(Glib::Threads::ThreadError &err)
 	{
@@ -733,7 +782,7 @@ void Geodesic_Distance_UI::take_optical_flow_frame()
 	{
 		Glib::Threads::Mutex::Lock lock(_background_work_mutex);
 		index = _aux_optical_flow_index;
-		_optical_flow_list[index].set_flow(_aux_optical_flow_x, _aux_optical_flow_y, size_x, size_y);
+		_optical_flow_list[index]->set_flow(_aux_optical_flow_x, _aux_optical_flow_y, size_x, size_y);
 	}
 
 	_progress_counter++;
@@ -741,8 +790,9 @@ void Geodesic_Distance_UI::take_optical_flow_frame()
 	_ui.background_work_infobar_message->set_text(message);
 
 	_ui.toggle_optical_flow_action->set_sensitive(true);
+	_ui.motion_compensation_picker->set_sensitive(true);
 
-	store_optical_flow(_optical_flow_list[index], index);
+	store_optical_flow(*_optical_flow_list[index], index);
 
 	_ui.restore_optical_flow_action->set_sensitive(true);
 }
@@ -771,11 +821,17 @@ bool Geodesic_Distance_UI::allow_background_computation()
 }
 
 
-void Geodesic_Distance_UI::calculate_optical_flow()
+/******************************************************************************************************
+ * If pass no tasks, forward and backward optical flow fields for all pairs of frames will be computed.
+ * In task list absolute value defines from what frame to compute flow, and sign defines direction.
+ * Example: '0' - forward flow from frame 0 to frame 1; '-2' - backward flow from frame 2 to frame 1.
+ */
+void Geodesic_Distance_UI::calculate_optical_flow(std::vector<int> task_list)
 {
 	if (!_sequence)
 		return;
 
+	// Prepare watchdog for catching possible cancellation command from user
 	SignalWatchdog *watchdog = new SignalWatchdog();
 	watchdog->signal_ask_permission().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::allow_background_computation ) );
 
@@ -787,9 +843,24 @@ void Geodesic_Distance_UI::calculate_optical_flow()
 	int y_size = _sequence->GetYSize();
 	int frame_count = _sequence->GetTSize();
 
-	for ( int i = 0; i < frame_count - 1; i++ ) {
-		float* first_frame_data = _sequence->GetFrame(i)->GetRawData();
-		float* second_frame_data = _sequence->GetFrame(i + 1)->GetRawData();
+	// Fill task list, if empty
+	if (task_list.size() == 0) {
+		int flow_count = frame_count - 1;	// in one direction
+		task_list.reserve(flow_count /** 2*/);
+
+		for (int i = 0; i < flow_count; i++)
+			task_list.push_back(i);
+		/*for (int i = -1; i >= -flow_count; i--)
+			task_list.push_back(i);*/
+	}
+
+	std::vector<int>::iterator it;
+	for (it = task_list.begin(); it != task_list.end(); ++it) {
+		// Get frames data
+		int first_index = std::abs(*it);
+		int second_index = (*it >= 0)? first_index + 1 : first_index - 1;
+		float* first_frame_data = _sequence->GetFrame(first_index)->GetRawData();
+		float* second_frame_data = _sequence->GetFrame(second_index)->GetRawData();
 
 		// Allocate memory for the flow
 		float *u1 = new float[x_size * y_size];
@@ -805,7 +876,7 @@ void Geodesic_Distance_UI::calculate_optical_flow()
 				Glib::Threads::Mutex::Lock lock(_background_work_mutex);
 				_aux_optical_flow_x = u1;
 				_aux_optical_flow_y = u2;
-				_aux_optical_flow_index = i;
+				_aux_optical_flow_index = *it;
 			}
 
 			// Notify main thread, that i-th optical flow slice is calculated

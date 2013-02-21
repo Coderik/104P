@@ -20,9 +20,9 @@ struct Shape
 	Shape(int size_x, int size_y, int size_t);
 	Shape(const Shape &source);
 
-	bool is_empty();
-	bool is_inside(const Point &p);
-	bool is_abs_inside(const Point &p);
+	bool is_empty() const;
+	bool is_inside(const Point &p) const;
+	bool is_abs_inside(const Point &p) const;
 
 	static Shape empty;
 };

@@ -47,6 +47,12 @@ public:
 		threshold
 	};
 
+	enum MotionCompensationMode
+	{
+		no_compensation,
+		pixelwise
+	};
+
 	Geodesic_Distance_UI();
 	~Geodesic_Distance_UI();
 
@@ -55,6 +61,7 @@ protected:
 	void open_image();
 	void open_sequence();
 	void set_distance_mode();
+	void set_motion_compensation_mode();
 	void set_patch_zoom();
 	void set_patch_size();
 	void set_patch_duration();
@@ -77,7 +84,7 @@ private:
 	vector<Glib::RefPtr<Gdk::Pixbuf> > _color_representations;
 	Glib::RefPtr<Gdk::Pixbuf> _patch_slice, _empty_pixmap;
 	Glib::RefPtr<Gdk::Pixbuf> _optical_flow_view;
-	std::vector<OpticalFlow> _optical_flow_list;
+	std::vector<OpticalFlowContainer*> _optical_flow_list;
 	std::string _sequence_folder;
 	float _distance_weight, _color_weight, _gamma;
 	int _current_time;
@@ -86,6 +93,7 @@ private:
 	int _patch_scale;
 	int _progress_counter;
 	DistanceMode _distance_mode;
+	MotionCompensationMode _motion_compensation_mode;
 	Glib::Threads::Thread *_background_worker;
 	Glib::Dispatcher _work_done_dispatcher;
 	Glib::Dispatcher _portion_ready_dispatcher;
@@ -108,8 +116,8 @@ private:
 	Glib::RefPtr<Gdk::Pixbuf> CreateEmptyPixbuf(int width, int height);
 	void ShowStatusMessage(std::string message);
 	void UpdateCoordinates();
-	void store_optical_flow(OpticalFlow &flow, int index);
-	void calculate_optical_flow();
+	void store_optical_flow(OpticalFlowContainer &flow, int index);
+	void calculate_optical_flow(std::vector<int> task_list);
 	void begin_calculate_optical_flow();
 	void end_calculate_optical_flow();
 	void cancel_calculate_optical_flow();

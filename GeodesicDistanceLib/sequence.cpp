@@ -156,7 +156,7 @@ int Sequence::DropEmptyFrames()
 
 Sequence* Sequence::GetPatchBetweenPoints(int a_x, int a_y, int a_t, int b_x, int b_y, int b_t)
 {
-	if (a_x >= b_x || a_y >= b_y || a_t >= b_t) {
+	if (a_x > b_x || a_y > b_y || a_t > b_t) {
 		return 0;
 	}
 
@@ -210,6 +210,56 @@ Sequence* Sequence::GetPatchArountPoint(int center_x, int center_y, int center_t
 	}
 
 	return GetPatchInternal(a_x, a_y, a_t, b_x, b_y, b_t);
+}
+
+
+// TODO: remove as depricated
+Sequence* Sequence::compensate_motion_pixelwise(std::vector<OpticalFlowContainer*> optical_flow, int start_frame, int end_frame, bool crop)
+{
+	// TODO: check optical_flow size
+	// TODO: get constant frame as a parameter
+
+	start_frame = std::max(std::min(start_frame, _t_size - 1), 0);
+	end_frame = std::max(std::min(end_frame, _t_size - 1), 0);
+
+	if (start_frame == end_frame) {
+		// TODO: return single constant frame
+	}
+
+	Sequence* compensated = new Sequence(_x_size, _y_size, _t_size); //end_frame - start_frame + 1
+
+	for (int f = start_frame; f < end_frame; f++) {
+		// f - frame to compensate
+		float* flow_x = optical_flow[f]->get_flow_x();
+		float* flow_y = optical_flow[f]->get_flow_y();
+
+		for (int x = 0; x < _x_size; x++) {
+			for (int y = 0; y < _y_size; y++) {
+				int ind = y * _x_size + x;
+				int nx = x + std::floor(flow_x[ind] * 2);
+				int ny = y + std::floor(flow_y[ind] * 2);
+
+				float value;
+				if (nx < 0 || ny < 0 || nx >= _x_size || ny >= _y_size) {
+					value = 0;
+				} else {
+					value = GetPixelValue(nx, ny, f + 1);
+				}
+
+				compensated->SetPixelValue(x, y, f, value);
+			}
+		}
+	}
+
+	for (int i = 0; i < _t_size; i++) {
+		if (i >= start_frame && i <end_frame)
+			continue;
+
+		Image *frame = new Image(*GetFrame(i));
+		compensated->SetFrame(i, frame);
+	}
+
+	return compensated;
 }
 
 /* private */

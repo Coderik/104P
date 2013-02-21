@@ -2,7 +2,7 @@
  * optical_flow_io.cpp
  *
  *  Created on: Jan 25, 2013
- *      Author: upf
+ *      Author: Vadim Fedorov
  */
 
 #include "headers/optical_flow_io.h"

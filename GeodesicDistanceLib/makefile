@@ -9,14 +9,19 @@ ARCH = -m32
 CPP_SRCS += \
 ./abstract_marching_algorithm.cpp \
 ./coarse_to_fine.cpp \
+./color_code.cpp \
 ./dijkstra_algorithm.cpp \
 ./fast_march_algorithm.cpp \
 ./field_operations.cpp \
 ./image.cpp \
+./intensity_code.cpp \
 ./interpolation.cpp \
+./optical_flow_container.cpp \
 ./optical_flow_io.cpp \
 ./pgm_util.cpp \
+./point.cpp \
 ./sequence.cpp \
+./shape.cpp \
 ./simple_distance_calculation.cpp \
 ./util.cpp \
 ./warping.cpp \
@@ -25,30 +30,40 @@ CPP_SRCS += \
 OBJS += \
 bin/abstract_marching_algorithm.o \
 bin/coarse_to_fine.o \
+bin/color_code.o \
 bin/dijkstra_algorithm.o \
 bin/fast_march_algorithm.o \
 bin/field_operations.o \
 bin/image.o \
+bin/intensity_code.o \
 bin/interpolation.o \
+bin/optical_flow_container.o \
 bin/optical_flow_io.o \
 bin/pgm_util.o \
+bin/point.o \
 bin/sequence.o \
+bin/shape.o \
 bin/simple_distance_calculation.o \
 bin/util.o \
 bin/warping.o \
-bin/zach_TVL1_optical_flow.o
+bin/zach_TVL1_optical_flow.o 
 
 CPP_DEPS += \
 bin/abstract_marching_algorithm.d \
 bin/coarse_to_fine.d \
+bin/color_code.d \
 bin/dijkstra_algorithm.d \
 bin/fast_march_algorithm.d \
 bin/field_operations.d \
 bin/image.d \
+bin/intensity_code.d \
 bin/interpolation.d \
+bin/optical_flow_container.d \
 bin/optical_flow_io.d \
 bin/pgm_util.d \
+bin/point.d \
 bin/sequence.d \
+bin/shape.d \
 bin/simple_distance_calculation.d \
 bin/util.d \
 bin/warping.d \

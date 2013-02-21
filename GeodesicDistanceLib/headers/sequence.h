@@ -10,6 +10,9 @@
 
 #include <vector>
 #include "image.h"
+#include "point.h"
+#include "shape.h"
+#include "optical_flow_container.h"
 
 using namespace std;
 
@@ -36,6 +39,7 @@ public:
 	Sequence* GetPatchArountPoint(int center_x, int center_y, int center_t, int size);
 	Sequence* GetPatchArountPoint(int center_x, int center_y, int center_t, int frame_size, int t_size);
 	Sequence* GetPatchArountPoint(int center_x, int center_y, int center_t, int x_size, int y_size, int t_size);
+	Sequence* compensate_motion_pixelwise(std::vector<OpticalFlowContainer*> optical_flow, int start_frame, int end_frame, bool crop = false);
 
 private:
 	int _x_size, _y_size, _t_size;

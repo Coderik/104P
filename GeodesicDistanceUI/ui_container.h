@@ -35,6 +35,7 @@ public:
 	Selectable_Image *patch_control;
 	Gtk::Scale *patch_zoom_slider;
 	Gtk::ComboBoxText *distance_mode_picker;
+	Gtk::ComboBoxText *motion_compensation_picker;
 	Gtk::ComboBoxText *patch_size_picker;
 	Gtk::ComboBoxText *patch_duration_picker;
 	Gtk::Scale *distance_weight_slider;
@@ -179,11 +180,17 @@ public:
 		//patch_zoom_slider->set_draw_value(false);
 		patch_view_box->pack_start(*patch_zoom_slider, Gtk::PACK_SHRINK);
 
-		Gtk::Frame *distance_mode_frame = new Gtk::Frame("Distance calc. mode:");
+		Gtk::Frame *distance_mode_frame = new Gtk::Frame("Distance calc. range:");
 		distance_mode_frame->set_shadow_type(Gtk::SHADOW_NONE);
 		distance_mode_picker = new Gtk::ComboBoxText();
 		distance_mode_frame->add(*distance_mode_picker);
 		parameters_box->pack_start(*distance_mode_frame, Gtk::PACK_SHRINK);
+
+		Gtk::Frame *motion_compensation_frame = new Gtk::Frame("Motion tracking");
+		motion_compensation_frame->set_shadow_type(Gtk::SHADOW_NONE);
+		motion_compensation_picker = new Gtk::ComboBoxText();
+		motion_compensation_frame->add(*motion_compensation_picker);
+		parameters_box->pack_start(*motion_compensation_frame, Gtk::PACK_SHRINK);
 
 		Gtk::Frame *patch_size_frame = new Gtk::Frame("Patch size:");
 		patch_size_frame->set_shadow_type(Gtk::SHADOW_NONE);

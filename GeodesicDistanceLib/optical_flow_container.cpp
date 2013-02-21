@@ -34,13 +34,13 @@ float* OpticalFlowContainer::get_flow_y()
 }
 
 
-int OpticalFlowContainer::get_size_x()
+int OpticalFlowContainer::get_size_x() const
 {
 	return _size_x;
 }
 
 
-int OpticalFlowContainer::get_size_y()
+int OpticalFlowContainer::get_size_y() const
 {
 	return _size_y;
 }
@@ -57,7 +57,7 @@ void OpticalFlowContainer::set_flow(float *flow_x, float *flow_y, int size_x, in
 }
 
 
-bool OpticalFlowContainer::contains_data()
+bool OpticalFlowContainer::contains_data() const
 {
 	return (_flow_x && _flow_y);
 }

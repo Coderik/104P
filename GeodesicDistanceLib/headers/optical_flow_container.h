@@ -16,10 +16,10 @@ public:
 
 	float* get_flow_x();
 	float* get_flow_y();
-	int get_size_x();
-	int get_size_y();
+	int get_size_x() const;
+	int get_size_y() const;
 	void set_flow(float *flow_x, float *flow_y, int size_x, int size_y);
-	bool contains_data();
+	bool contains_data() const;
 
 protected:
 	virtual void internal_update() { };
