@@ -27,6 +27,7 @@ public:
 	virtual ~OpticalFlow();
 	Glib::RefPtr<Gdk::Pixbuf> get_magnitudes_view();
 	Glib::RefPtr<Gdk::Pixbuf> get_color_code_view();
+	virtual void clear();
 
 private:
 	virtual void internal_update();

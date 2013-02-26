@@ -20,6 +20,7 @@ public:
 	int get_size_y() const;
 	void set_flow(float *flow_x, float *flow_y, int size_x, int size_y);
 	bool contains_data() const;
+	virtual void clear();
 
 protected:
 	virtual void internal_update() { };

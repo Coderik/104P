@@ -32,6 +32,12 @@ Glib::RefPtr<Gdk::Pixbuf> OpticalFlow::get_color_code_view()
 	return buffer;
 }
 
+
+void OpticalFlow::clear()
+{
+	OpticalFlowContainer::clear();
+}
+
 /* private */
 
 Glib::RefPtr<Gdk::Pixbuf> OpticalFlow::get_view(IOptivalFlowCode *optical_flow_code)

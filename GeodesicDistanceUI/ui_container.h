@@ -15,7 +15,10 @@
 #include <gtkmm/statusbar.h>
 #include <gtkmm/label.h>
 #include <gtkmm/toggleaction.h>
+#include <gtkmm/radioaction.h>
 #include <gtkmm/infobar.h>
+#include <sigc++/sigc++.h>
+#include <map>
 
 #include "selectable_image.h"
 
@@ -28,8 +31,9 @@ public:
 	Glib::RefPtr<Gtk::Action> quit_action;
 	Glib::RefPtr<Gtk::ActionGroup> optical_flow_action_group;
 	Glib::RefPtr<Gtk::Action> calculate_optical_flow_action;
+	Glib::RefPtr<Gtk::Action> proceed_optical_flow_action;
 	Glib::RefPtr<Gtk::Action> restore_optical_flow_action;
-	Glib::RefPtr<Gtk::ToggleAction> toggle_optical_flow_action;
+	Glib::RefPtr<Gtk::ActionGroup> view_action_group;
 
 	Selectable_Image *image_control;
 	Selectable_Image *patch_control;
@@ -47,9 +51,25 @@ public:
 	Gtk::InfoBar *background_work_infobar;
 	Gtk::Label *background_work_infobar_message;
 
+	typedef sigc::signal<void> type_signal_view_changed;
+	type_signal_view_changed signal_view_changed()
+	{
+		return _signal_view_changed;
+	}
+
+	enum View
+	{
+		VIEW_ORIGINAL_IMAGE,
+		VIEW_FORWARD_OF_COLOR,
+		VIEW_FORWARD_OF_GRAY,
+		VIEW_BACKWARD_OF_COLOR,
+		VIEW_BACKWARD_OF_GRAY,
+	};
 
 	void setup_ui(Gtk::Window* window)
 	{
+		_current_view = VIEW_ORIGINAL_IMAGE;
+
 		// adjust main window
 		window->set_title("Geodesic Distance test app");
 		window->set_default_size(800, 700);
@@ -71,11 +91,33 @@ public:
 		optical_flow_action_group->add(Gtk::Action::create("OpticalFlowMenu", "Optical Flow"));
 		calculate_optical_flow_action = Gtk::Action::create("CalculateOptFlow", "Calculate Optical Flow");
 		optical_flow_action_group->add(calculate_optical_flow_action);
+		proceed_optical_flow_action = Gtk::Action::create("ProceedOptFlow", "Proceed Calculaton");
+		optical_flow_action_group->add(proceed_optical_flow_action);
 		restore_optical_flow_action = Gtk::Action::create("RestoreOptFlow", "Restore Optical Flow");
 		optical_flow_action_group->add(restore_optical_flow_action);
-		toggle_optical_flow_action = Gtk::ToggleAction::create("ToggleOpticalFlow", "Show Optical Flow");
-		optical_flow_action_group->add(toggle_optical_flow_action);
 		menu_manager->insert_action_group(optical_flow_action_group);
+
+		view_action_group = Gtk::ActionGroup::create();
+		view_action_group->add(Gtk::Action::create("ViewMenu", "View"));
+		Gtk::RadioAction::Group view_group = Gtk::RadioAction::Group();
+		Glib::RefPtr<Gtk::RadioAction> view_action = Gtk::RadioAction::create(view_group, "ImageView", "Original Image");
+		view_action_group->add(view_action);
+		_view_map[VIEW_ORIGINAL_IMAGE] = view_action;
+		view_action = Gtk::RadioAction::create(view_group, "ForwardOFColorView", "Forward Optical Flow (direction and magnitude)");
+		view_action_group->add(view_action);
+		_view_map[VIEW_FORWARD_OF_COLOR] = view_action;
+		view_action = Gtk::RadioAction::create(view_group, "ForwardOFGrayView", "Forward Optical Flow (magnitude)");
+		view_action_group->add(view_action);
+		_view_map[VIEW_FORWARD_OF_GRAY] = view_action;
+		view_action = Gtk::RadioAction::create(view_group, "BackwardOFColorView", "Backward Optical Flow (direction and magnitude)");
+		view_action_group->add(view_action);
+		_view_map[VIEW_BACKWARD_OF_COLOR] = view_action;
+		view_action = Gtk::RadioAction::create(view_group, "BackwardOFGrayView", "Backward Optical Flow (magnitude)");
+		view_action_group->add(view_action);
+		_view_map[VIEW_BACKWARD_OF_GRAY] = view_action;
+		menu_manager->insert_action_group(view_action_group);
+		view_action->signal_changed().connect( sigc::mem_fun(*this, &UI_Container::set_view_internal) );
+
 
 		Glib::ustring ui_info =
 		    "<ui>"
@@ -87,10 +129,17 @@ public:
 		    "      <menuitem action='Quit'/>"
 		    "    </menu>"
 			"    <menu action='OpticalFlowMenu'>"
-			"      <menuitem action='CalculateOptFlow'/>"
 			"      <menuitem action='RestoreOptFlow'/>"
 			"      <separator/>"
-			"      <menuitem action='ToggleOpticalFlow'/>"
+			"      <menuitem action='CalculateOptFlow'/>"
+			"      <menuitem action='ProceedOptFlow'/>"
+			"    </menu>"
+			"    <menu action='ViewMenu'>"
+			"      <menuitem action='ImageView'/>"
+			"      <menuitem action='ForwardOFColorView'/>"
+			"      <menuitem action='ForwardOFGrayView'/>"
+			"      <menuitem action='BackwardOFColorView'/>"
+			"      <menuitem action='BackwardOFGrayView'/>"
 			"    </menu>"
 		    "  </menubar>"
 		    "</ui>";
@@ -230,7 +279,59 @@ public:
 
 		// show all
 		window->show_all_children();
+	}
 
+
+	View get_view()
+	{
+		return _current_view;
+	}
+
+
+	/*
+	 * NOTE: Does not emit 'signal_view_changed'.
+	 */
+	void set_view(View view)
+	{
+		if (_current_view != view) {
+			_current_view = view;
+			_view_map[_current_view]->set_active(true);
+		}
+	}
+
+
+	void allow_optical_flow_views(bool is_allowed)
+	{
+		// NOTE: This must be generalized when there would be more categories of views
+		_view_map[VIEW_FORWARD_OF_COLOR]->set_sensitive(is_allowed);
+		_view_map[VIEW_FORWARD_OF_GRAY]->set_sensitive(is_allowed);
+		_view_map[VIEW_BACKWARD_OF_COLOR]->set_sensitive(is_allowed);
+		_view_map[VIEW_BACKWARD_OF_GRAY]->set_sensitive(is_allowed);
+	}
+
+private:
+	std::map<View, Glib::RefPtr<Gtk::RadioAction> > _view_map;
+	type_signal_view_changed _signal_view_changed;
+	View _current_view;
+
+	void set_view_internal(const Glib::RefPtr<Gtk::RadioAction>& current)
+	{
+		Glib::ustring name = current->get_name();
+		if (name == "ImageView") {
+			_current_view = VIEW_ORIGINAL_IMAGE;
+		} else if (name == "ForwardOFColorView") {
+			_current_view = VIEW_FORWARD_OF_COLOR;
+		} else if (name == "ForwardOFGrayView") {
+			_current_view = VIEW_FORWARD_OF_GRAY;
+		} else if (name == "BackwardOFColorView") {
+			_current_view = VIEW_BACKWARD_OF_COLOR;
+		} else if (name == "BackwardOFGrayView") {
+			_current_view = VIEW_BACKWARD_OF_GRAY;
+		} else {
+			_current_view = VIEW_ORIGINAL_IMAGE;
+		}
+
+		_signal_view_changed.emit();
 	}
 };
 

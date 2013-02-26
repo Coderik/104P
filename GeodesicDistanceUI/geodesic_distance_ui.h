@@ -15,6 +15,7 @@
 #include <giomm/file.h>
 #include <glibmm/threads.h>
 #include <glibmm/dispatcher.h>
+#include <gtkmm/radioaction.h>
 
 #include <string.h>
 #include <iostream>
@@ -29,6 +30,7 @@
 #include "zach_TVL1_optical_flow.h"
 #include "util.h"
 #include "optical_flow_io.h"
+#include "optical_flow_io_legacy.h"
 #include "optical_flow.h"
 #include "optical_flow_container.h"
 #include "signal_watchdog.h"
@@ -71,9 +73,12 @@ protected:
 	void set_gamma();
 	void set_time();
 	void restore_optical_flow();
-	void show_hide_optical_flow();
-	void perceive_background_worker(int responce_id);	//TODO: rename it
+	void update_view();
+	void perceive_background_worker(int responce_id);	//TODO: rename it!
 	bool allow_background_computation();
+
+	void begin_full_optical_flow_calculation();
+	void begin_missing_optical_flow_calculation();
 
 	bool move_selected_point(GdkEventKey* event);
 
@@ -84,14 +89,17 @@ private:
 	vector<Glib::RefPtr<Gdk::Pixbuf> > _color_representations;
 	Glib::RefPtr<Gdk::Pixbuf> _patch_slice, _empty_pixmap;
 	Glib::RefPtr<Gdk::Pixbuf> _optical_flow_view;
-	std::vector<OpticalFlowContainer*> _optical_flow_list;
+	std::vector<OpticalFlowContainer*> _forward_optical_flow_list;
+	std::vector<OpticalFlowContainer*> _backward_optical_flow_list;
+	std::vector<int> _task_list;
 	std::string _sequence_folder;
 	float _distance_weight, _color_weight, _gamma;
 	int _current_time;
 	int _patch_size, _patch_duration;
 	Point _patch_center;
 	int _patch_scale;
-	int _progress_counter;
+	int _progress_counter, _progress_total;
+	bool _optical_flow_legacy_format;
 	DistanceMode _distance_mode;
 	MotionCompensationMode _motion_compensation_mode;
 	Glib::Threads::Thread *_background_worker;
@@ -109,6 +117,9 @@ private:
 	Sequence* calculate_distances(Sequence &sequence, const Point &patch_center, const Shape &patch_size, float distance_threshold, DistanceMode mode, float distance_weight, float color_weight);
 	vector<Glib::RefPtr<Gdk::Pixbuf> > draw_distances_with_color(Sequence &distances, float gamma);
 
+	template <typename T>
+	void reset_vector_of_pointers(std::vector<T*> &v, int size);
+
 	Glib::RefPtr<Gdk::Pixbuf> WrapRawImageData(Image *image);
 	Glib::RefPtr<Gdk::Pixbuf> GetDistanceRepresentatonByTime(vector<Glib::RefPtr<Gdk::Pixbuf> > representation, int patch_time_offset, int current_time, Glib::RefPtr<Gdk::Pixbuf> empty_pixbuf);
 	void ShowPatchPixbuf(Glib::RefPtr<Gdk::Pixbuf> pixmap, int scale);
@@ -118,10 +129,11 @@ private:
 	void UpdateCoordinates();
 	void store_optical_flow(OpticalFlowContainer &flow, int index);
 	void calculate_optical_flow(std::vector<int> task_list);
-	void begin_calculate_optical_flow();
+	void begin_optical_flow_calculation_internal(std::vector<int> task_list);
 	void end_calculate_optical_flow();
 	void cancel_calculate_optical_flow();
 	void take_optical_flow_frame();
+	void fill_task_list(std::vector<OpticalFlowContainer*> &forward_flow, std::vector<OpticalFlowContainer*> &backward_flow, std::vector<int> &task_list);
 	//tmp
 	int write_flow(float *u, float *v, int w, int h);
 };

@@ -18,8 +18,8 @@ OpticalFlowContainer::OpticalFlowContainer()
 
 OpticalFlowContainer::~OpticalFlowContainer()
 {
-	//delete[] _flow_x;
-	//delete[] _flow_y;
+	if (_flow_x) delete[] _flow_x;
+	if (_flow_y) delete[] _flow_y;
 }
 
 float* OpticalFlowContainer::get_flow_x()
@@ -60,6 +60,17 @@ void OpticalFlowContainer::set_flow(float *flow_x, float *flow_y, int size_x, in
 bool OpticalFlowContainer::contains_data() const
 {
 	return (_flow_x && _flow_y);
+}
+
+
+void OpticalFlowContainer::clear()
+{
+	if (_flow_x) delete[] _flow_x;
+	if (_flow_y) delete[] _flow_y;
+	_flow_x = 0;
+	_flow_y = 0;
+	_size_x = -1;
+	_size_y = -1;
 }
 
 

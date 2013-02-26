@@ -18,6 +18,7 @@ CPP_SRCS += \
 ./interpolation.cpp \
 ./optical_flow_container.cpp \
 ./optical_flow_io.cpp \
+./optical_flow_io_legacy.cpp \
 ./pgm_util.cpp \
 ./point.cpp \
 ./sequence.cpp \
@@ -39,6 +40,7 @@ bin/intensity_code.o \
 bin/interpolation.o \
 bin/optical_flow_container.o \
 bin/optical_flow_io.o \
+bin/optical_flow_io_legacy.o \
 bin/pgm_util.o \
 bin/point.o \
 bin/sequence.o \
@@ -60,6 +62,7 @@ bin/intensity_code.d \
 bin/interpolation.d \
 bin/optical_flow_container.d \
 bin/optical_flow_io.d \
+bin/optical_flow_io_legacy.d \
 bin/pgm_util.d \
 bin/point.d \
 bin/sequence.d \
