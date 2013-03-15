@@ -21,8 +21,8 @@ struct Shape
 	Shape(const Shape &source);
 
 	bool is_empty() const;
-	bool is_inside(const Point &p) const;
-	bool is_abs_inside(const Point &p) const;
+	bool contains(const Point &p) const;
+	bool abs_contains(const Point &p) const;
 
 	static Shape empty;
 };

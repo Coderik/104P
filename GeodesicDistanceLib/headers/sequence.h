@@ -28,6 +28,7 @@ public:
 	int GetXSize();
 	int GetYSize();
 	int GetTSize();
+	Shape get_size();
 	double GetPixelValue(int x, int y, int t);
 	void SetPixelValue(int x, int y, int t, double value);
 	void fill(float value);

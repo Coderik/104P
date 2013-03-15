@@ -69,6 +69,12 @@ int Sequence::GetTSize()
 }
 
 
+Shape Sequence::get_size()
+{
+	return Shape(_x_size, _y_size, _t_size);
+}
+
+
 double Sequence::GetPixelValue(int x, int y, int t)
 {
 	if (t < 0 || t > _t_size || !_frames[t])

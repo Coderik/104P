@@ -50,7 +50,7 @@ bool Shape::is_empty() const
 /**
  * True if point lies inside the shape (relative to the top left point).
  */
-bool Shape::is_inside(const Point &p) const
+bool Shape::contains(const Point &p) const
 {
 	return p.x >= 0 && p.y >= 0 && p.t >= 0 && p.x < size_x && p.y < size_y && p.t < size_t;
 }
@@ -59,7 +59,7 @@ bool Shape::is_inside(const Point &p) const
 /**
  * True if point lies inside the shape (relative to the center point).
  */
-bool Shape::is_abs_inside(const Point &p) const
+bool Shape::abs_contains(const Point &p) const
 {
 	return std::abs(p.x) * 2 < size_x && std::abs(p.y) * 2 < size_y && std::abs(p.t) * 2 < size_t;
 }

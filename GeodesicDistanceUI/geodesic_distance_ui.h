@@ -52,7 +52,8 @@ public:
 	enum MotionCompensationMode
 	{
 		no_compensation,
-		pixelwise
+		pixelwise,
+		patch_shift
 	};
 
 	Geodesic_Distance_UI();

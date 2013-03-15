@@ -12,12 +12,14 @@ struct Point
 {
 	int x, y, t;
 
+	Point& operator= (const Point &p);
 	Point& operator+= (const Point &p);
 	Point& operator-= (const Point &p);
 	const Point operator+ (const Point &p) const;
 	const Point operator- (const Point &p) const;
 
-
+	const Point spatial_add (const Point &p) const;
+	const Point spatial_subtract (const Point &p) const;
 };
 
 

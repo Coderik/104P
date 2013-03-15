@@ -59,6 +59,7 @@ Geodesic_Distance_UI::Geodesic_Distance_UI()
 
 	_ui.motion_compensation_picker->append("no", "No tracking");
 	_ui.motion_compensation_picker->append("pixelwise", "Pixelwise tracking");
+	_ui.motion_compensation_picker->append("shift", "Patch shift tracking");
 	_ui.motion_compensation_picker->set_active(0);
 
 	for ( int i=5; i<=15; i+=2 ) {
@@ -308,6 +309,8 @@ void Geodesic_Distance_UI::set_motion_compensation_mode()
 		mode = no_compensation;
 	} else if (id == "pixelwise") {
 		mode = pixelwise;
+	} else if (id == "shift") {
+		mode = patch_shift;
 	} else {
 		mode = no_compensation;
 	}
@@ -688,7 +691,9 @@ Sequence* Geodesic_Distance_UI::calculate_distances( Sequence &sequence,
 			lookup_limits.size_y = patch_size.size_y * factor;
 			lookup_limits.size_t = patch_size.size_t * factor;
 			if (_motion_compensation_mode == pixelwise) {
-				distances = marching.CalculateDistance(sequence, _forward_optical_flow_list, _backward_optical_flow_list, lookup_limits, patch_size, patch_center);
+				distances = marching.CalculateDistance(sequence, _forward_optical_flow_list, _backward_optical_flow_list, lookup_limits, patch_size, patch_center, false);
+			} else if (_motion_compensation_mode == patch_shift) {
+				distances = marching.CalculateDistance(sequence, _forward_optical_flow_list, _backward_optical_flow_list, lookup_limits, patch_size, patch_center, true);
 			} else {
 				distances = marching.CalculateDistance(sequence, lookup_limits, patch_size, patch_center);
 			}
@@ -697,7 +702,9 @@ Sequence* Geodesic_Distance_UI::calculate_distances( Sequence &sequence,
 		case patch_space: {
 			// TODO: maybe get patch first
 			if (_motion_compensation_mode == pixelwise) {
-				distances = marching.CalculateDistance(sequence, _forward_optical_flow_list, _backward_optical_flow_list, patch_size, patch_size, patch_center);
+				distances = marching.CalculateDistance(sequence, _forward_optical_flow_list, _backward_optical_flow_list, patch_size, patch_size, patch_center, false);
+			} else if (_motion_compensation_mode == patch_shift) {
+				distances = marching.CalculateDistance(sequence, _forward_optical_flow_list, _backward_optical_flow_list, patch_size, patch_size, patch_center, true);
 			} else {
 				distances = marching.CalculateDistance(sequence, patch_size, patch_size, patch_center);
 			}
