@@ -53,7 +53,8 @@ public:
 	{
 		no_compensation,
 		pixelwise,
-		patch_shift
+		patch_shift_central,
+		patch_shift_weighted
 	};
 
 	Geodesic_Distance_UI();

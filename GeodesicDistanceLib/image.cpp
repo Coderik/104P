@@ -27,6 +27,17 @@ Image::Image(int x_size, int y_size)
 }
 
 
+Image::Image(int x_size,int y_size, float value)
+{
+	_x_size = x_size;
+	_y_size = y_size;
+
+	_points = (float *)malloc(sizeof(float) * x_size * y_size);
+
+	fill(value);
+}
+
+
 Image::Image(Image &source)
 {
 	_x_size = source._x_size;
@@ -49,7 +60,7 @@ Image::~Image()
 
 /* public */
 
-float Image::GetPixelValue(int x, int y)
+float Image::GetPixelValue(int x, int y) const
 {
 	if ( x < 0 || y < 0 || x >= _x_size || y >= _y_size || !_points) {
 		return -1;
@@ -74,15 +85,21 @@ void Image::fill(float value)
 }
 
 
-int Image::GetXSize()
+int Image::GetXSize() const
 {
 	return _x_size;
 }
 
 
-int Image::GetYSize()
+int Image::GetYSize() const
 {
 	return _y_size;
+}
+
+
+Shape Image::get_size() const
+{
+	return Shape(_x_size, _y_size, 1);
 }
 
 
@@ -175,7 +192,7 @@ float* Image::GetRawData()
 
 /* private */
 
-inline int Image::GetIndex(int x, int y)
+inline int Image::GetIndex(int x, int y) const
 {
 	return _x_size * y + x;
 }
