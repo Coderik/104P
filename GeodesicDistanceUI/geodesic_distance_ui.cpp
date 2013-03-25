@@ -197,6 +197,15 @@ void Geodesic_Distance_UI::open_sequence()
 			_sequence->AddFrame(frame);
 		}
 
+		// Set initial coordinates
+		_sequence_folder = sequence_folder;
+		_patch_center.x = first_frame->GetXSize() / 2;
+		_patch_center.y = first_frame->GetYSize() / 2;
+		_patch_center.t = 0;
+		_patch_duration = 1;
+		_current_time = 0;
+		UpdateCoordinates();
+
 		// Adjust UI
 		_ui.set_view(UI_Container::VIEW_ORIGINAL_IMAGE);
 		_ui.optical_flow_action_group->set_sensitive(true);
@@ -227,14 +236,6 @@ void Geodesic_Distance_UI::open_sequence()
 		_ui.allow_optical_flow_views(false);
 		_ui.proceed_optical_flow_action->set_sensitive(false);
 		_ui.motion_compensation_picker->set_sensitive(false);
-
-		// Set initial coordinates
-		_sequence_folder = sequence_folder;
-		_patch_center.x = first_frame->GetXSize() / 2;
-		_patch_center.y = first_frame->GetYSize() / 2;
-		_patch_center.t = 0;
-		_current_time = 0;
-		UpdateCoordinates();
 
 		// [Re]set optical flow
 		reset_vector_of_pointers(_forward_optical_flow_list, _sequence->GetTSize() - 1);

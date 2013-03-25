@@ -13,9 +13,9 @@
 #include <glibmm/ustring.h>
 #include <gtkmm/filechooserdialog.h>
 #include <giomm/file.h>
-#include <glibmm/threads.h>
 #include <glibmm/dispatcher.h>
 #include <gtkmm/radioaction.h>
+#include <glibmm/threads.h>
 
 #include <string.h>
 #include <iostream>
