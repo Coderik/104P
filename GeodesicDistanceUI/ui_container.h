@@ -21,6 +21,7 @@
 #include <map>
 
 #include "selectable_image.h"
+#include "layer_manager.h"
 
 
 class UI_Container
@@ -34,6 +35,7 @@ public:
 	Glib::RefPtr<Gtk::Action> proceed_optical_flow_action;
 	Glib::RefPtr<Gtk::Action> restore_optical_flow_action;
 	Glib::RefPtr<Gtk::ActionGroup> view_action_group;
+	Glib::RefPtr<Gtk::ActionGroup> layer_action_group;
 
 	Selectable_Image *image_control;
 	Selectable_Image *patch_control;
@@ -118,6 +120,10 @@ public:
 		menu_manager->insert_action_group(view_action_group);
 		view_action->signal_changed().connect( sigc::mem_fun(*this, &UI_Container::set_view_internal) );
 
+		layer_action_group = Gtk::ActionGroup::create();
+		layer_action_group->add(Gtk::Action::create("LayerMenu", "Layers"));
+		menu_manager->insert_action_group(layer_action_group);
+		layer_action_group->set_sensitive(false);
 
 		Glib::ustring ui_info =
 		    "<ui>"
@@ -140,6 +146,8 @@ public:
 			"      <menuitem action='ForwardOFGrayView'/>"
 			"      <menuitem action='BackwardOFColorView'/>"
 			"      <menuitem action='BackwardOFGrayView'/>"
+			"    </menu>"
+			"    <menu action='LayerMenu'>"
 			"    </menu>"
 		    "  </menubar>"
 		    "</ui>";
@@ -309,10 +317,18 @@ public:
 		_view_map[VIEW_BACKWARD_OF_GRAY]->set_sensitive(is_allowed);
 	}
 
+
+	void set_layer_manager(LayerManager layer_manager)
+	{
+		_layer_manager = layer_manager;
+		update_layers();
+	}
+
 private:
 	std::map<View, Glib::RefPtr<Gtk::RadioAction> > _view_map;
 	type_signal_view_changed _signal_view_changed;
 	View _current_view;
+	LayerManager _layer_manager;
 
 	void set_view_internal(const Glib::RefPtr<Gtk::RadioAction>& current)
 	{
@@ -332,6 +348,21 @@ private:
 		}
 
 		_signal_view_changed.emit();
+	}
+
+	void update_layers()
+	{
+		Glib::RefPtr<Gtk::ToggleAction > layer_action = Gtk::ToggleAction::create("id", "Name", "tooltip", false);
+		layer_action->signal_toggled().connect( sigc::mem_fun(*this, &UI_Container::update_layers_state) );
+		layer_action_group->add(layer_action);
+		// TODO: update somehow
+
+		layer_action_group->set_sensitive(true);
+	}
+
+	void update_layers_state()
+	{
+
 	}
 };
 

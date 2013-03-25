@@ -36,6 +36,7 @@
 #include "signal_watchdog.h"
 #include "point.h"
 #include "shape.h"
+#include "layer_manager.h"
 
 
 
@@ -91,6 +92,7 @@ private:
 	vector<Glib::RefPtr<Gdk::Pixbuf> > _color_representations;
 	Glib::RefPtr<Gdk::Pixbuf> _patch_slice, _empty_pixmap;
 	Glib::RefPtr<Gdk::Pixbuf> _optical_flow_view;
+	LayerManager _layer_manager;
 	std::vector<OpticalFlowContainer*> _forward_optical_flow_list;
 	std::vector<OpticalFlowContainer*> _backward_optical_flow_list;
 	std::vector<int> _task_list;

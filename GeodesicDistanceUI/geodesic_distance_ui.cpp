@@ -43,6 +43,9 @@ Geodesic_Distance_UI::Geodesic_Distance_UI()
 	_distances = 0;
 	_patch_scale = 1;
 
+	_layer_manager = LayerManager();
+	_ui.set_layer_manager(_layer_manager);
+
 	_ui.background_work_infobar->hide();
 	_ui.optical_flow_action_group->set_sensitive(false);
 	_ui.view_action_group->set_sensitive(false);
@@ -724,6 +727,15 @@ Sequence* Geodesic_Distance_UI::calculate_distances( Sequence &sequence,
 			break;
 		}
 	}
+
+	// Update layer.
+	// TODO: finish
+	Layer *layer = _layer_manager.find_layer("some_key");
+	if (!layer) {
+		layer = new Layer("some key", "Some Display Name");
+		_layer_manager.add_layer(layer);
+	}
+	// TODO: do update here
 
 	return distances;
 }
