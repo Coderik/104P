@@ -77,7 +77,7 @@ public:
 		window->set_default_size(800, 700);
 
 		// set up menu
-		Glib::RefPtr<Gtk::UIManager> menu_manager = Gtk::UIManager::create();
+		_menu_manager = Gtk::UIManager::create();
 
 		Glib::RefPtr<Gtk::ActionGroup> action_group = Gtk::ActionGroup::create();
 		action_group->add(Gtk::Action::create("FileMenu", "File"));
@@ -87,7 +87,7 @@ public:
 		action_group->add(open_sequence_action);
 		quit_action = Gtk::Action::create("Quit", Gtk::Stock::QUIT);
 		action_group->add(quit_action);
-		menu_manager->insert_action_group(action_group);
+		_menu_manager->insert_action_group(action_group);
 
 		optical_flow_action_group = Gtk::ActionGroup::create();
 		optical_flow_action_group->add(Gtk::Action::create("OpticalFlowMenu", "Optical Flow"));
@@ -97,7 +97,7 @@ public:
 		optical_flow_action_group->add(proceed_optical_flow_action);
 		restore_optical_flow_action = Gtk::Action::create("RestoreOptFlow", "Restore Optical Flow");
 		optical_flow_action_group->add(restore_optical_flow_action);
-		menu_manager->insert_action_group(optical_flow_action_group);
+		_menu_manager->insert_action_group(optical_flow_action_group);
 
 		view_action_group = Gtk::ActionGroup::create();
 		view_action_group->add(Gtk::Action::create("ViewMenu", "View"));
@@ -117,12 +117,12 @@ public:
 		view_action = Gtk::RadioAction::create(view_group, "BackwardOFGrayView", "Backward Optical Flow (magnitude)");
 		view_action_group->add(view_action);
 		_view_map[VIEW_BACKWARD_OF_GRAY] = view_action;
-		menu_manager->insert_action_group(view_action_group);
+		_menu_manager->insert_action_group(view_action_group);
 		view_action->signal_changed().connect( sigc::mem_fun(*this, &UI_Container::set_view_internal) );
 
 		layer_action_group = Gtk::ActionGroup::create();
 		layer_action_group->add(Gtk::Action::create("LayerMenu", "Layers"));
-		menu_manager->insert_action_group(layer_action_group);
+		_menu_manager->insert_action_group(layer_action_group);
 		layer_action_group->set_sensitive(false);
 
 		Glib::ustring ui_info =
@@ -151,13 +151,13 @@ public:
 			"    </menu>"
 		    "  </menubar>"
 		    "</ui>";
-		menu_manager->add_ui_from_string(ui_info);
+		_menu_manager->add_ui_from_string(ui_info);
 
 		// create layout
 		Gtk::Box *window_layout = new Gtk::VBox();		// containes menubar, infobar, main working area and statusbar
 		window->add(*window_layout);
 
-		Gtk::Widget* menu_bar = menu_manager->get_widget("/MenuBar");
+		Gtk::Widget* menu_bar = _menu_manager->get_widget("/MenuBar");
 		if (menu_bar) {
 			window_layout->pack_start(*menu_bar, Gtk::PACK_SHRINK);
 		}
@@ -325,6 +325,7 @@ public:
 	}
 
 private:
+	Glib::RefPtr<Gtk::UIManager> _menu_manager;
 	std::map<View, Glib::RefPtr<Gtk::RadioAction> > _view_map;
 	type_signal_view_changed _signal_view_changed;
 	View _current_view;
@@ -355,7 +356,9 @@ private:
 		Glib::RefPtr<Gtk::ToggleAction > layer_action = Gtk::ToggleAction::create("id", "Name", "tooltip", false);
 		layer_action->signal_toggled().connect( sigc::mem_fun(*this, &UI_Container::update_layers_state) );
 		layer_action_group->add(layer_action);
+		_menu_manager->ensure_update();
 		// TODO: update somehow
+		//layer_action_group->
 
 		layer_action_group->set_sensitive(true);
 	}

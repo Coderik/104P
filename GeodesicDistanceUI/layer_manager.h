@@ -10,6 +10,7 @@
 
 #include <string>
 #include <map>
+#include <vector>
 
 #include "layer.h"
 
@@ -22,9 +23,12 @@ public:
 
 	string add_layer(Layer* layer);
 	Layer* find_layer(string key);
-	// TODO: add smth to iterate layers
+	vector<Layer* > get_all_layers();
+	// get by target
 private:
 	map<string, Layer* > _layers_map;
+	vector<Layer* > _layers_cache;
+	bool _is_layers_cache_valid;
 };
 
 
