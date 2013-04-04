@@ -29,6 +29,8 @@ public:
 	int GetYSize();
 	int GetTSize();
 	Shape get_size();
+	void set_coordinates(Point coordinates);
+	Point get_coordinates();
 	double GetPixelValue(int x, int y, int t);
 	void SetPixelValue(int x, int y, int t, double value);
 	void fill(float value);
@@ -44,6 +46,7 @@ public:
 
 private:
 	int _x_size, _y_size, _t_size;
+	Point _coordinates;
 	vector<Image* > _frames;
 
 	Sequence* GetPatchInternal(int a_x, int a_y, int a_t, int b_x, int b_y, int b_t);

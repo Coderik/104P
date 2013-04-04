@@ -10,6 +10,7 @@
 Selectable_Image::Selectable_Image()
 {
 	add_events(Gdk::BUTTON_PRESS_MASK);
+	_layer_manager = (Layer_Manager*)0;
 }
 
 
@@ -31,6 +32,19 @@ void Selectable_Image::set_pixbuf(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf)
 	}
 }
 
+
+void Selectable_Image::set_layer_manager(Layer_Manager *layer_manager)
+{
+	if (_connection_layer_manager_signal_layer_changed.connected()) {
+		_connection_layer_manager_signal_layer_changed.disconnect();
+	}
+
+	_layer_manager = layer_manager;
+	_connection_layer_manager_signal_layer_changed =
+			_layer_manager->signal_layer_changed().connect( sigc::mem_fun(*this, &Selectable_Image::queue_draw) );
+}
+
+
 /* protected */
 
 bool Selectable_Image::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
@@ -50,6 +64,14 @@ bool Selectable_Image::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 	Gdk::Cairo::set_source_pixbuf(cr, _pixbuf, pixbuf_x, pixbuf_y);
 	cr->paint();
 
+	if (_layer_manager) {
+		vector<Layer* > layers = _layer_manager->get_all_layers();
+		vector<Layer* >::iterator it;
+		for (it = layers.begin(); it != layers.end(); ++it) {
+			(*it)->set_drawing_rectangle(pixbuf_x, pixbuf_y, width, height);
+			(*it)->draw(cr);
+		}
+	}
 	return true;
 }
 

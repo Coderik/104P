@@ -8,11 +8,13 @@
 #ifndef SELECTABLE_IMAGE_H_
 #define SELECTABLE_IMAGE_H_
 
+#include <vector>
 #include <gdkmm/general.h>
 #include <gtkmm/drawingarea.h>
 #include <gdkmm/pixbuf.h>
 #include <cairomm/context.h>
 #include <sigc++/sigc++.h>
+#include "layer_manager.h"
 
 class Selectable_Image: public Gtk::DrawingArea
 {
@@ -20,6 +22,7 @@ public:
 	Selectable_Image();
 	virtual ~Selectable_Image();
 	void set_pixbuf(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf);
+	void set_layer_manager(Layer_Manager *layer_manager);
 
 	typedef sigc::signal<void, int, int> type_signal_point_selected;
 	type_signal_point_selected signal_point_selected()
@@ -36,6 +39,8 @@ private:
 	Glib::RefPtr<Gdk::Pixbuf> _pixbuf;
 	int _content_width, _content_height;
 	type_signal_point_selected _signal_point_selected;
+	Layer_Manager *_layer_manager;
+	sigc::connection _connection_layer_manager_signal_layer_changed;
 
 };
 

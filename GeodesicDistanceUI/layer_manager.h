@@ -11,24 +11,37 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <utility>
 
 #include "layer.h"
 
 using namespace std;
 
-class LayerManager
+class Layer_Manager
 {
 public:
-	LayerManager();
+	Layer_Manager();
 
 	string add_layer(Layer* layer);
 	Layer* find_layer(string key);
 	vector<Layer* > get_all_layers();
-	// get by target
+	void set_visibility(bool is_visible);
+
+	typedef sigc::signal<void> type_signal_layer_changed;
+	type_signal_layer_changed signal_layer_changed()
+	{
+		return _signal_layer_changed;
+	}
+
 private:
-	map<string, Layer* > _layers_map;
+	typedef pair<Layer*, sigc::connection > type_layer_and_connection;
+	map<string, type_layer_and_connection > _layers_map;
 	vector<Layer* > _layers_cache;
 	bool _is_layers_cache_valid;
+	type_signal_layer_changed _signal_layer_changed;
+	bool _is_notification_allowed;
+
+	void notify_layer_changed();
 };
 
 

@@ -75,6 +75,18 @@ Shape Sequence::get_size()
 }
 
 
+void Sequence::set_coordinates(Point coordinates)
+{
+	_coordinates = coordinates;
+}
+
+
+Point Sequence::get_coordinates()
+{
+	return _coordinates;
+}
+
+
 double Sequence::GetPixelValue(int x, int y, int t)
 {
 	if (t < 0 || t > _t_size || !_frames[t])
@@ -285,6 +297,8 @@ Sequence* Sequence::GetPatchInternal(int a_x, int a_y, int a_t, int b_x, int b_y
 			patch->SetFrame(t, frame_patch);
 		}
 	}
+
+	patch->set_coordinates(Point(a_x, a_y, a_t));
 
 	return patch;
 }

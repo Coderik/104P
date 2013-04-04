@@ -12,6 +12,10 @@ struct Point
 {
 	int x, y, t;
 
+	Point();
+	Point(int x, int y);
+	Point(int x, int y, int t);
+
 	Point& operator= (const Point &p);
 	Point& operator+= (const Point &p);
 	Point& operator-= (const Point &p);

@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include "shape.h"
+#include "point.h"
 
 class Image
 {
@@ -23,6 +24,8 @@ public:
 	int GetXSize() const;
 	int GetYSize() const;
 	Shape get_size() const;
+	void set_coordinates(Point coordinates);
+	Point get_coordinates();
 	float GetPixelValue(int x, int y) const;
 	void SetPixelValue(int x, int y, double value);
 	void fill(float value);
@@ -35,6 +38,7 @@ public:
 private:
 	int _x_size, _y_size;
 	float *_points;
+	Point _coordinates;
 	inline int GetIndex(int x, int y) const;
 	inline bool IsOddNumber(int number);
 	Image* GetPatchInternal(int a_x, int a_y, int b_x, int b_y);

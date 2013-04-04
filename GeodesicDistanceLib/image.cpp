@@ -103,6 +103,18 @@ Shape Image::get_size() const
 }
 
 
+void Image::set_coordinates(Point coordinates)
+{
+	_coordinates = coordinates;
+}
+
+
+Point Image::get_coordinates()
+{
+	return _coordinates;
+}
+
+
 Image* Image::GetPatchBetweenPoints(int a_x, int a_y, int b_x, int b_y)
 {
 	// /* ensure that points lie inside the image */

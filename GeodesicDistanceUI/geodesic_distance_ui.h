@@ -37,6 +37,7 @@
 #include "point.h"
 #include "shape.h"
 #include "layer_manager.h"
+#include "patch_position_layer.h"
 
 
 
@@ -77,6 +78,7 @@ protected:
 	void set_time();
 	void restore_optical_flow();
 	void update_view();
+	void set_layers_visibility();
 	void perceive_background_worker(int responce_id);	//TODO: rename it!
 	bool allow_background_computation();
 
@@ -92,7 +94,7 @@ private:
 	vector<Glib::RefPtr<Gdk::Pixbuf> > _color_representations;
 	Glib::RefPtr<Gdk::Pixbuf> _patch_slice, _empty_pixmap;
 	Glib::RefPtr<Gdk::Pixbuf> _optical_flow_view;
-	LayerManager _layer_manager;
+	Layer_Manager _layer_manager;
 	std::vector<OpticalFlowContainer*> _forward_optical_flow_list;
 	std::vector<OpticalFlowContainer*> _backward_optical_flow_list;
 	std::vector<int> _task_list;
@@ -104,6 +106,7 @@ private:
 	int _patch_scale;
 	int _progress_counter, _progress_total;
 	bool _optical_flow_legacy_format;
+	bool _layers_visibility;
 	DistanceMode _distance_mode;
 	MotionCompensationMode _motion_compensation_mode;
 	Glib::Threads::Thread *_background_worker;
@@ -138,6 +141,7 @@ private:
 	void cancel_calculate_optical_flow();
 	void take_optical_flow_frame();
 	void fill_task_list(std::vector<OpticalFlowContainer*> &forward_flow, std::vector<OpticalFlowContainer*> &backward_flow, std::vector<int> &task_list);
+	Patch_Position_Layer* find_or_create_patch_position_layer(Layer_Manager layer_manager);
 	//tmp
 	int write_flow(float *u, float *v, int w, int h);
 };

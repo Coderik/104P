@@ -20,6 +20,7 @@ Geodesic_Distance_UI::Geodesic_Distance_UI()
 	_ui.proceed_optical_flow_action->signal_activate().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::begin_missing_optical_flow_calculation) );
 	_ui.restore_optical_flow_action->signal_activate().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::restore_optical_flow) );
 	_ui.background_work_infobar->signal_response().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::perceive_background_worker) );
+	_ui.layers_visibility_toggle_action->signal_toggled().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::set_layers_visibility) );
 	_ui.signal_view_changed().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::update_view) );
 
 	_ui.patch_zoom_slider->signal_value_changed().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::set_patch_zoom) );
@@ -43,8 +44,8 @@ Geodesic_Distance_UI::Geodesic_Distance_UI()
 	_distances = 0;
 	_patch_scale = 1;
 
-	_layer_manager = LayerManager();
-	_ui.set_layer_manager(_layer_manager);
+	_layer_manager = Layer_Manager();
+	_ui.image_control->set_layer_manager(&_layer_manager);
 
 	_ui.background_work_infobar->hide();
 	_ui.optical_flow_action_group->set_sensitive(false);
@@ -52,6 +53,7 @@ Geodesic_Distance_UI::Geodesic_Distance_UI()
 	_ui.patch_control->set_redraw_on_allocate(false);
 	_ui.time_slider->set_sensitive(false);
 	_ui.patch_duration_picker->set_sensitive(false);
+	_ui.layers_visibility_toggle_action->set_active(true);
 
 	_ui.patch_zoom_slider->set_range(1, MAX_PATCH_SCALE);
 	_ui.patch_zoom_slider->set_digits(0);
@@ -117,6 +119,7 @@ void Geodesic_Distance_UI::open_image()
 		// TODO: check image
 
 		// Adjust UI
+		_ui.layer_action_group->set_sensitive(true);
 		_ui.optical_flow_action_group->set_sensitive(false);
 		_ui.view_action_group->set_sensitive(false);
 		_ui.patch_duration_picker->set_active(0);
@@ -211,6 +214,7 @@ void Geodesic_Distance_UI::open_sequence()
 
 		// Adjust UI
 		_ui.set_view(UI_Container::VIEW_ORIGINAL_IMAGE);
+		_ui.layer_action_group->set_sensitive(true);
 		_ui.optical_flow_action_group->set_sensitive(true);
 		_ui.view_action_group->set_sensitive(true);
 		_ui.patch_duration_picker->set_active(0);
@@ -270,6 +274,16 @@ void Geodesic_Distance_UI::reset_vector_of_pointers(std::vector<T*> &v, int size
 	v = std::vector<T*>(size);
 	for (it = v.begin(); it != v.end(); ++it) {
 		*it = 0;
+	}
+}
+
+
+void Geodesic_Distance_UI::set_layers_visibility()
+{
+	bool visibility = _ui.layers_visibility_toggle_action->get_active();
+	if (visibility != _layers_visibility) {
+		_layers_visibility = visibility;
+		_layer_manager.set_visibility(_layers_visibility);
 	}
 }
 
@@ -376,6 +390,10 @@ void Geodesic_Distance_UI::set_patch_size()
 		_patch_slice = GetDistanceRepresentatonByTime(_color_representations, _patch_center.t, _current_time, _empty_pixmap);
 		ShowPatchPixbuf(_patch_slice, _patch_scale);
 	}
+
+	// Update layer.
+	Patch_Position_Layer *layer = find_or_create_patch_position_layer(_layer_manager);
+	layer->set_patch_size(_patch_size);
 }
 
 /*
@@ -485,6 +503,10 @@ void Geodesic_Distance_UI::set_gamma()
 void Geodesic_Distance_UI::set_time()
 {
 	_current_time = _ui.time_slider->get_value();
+
+	// Update layer.
+	Patch_Position_Layer *layer = find_or_create_patch_position_layer(_layer_manager);
+	layer->set_current_time(_current_time);
 
 	update_image_control(_current_time);
 
@@ -729,15 +751,29 @@ Sequence* Geodesic_Distance_UI::calculate_distances( Sequence &sequence,
 	}
 
 	// Update layer.
-	// TODO: finish
-	Layer *layer = _layer_manager.find_layer("some_key");
-	if (!layer) {
-		layer = new Layer("some key", "Some Display Name");
-		_layer_manager.add_layer(layer);
+	Patch_Position_Layer *layer = find_or_create_patch_position_layer(_layer_manager);
+	layer->clear_slice_origins();
+	for (int i = 0;i < distances->GetTSize(); i++) {
+		layer->set_slice_origin( distances->GetFrame(i)->get_coordinates() );
 	}
-	// TODO: do update here
+	layer->set_current_time(_current_time);
+
 
 	return distances;
+}
+
+
+Patch_Position_Layer* Geodesic_Distance_UI::find_or_create_patch_position_layer(Layer_Manager layer_manager)
+{
+	const string key = "patch_position";
+	Patch_Position_Layer *layer = dynamic_cast<Patch_Position_Layer* >(_layer_manager.find_layer(key));
+	if (!layer) {
+		layer = new Patch_Position_Layer(key, "Patch Position");
+		layer->set_visibitity(_layers_visibility);
+		_layer_manager.add_layer(layer);
+	}
+
+	return layer;
 }
 
 

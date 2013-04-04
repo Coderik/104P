@@ -9,6 +9,30 @@
 #include "headers/point.h"
 
 
+Point::Point()
+{
+	x = 0;
+	y = 0;
+	t = 0;
+}
+
+
+Point::Point(int x, int y)
+{
+	this->x = x;
+	this->y = y;
+	t = 1;
+}
+
+
+Point::Point(int x, int y, int t)
+{
+	this->x = x;
+	this->y = y;
+	this->t = t;
+}
+
+
 Point& Point::operator= (const Point &p)
 {
 	if (this != &p) {
