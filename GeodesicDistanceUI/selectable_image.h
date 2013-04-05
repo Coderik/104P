@@ -12,6 +12,10 @@
 #include <gdkmm/general.h>
 #include <gtkmm/drawingarea.h>
 #include <gdkmm/pixbuf.h>
+#include <gtkmm/uimanager.h>
+#include <gtkmm/menu.h>
+#include <gtkmm/filechooserdialog.h>
+#include <gtkmm/stock.h>
 #include <cairomm/context.h>
 #include <sigc++/sigc++.h>
 #include "layer_manager.h"
@@ -23,6 +27,8 @@ public:
 	virtual ~Selectable_Image();
 	void set_pixbuf(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf);
 	void set_layer_manager(Layer_Manager *layer_manager);
+
+	void save_content();
 
 	typedef sigc::signal<void, int, int> type_signal_point_selected;
 	type_signal_point_selected signal_point_selected()
@@ -41,6 +47,10 @@ private:
 	type_signal_point_selected _signal_point_selected;
 	Layer_Manager *_layer_manager;
 	sigc::connection _connection_layer_manager_signal_layer_changed;
+	Glib::RefPtr<Gtk::UIManager> _menu_manager;
+	Gtk::Menu *_context_menu;
+
+	void save_content_internal(const string& filename);
 
 };
 

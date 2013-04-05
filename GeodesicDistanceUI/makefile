@@ -6,22 +6,31 @@ ARCH = -m32
 # Add inputs and outputs to the build variables 
 CPP_SRCS += \
 ./geodesic_distance_ui.cpp \
+./layer.cpp \
+./layer_manager.cpp \
 ./main.cpp \
 ./optical_flow.cpp \
+./patch_position_layer.cpp \
 ./selectable_image.cpp \
-./signal_watchdog.cpp 
+./signal_watchdog.cpp
 
 OBJS += \
 bin/geodesic_distance_ui.o \
+bin/layer.o \
+bin/layer_manager.o \
 bin/main.o \
 bin/optical_flow.o \
+bin/patch_position_layer.o \
 bin/selectable_image.o \
 bin/signal_watchdog.o 
 
 CPP_DEPS += \
 bin/geodesic_distance_ui.d \
+bin/layer.d \
+bin/layer_manager.d \
 bin/main.d \
 bin/optical_flow.d \
+bin/patch_position_layer.d \
 bin/selectable_image.d \
 bin/signal_watchdog.d 
 
