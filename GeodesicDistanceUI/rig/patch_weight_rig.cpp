@@ -172,6 +172,30 @@ void Patch_Weight_Rig::left_button_pressed(int x, int y)
 }
 
 
+void Patch_Weight_Rig::key_pressed(GdkEventKey* event)
+{
+	std::string key = event->string;
+	Sequence *sequence = _hull->request_sequence();
+
+	if (key.compare("w") == 0) {
+		if (sequence && _patch_center.y > 1)
+			left_button_pressed(_patch_center.x, _patch_center.y - 1);
+	}
+	if (key.compare("a") == 0) {
+		if (sequence && _patch_center.x > 1)
+			left_button_pressed(_patch_center.x - 1, _patch_center.y);
+	}
+	if (key.compare("s") == 0) {
+		if (sequence && _patch_center.y < sequence->GetYSize() - 1)
+			left_button_pressed(_patch_center.x, _patch_center.y + 1);
+	}
+	if (key.compare("d") == 0) {
+		if (sequence && _patch_center.x < sequence->GetXSize() - 1)
+			left_button_pressed(_patch_center.x + 1, _patch_center.y);
+	}
+}
+
+
 /* Private Slots */
 
 void Patch_Weight_Rig::set_distance_mode()
@@ -572,5 +596,3 @@ void Patch_Weight_Rig::update_coordinates()
 	Glib::ustring coordinates = Glib::ustring::compose("x: %1; y: %2; t: %3", _patch_center.x, _patch_center.y, _patch_center.t);
 	_ui.coordinates_label->set_label(coordinates);
 }
-
-

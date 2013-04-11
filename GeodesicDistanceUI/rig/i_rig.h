@@ -8,6 +8,8 @@
 #ifndef I_RIG_H_
 #define I_RIG_H_
 
+#include <gdk/gdk.h>
+
 class IRig
 {
 public:
@@ -22,6 +24,7 @@ public:
 
 	// TODO: replace with more generich approach (e.g. User_Interaction class)
 	virtual void left_button_pressed(int x, int y) = 0;
+	virtual void key_pressed(GdkEventKey* event) = 0;
 };
 
 

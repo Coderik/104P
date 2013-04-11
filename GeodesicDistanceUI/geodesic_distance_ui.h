@@ -16,6 +16,7 @@
 #include <glibmm/dispatcher.h>
 #include <gtkmm/radioaction.h>
 #include <glibmm/threads.h>
+#include <gdk/gdkkeysyms.h>
 
 #include <string.h>
 #include <iostream>
@@ -24,12 +25,11 @@
 #include "rig/i_hull.h"
 #include "rig/i_rig.h"
 #include "rig/patch_weight_rig.h"
+#include "rig/fitting.h"
 #include "ui_container.h"
 #include "image.h"
 #include "sequence.h"
 #include "pgm_util.h"
-#include "dijkstra_algorithm.h"
-#include "simple_distance_calculation.h"
 #include "zach_TVL1_optical_flow.h"
 #include "util.h"
 #include "optical_flow_io.h"
@@ -73,19 +73,17 @@ protected:
 	void begin_full_optical_flow_calculation();
 	void begin_missing_optical_flow_calculation();
 
-	bool move_selected_point(GdkEventKey* event);
+	bool key_pressed(GdkEventKey* event);
 
 private:
-	IRig *_current_rig;
+	Fitting _current_fitting;
 	Sequence *_sequence;
 	Glib::RefPtr<Gdk::Pixbuf> _optical_flow_view;
-	Layer_Manager _layer_manager;
 	std::vector<OpticalFlowContainer*> _forward_optical_flow_list;
 	std::vector<OpticalFlowContainer*> _backward_optical_flow_list;
 	std::vector<int> _task_list;
 	std::string _sequence_folder;
 	int _current_time;
-	Point _patch_center;
 	int _progress_counter, _progress_total;
 	bool _has_optical_flow_data;
 	bool _optical_flow_legacy_format;

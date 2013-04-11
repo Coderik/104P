@@ -54,6 +54,7 @@ public:
 
 	// TODO: replace with more generich approach (e.g. User_Interaction class)
 	virtual void left_button_pressed(int x, int y);
+	virtual void key_pressed(GdkEventKey* event);
 
 private:
 	static const int MAX_PATCH_SCALE = 8;
