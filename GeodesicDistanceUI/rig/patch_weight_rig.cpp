@@ -26,8 +26,9 @@ Patch_Weight_Rig::Patch_Weight_Rig(IHull *hull)
 
 void Patch_Weight_Rig::activate()
 {
-	// TODO: check if ui is been built
-	// TODO: assign ui to some placeholder
+	// Assign ui to a placeholder
+	_ui.attach_ui(_hull->request_ui_placeholder());
+
 	// TODO: check if sequence is the same to restore some data from previous session
 	Sequence* sequence = _hull->request_sequence();
 	int current_time = _hull->request_current_time();
@@ -175,7 +176,7 @@ void Patch_Weight_Rig::set_patch_size()
 		return;
 
 	_patch_size = int_value;
-	_empty_pixmap = CreateEmptyPixbuf(_patch_size, _patch_size);
+	_empty_pixmap = create_empty_pixbuf(_patch_size, _patch_size);
 
 	Sequence* sequence = _hull->request_sequence();
 	int current_time = _hull->request_current_time();
@@ -189,7 +190,8 @@ void Patch_Weight_Rig::set_patch_size()
 	}
 
 	// Update layer.
-	Patch_Position_Layer *layer = find_or_create_patch_position_layer(_layer_manager);
+	Layer_Manager *layer_manager = _hull->request_layer_manager();
+	Patch_Position_Layer *layer = find_or_create_patch_position_layer(layer_manager);
 	layer->set_patch_size(_patch_size);
 }
 
@@ -347,26 +349,28 @@ Sequence* Patch_Weight_Rig::calculate_distances( Sequence &sequence,
 	}
 
 	// Update layer.
-	Patch_Position_Layer *layer = find_or_create_patch_position_layer(_layer_manager);
+	Layer_Manager *layer_manager = _hull->request_layer_manager();
+	Patch_Position_Layer *layer = find_or_create_patch_position_layer(layer_manager);
 	layer->clear_slice_origins();
 	for (int i = 0;i < distances->GetTSize(); i++) {
 		layer->set_slice_origin( distances->GetFrame(i)->get_coordinates() );
 	}
-	//layer->set_current_time(_current_time);
+	int current_time = _hull->request_current_time();
+	layer->set_current_time(current_time);
 
 
 	return distances;
 }
 
 
-Patch_Position_Layer* Patch_Weight_Rig::find_or_create_patch_position_layer(Layer_Manager layer_manager)
+Patch_Position_Layer* Patch_Weight_Rig::find_or_create_patch_position_layer(Layer_Manager *layer_manager)
 {
 	const string key = "patch_position";
-	Patch_Position_Layer *layer = dynamic_cast<Patch_Position_Layer* >(layer_manager.find_layer(key));
+	Patch_Position_Layer *layer = dynamic_cast<Patch_Position_Layer* >(layer_manager->find_layer(key));
 	if (!layer) {
 		layer = new Patch_Position_Layer(key, "Patch Position");
-		//layer->set_visibitity(_layers_visibility); //?????
-		layer_manager.add_layer(layer);
+		//layer->set_visibitity(_layers_visibility); // TODO: handle it the hull
+		layer_manager->add_layer(layer);
 	}
 
 	return layer;

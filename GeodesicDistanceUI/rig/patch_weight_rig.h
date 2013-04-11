@@ -79,7 +79,7 @@ private:
 								  DistanceMode mode,
 								  float distance_weight,
 								  float color_weight);
-	Patch_Position_Layer* find_or_create_patch_position_layer(Layer_Manager layer_manager);
+	Patch_Position_Layer* find_or_create_patch_position_layer(Layer_Manager *layer_manager);
 	vector<Glib::RefPtr<Gdk::Pixbuf> > draw_distances_with_color(Sequence &distances, float gamma);
 	Glib::RefPtr<Gdk::Pixbuf> wrap_raw_image_data(Image *image);
 	Glib::RefPtr<Gdk::Pixbuf> get_distance_representaton_by_time(

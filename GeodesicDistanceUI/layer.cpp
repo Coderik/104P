@@ -11,6 +11,7 @@ Layer::Layer(string id, string display_name)
 {
 	_id = id;
 	_display_name = display_name;
+	_is_visible = true;
 }
 
 
