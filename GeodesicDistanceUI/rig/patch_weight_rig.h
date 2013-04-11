@@ -48,7 +48,16 @@ public:
 	virtual void activate();
 	virtual void deactivate();
 
+	virtual void sequence_changed();
+	virtual void optical_flow_changed();
+	virtual void current_time_changed();
+
+	// TODO: replace with more generich approach (e.g. User_Interaction class)
+	virtual void left_button_pressed(int x, int y);
+
 private:
+	static const int MAX_PATCH_SCALE = 8;
+
 	IHull *_hull;
 	Patch_Weight_UI_Container _ui;
 	Sequence *_distances;

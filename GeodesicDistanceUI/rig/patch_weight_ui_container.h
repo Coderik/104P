@@ -13,6 +13,8 @@
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/label.h>
 
+#include "../selectable_image.h"
+
 class Patch_Weight_UI_Container
 {
 public:
@@ -30,7 +32,7 @@ public:
 	Patch_Weight_UI_Container();
 	~Patch_Weight_UI_Container();
 
-	void attach_ui(Gtk::VBox *placeholder);
+	void attach_ui(Gtk::Box *placeholder);
 
 private:
 	Gtk::Frame *_patch_view_frame;
@@ -38,7 +40,7 @@ private:
 	Gtk::Frame *_coordinates_frame;
 
 	void build_ui();
-}
+};
 
 
 #endif /* PATCH_WEIGHT_UI_CONTAINER_H_ */

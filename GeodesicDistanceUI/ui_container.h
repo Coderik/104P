@@ -38,18 +38,9 @@ public:
 	Glib::RefPtr<Gtk::ActionGroup> layer_action_group;
 	Glib::RefPtr<Gtk::ToggleAction> layers_visibility_toggle_action;
 
+	Gtk::Box *right_side_layout;
 	Selectable_Image *image_control;
-	Selectable_Image *patch_control;
-	Gtk::Scale *patch_zoom_slider;
-	Gtk::ComboBoxText *distance_mode_picker;
-	Gtk::ComboBoxText *motion_compensation_picker;
-	Gtk::ComboBoxText *patch_size_picker;
-	Gtk::ComboBoxText *patch_duration_picker;
-	Gtk::Scale *distance_weight_slider;
-	Gtk::Scale *color_weight_slider;
-	Gtk::Scale *gamma_slider;
 	Gtk::Scale *time_slider;
-	Gtk::Label *coordinates_label;
 	Gtk::Statusbar *status_bar;
 	Gtk::InfoBar *background_work_infobar;
 	Gtk::Label *background_work_infobar_message;
@@ -191,32 +182,8 @@ public:
 		time_slider = new Gtk::Scale(Gtk::ORIENTATION_HORIZONTAL);
 		left_side_layout->pack_start(*time_slider, Gtk::PACK_SHRINK);
 
-		Gtk::Box *right_side_layout = new Gtk::VBox();		// containes patch view, params panel and coordinates
+		right_side_layout = new Gtk::VBox();		// rig placeholder
 		working_area_layout->pack_start(*right_side_layout, Gtk::PACK_SHRINK);
-
-		Gtk::Frame *patch_view_frame = new Gtk::Frame("Patch view");
-		patch_view_frame->set_label_align(Gtk::ALIGN_CENTER, Gtk::ALIGN_START);
-		patch_view_frame->set_shadow_type(Gtk::SHADOW_ETCHED_OUT);
-		patch_view_frame->set_size_request(200,200);
-		patch_view_frame->set_margin_bottom(10);
-		right_side_layout->pack_start(*patch_view_frame, Gtk::PACK_SHRINK);
-
-		Gtk::Box *patch_view_box = new Gtk::VBox();			// containes patch view itself and zoom slider
-		patch_view_frame->add(*patch_view_box);
-
-		Gtk::Frame *parameters_frame = new Gtk::Frame("Parameters");
-		parameters_frame->set_label_align(Gtk::ALIGN_CENTER, Gtk::ALIGN_START);
-		parameters_frame->set_shadow_type(Gtk::SHADOW_ETCHED_OUT);
-		parameters_frame->set_margin_bottom(10);
-		right_side_layout->pack_start(*parameters_frame, Gtk::PACK_SHRINK);
-
-		Gtk::Box *parameters_box = new Gtk::VBox();			// containes parameters adjustment controls
-		parameters_frame->add(*parameters_box);
-
-		Gtk::Frame *coordinates_frame = new Gtk::Frame("Coordinates");
-		coordinates_frame->set_label_align(Gtk::ALIGN_CENTER, Gtk::ALIGN_START);
-		coordinates_frame->set_shadow_type(Gtk::SHADOW_ETCHED_OUT);
-		right_side_layout->pack_start(*coordinates_frame, Gtk::PACK_EXPAND_WIDGET);
 
 		// fill layout with controls
 		background_work_infobar->add_button(Gtk::Stock::CANCEL, 0);
@@ -233,61 +200,6 @@ public:
 
 		image_control = new Selectable_Image();
 		image_view_frame->add(*image_control);
-
-		patch_control = new Selectable_Image();
-		patch_view_box->pack_start(*patch_control, Gtk::PACK_EXPAND_WIDGET);
-
-		patch_zoom_slider = new Gtk::Scale(Gtk::ORIENTATION_HORIZONTAL);
-		//patch_zoom_slider->set_draw_value(false);
-		patch_view_box->pack_start(*patch_zoom_slider, Gtk::PACK_SHRINK);
-
-		Gtk::Frame *distance_mode_frame = new Gtk::Frame("Distance calc. range:");
-		distance_mode_frame->set_shadow_type(Gtk::SHADOW_NONE);
-		distance_mode_picker = new Gtk::ComboBoxText();
-		distance_mode_frame->add(*distance_mode_picker);
-		parameters_box->pack_start(*distance_mode_frame, Gtk::PACK_SHRINK);
-
-		Gtk::Frame *motion_compensation_frame = new Gtk::Frame("Motion tracking");
-		motion_compensation_frame->set_shadow_type(Gtk::SHADOW_NONE);
-		motion_compensation_picker = new Gtk::ComboBoxText();
-		motion_compensation_frame->add(*motion_compensation_picker);
-		parameters_box->pack_start(*motion_compensation_frame, Gtk::PACK_SHRINK);
-
-		Gtk::Frame *patch_size_frame = new Gtk::Frame("Patch size:");
-		patch_size_frame->set_shadow_type(Gtk::SHADOW_NONE);
-		patch_size_picker = new Gtk::ComboBoxText();
-		patch_size_frame->add(*patch_size_picker);
-		parameters_box->pack_start(*patch_size_frame, Gtk::PACK_SHRINK);
-
-		Gtk::Frame *patch_duration_frame = new Gtk::Frame("Patch duration:");
-		patch_duration_frame->set_shadow_type(Gtk::SHADOW_NONE);
-		patch_duration_picker = new Gtk::ComboBoxText();
-		patch_duration_frame->add(*patch_duration_picker);
-		parameters_box->pack_start(*patch_duration_frame, Gtk::PACK_SHRINK);
-
-		Gtk::Frame *distance_weight_frame = new Gtk::Frame("Distance weight:");
-		distance_weight_frame->set_shadow_type(Gtk::SHADOW_NONE);
-		distance_weight_slider = new Gtk::Scale(Gtk::ORIENTATION_HORIZONTAL);
-		distance_weight_slider->set_value_pos(Gtk::POS_LEFT);
-		distance_weight_frame->add(*distance_weight_slider);
-		parameters_box->pack_start(*distance_weight_frame, Gtk::PACK_SHRINK);
-
-		Gtk::Frame *color_weight_frame = new Gtk::Frame("Color weight:");
-		color_weight_frame->set_shadow_type(Gtk::SHADOW_NONE);
-		color_weight_slider = new Gtk::Scale(Gtk::ORIENTATION_HORIZONTAL);
-		color_weight_slider->set_value_pos(Gtk::POS_LEFT);
-		color_weight_frame->add(*color_weight_slider);
-		parameters_box->pack_start(*color_weight_frame, Gtk::PACK_SHRINK);
-
-		Gtk::Frame *gamma_frame = new Gtk::Frame("Gamma:");
-		gamma_frame->set_shadow_type(Gtk::SHADOW_NONE);
-		gamma_slider = new Gtk::Scale(Gtk::ORIENTATION_HORIZONTAL);
-		gamma_slider->set_value_pos(Gtk::POS_LEFT);
-		gamma_frame->add(*gamma_slider);
-		parameters_box->pack_start(*gamma_frame, Gtk::PACK_SHRINK);
-
-		coordinates_label = new Gtk::Label();
-		coordinates_frame->add(*coordinates_label);
 
 		// show all
 		window->show_all_children();

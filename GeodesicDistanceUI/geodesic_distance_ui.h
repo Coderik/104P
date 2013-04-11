@@ -21,6 +21,9 @@
 #include <iostream>
 #include <algorithm>
 
+#include "rig/i_hull.h"
+#include "rig/i_rig.h"
+#include "rig/patch_weight_rig.h"
 #include "ui_container.h"
 #include "image.h"
 #include "sequence.h"
@@ -39,42 +42,27 @@
 #include "layer_manager.h"
 #include "patch_position_layer.h"
 
+using namespace std;
 
-
-class Geodesic_Distance_UI : public Gtk::Window
+class Geodesic_Distance_UI : public Gtk::Window, public IHull
 {
 public:
-	enum DistanceMode
-	{
-		extended_space,
-		patch_space,
-		threshold
-	};
-
-	enum MotionCompensationMode
-	{
-		no_compensation,
-		pixelwise,
-		patch_shift_central,
-		patch_shift_weighted
-	};
-
 	Geodesic_Distance_UI();
-	~Geodesic_Distance_UI();
+	virtual ~Geodesic_Distance_UI();
+
+	virtual Sequence* request_sequence();
+	virtual vector<OpticalFlowContainer*> request_forward_optical_flow();
+	virtual vector<OpticalFlowContainer*> request_backward_optical_flow();
+	virtual bool request_has_optical_flow_data();
+	virtual Layer_Manager* request_layer_manager();
+	virtual Gtk::Box* request_ui_placeholder();
+	virtual int request_current_time();
 
 protected:
 	/* slots */
 	void open_image();
 	void open_sequence();
-	void set_distance_mode();
-	void set_motion_compensation_mode();
-	void set_patch_zoom();
-	void set_patch_size();
-	void set_patch_duration();
-	void set_patch_location(int patch_center_x, int patch_center_y);
-	void set_distance_weight();
-	void set_color_weight();
-	void set_gamma();
+	void left_button_pressed(int mouse_x, int mouse_y);
 	void set_time();
 	void restore_optical_flow();
 	void update_view();
@@ -88,27 +76,20 @@ protected:
 	bool move_selected_point(GdkEventKey* event);
 
 private:
-	static const int MAX_PATCH_SCALE = 8;
-
-	Sequence *_sequence, *_distances;
-	vector<Glib::RefPtr<Gdk::Pixbuf> > _color_representations;
-	Glib::RefPtr<Gdk::Pixbuf> _patch_slice, _empty_pixmap;
+	IRig *_current_rig;
+	Sequence *_sequence;
 	Glib::RefPtr<Gdk::Pixbuf> _optical_flow_view;
 	Layer_Manager _layer_manager;
 	std::vector<OpticalFlowContainer*> _forward_optical_flow_list;
 	std::vector<OpticalFlowContainer*> _backward_optical_flow_list;
 	std::vector<int> _task_list;
 	std::string _sequence_folder;
-	float _distance_weight, _color_weight, _gamma;
 	int _current_time;
-	int _patch_size, _patch_duration;
 	Point _patch_center;
-	int _patch_scale;
 	int _progress_counter, _progress_total;
+	bool _has_optical_flow_data;
 	bool _optical_flow_legacy_format;
 	bool _layers_visibility;
-	DistanceMode _distance_mode;
-	MotionCompensationMode _motion_compensation_mode;
 	Glib::Threads::Thread *_background_worker;
 	Glib::Dispatcher _work_done_dispatcher;
 	Glib::Dispatcher _portion_ready_dispatcher;
@@ -121,19 +102,14 @@ private:
 
 	UI_Container _ui;
 
-	Sequence* calculate_distances(Sequence &sequence, const Point &patch_center, const Shape &patch_size, float distance_threshold, DistanceMode mode, float distance_weight, float color_weight);
-	vector<Glib::RefPtr<Gdk::Pixbuf> > draw_distances_with_color(Sequence &distances, float gamma);
-
 	template <typename T>
 	void reset_vector_of_pointers(std::vector<T*> &v, int size);
 
-	Glib::RefPtr<Gdk::Pixbuf> WrapRawImageData(Image *image);
-	Glib::RefPtr<Gdk::Pixbuf> GetDistanceRepresentatonByTime(vector<Glib::RefPtr<Gdk::Pixbuf> > representation, int patch_time_offset, int current_time, Glib::RefPtr<Gdk::Pixbuf> empty_pixbuf);
-	void ShowPatchPixbuf(Glib::RefPtr<Gdk::Pixbuf> pixmap, int scale);
+	Glib::RefPtr<Gdk::Pixbuf> wrap_raw_image_data(Image *image);
 	void update_image_control(int current_time);
-	Glib::RefPtr<Gdk::Pixbuf> CreateEmptyPixbuf(int width, int height);
-	void ShowStatusMessage(std::string message);
-	void UpdateCoordinates();
+	Glib::RefPtr<Gdk::Pixbuf> create_empty_pixbuf(int width, int height);
+	void show_status_message(std::string message);
+
 	void store_optical_flow(OpticalFlowContainer &flow, int index);
 	void calculate_optical_flow(std::vector<int> task_list);
 	void begin_optical_flow_calculation_internal(std::vector<int> task_list);
@@ -141,7 +117,6 @@ private:
 	void cancel_calculate_optical_flow();
 	void take_optical_flow_frame();
 	void fill_task_list(std::vector<OpticalFlowContainer*> &forward_flow, std::vector<OpticalFlowContainer*> &backward_flow, std::vector<int> &task_list);
-	Patch_Position_Layer* find_or_create_patch_position_layer(Layer_Manager layer_manager);
 	//tmp
 	int write_flow(float *u, float *v, int w, int h);
 };

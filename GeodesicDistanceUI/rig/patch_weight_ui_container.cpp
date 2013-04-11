@@ -20,7 +20,7 @@ Patch_Weight_UI_Container::~Patch_Weight_UI_Container()
 }
 
 
-void Patch_Weight_UI_Container::attach_ui(Gtk::VBox *placeholder)
+void Patch_Weight_UI_Container::attach_ui(Gtk::Box *placeholder)
 {
 	placeholder->pack_start(*_patch_view_frame, Gtk::PACK_SHRINK);
 	placeholder->pack_start(*_parameters_frame, Gtk::PACK_SHRINK);

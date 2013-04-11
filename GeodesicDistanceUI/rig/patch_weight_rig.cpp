@@ -21,6 +21,43 @@ Patch_Weight_Rig::Patch_Weight_Rig(IHull *hull)
 	_ui.distance_weight_slider->signal_value_changed().connect( sigc::mem_fun(*this, &Patch_Weight_Rig::set_distance_weight) );
 	_ui.color_weight_slider->signal_value_changed().connect( sigc::mem_fun(*this, &Patch_Weight_Rig::set_color_weight) );
 	_ui.gamma_slider->signal_value_changed().connect( sigc::mem_fun(*this, &Patch_Weight_Rig::set_gamma) );
+
+	_patch_scale = 1;
+
+	// Initialize ui.
+	_ui.patch_control->set_redraw_on_allocate(false);
+	_ui.patch_duration_picker->set_sensitive(false);
+
+	_ui.patch_zoom_slider->set_range(1, MAX_PATCH_SCALE);
+	_ui.patch_zoom_slider->set_digits(0);
+
+	_ui.distance_mode_picker->append("patch_limit", "Use only patch points");
+	_ui.distance_mode_picker->append("extended_limit", "Use extended range (2x)");
+	_ui.distance_mode_picker->set_active(0);
+
+	_ui.motion_compensation_picker->append("no", "No tracking");
+	_ui.motion_compensation_picker->append("pixelwise", "Pixelwise tracking");
+	_ui.motion_compensation_picker->append("shift_central", "Patch shift tracking (central)");
+	_ui.motion_compensation_picker->append("shift_weighted", "Patch shift tracking (weighted)");
+	_ui.motion_compensation_picker->set_active(0);
+
+	for ( int i=5; i<=15; i+=2 ) {
+		_ui.patch_size_picker->append(Glib::ustring::compose("%1",i));
+	}
+	_ui.patch_size_picker->set_active(1);				//_patch_size = 7
+
+	for ( int i=1; i<=7; i+=2 ) {
+		_ui.patch_duration_picker->append(Glib::ustring::compose("%1",i));
+	}
+	_ui.patch_duration_picker->set_active(0);			//_patch_duration = 1
+
+	_ui.distance_weight_slider->set_range(0, 1.0);
+	_ui.distance_weight_slider->set_value(0.1);
+	_ui.color_weight_slider->set_range(0, 1.0);
+	_ui.color_weight_slider->set_value(0.1);
+	_ui.gamma_slider->set_range(0.01, 0.2);
+	_ui.gamma_slider->set_digits(2);
+	_ui.gamma_slider->set_value(0.09);
 }
 
 
@@ -28,7 +65,17 @@ void Patch_Weight_Rig::activate()
 {
 	// Assign ui to a placeholder
 	_ui.attach_ui(_hull->request_ui_placeholder());
+}
 
+
+void Patch_Weight_Rig::deactivate()
+{
+
+}
+
+
+void Patch_Weight_Rig::sequence_changed()
+{
 	// TODO: check if sequence is the same to restore some data from previous session
 	Sequence* sequence = _hull->request_sequence();
 	int current_time = _hull->request_current_time();
@@ -58,6 +105,8 @@ void Patch_Weight_Rig::activate()
 		// Adjust UI for a stil image
 		_ui.patch_duration_picker->set_active(0);
 		_ui.patch_duration_picker->set_sensitive(false);
+		bool has_data = _hull->request_has_optical_flow_data();
+		_ui.motion_compensation_picker->set_sensitive(has_data);
 
 		// Get pixmap for the only time point.
 		_patch_slice = _color_representations[0];
@@ -68,9 +117,58 @@ void Patch_Weight_Rig::activate()
 }
 
 
-void Patch_Weight_Rig::deactivate()
+void Patch_Weight_Rig::optical_flow_changed()
 {
+	bool has_data = _hull->request_has_optical_flow_data();
+	_ui.motion_compensation_picker->set_sensitive(has_data);
+}
 
+
+void Patch_Weight_Rig::current_time_changed()
+{
+	int current_time = _hull->request_current_time();
+	Layer_Manager *layer_manager = _hull->request_layer_manager();
+
+	// Update layer.
+	Patch_Position_Layer *layer = find_or_create_patch_position_layer(layer_manager);
+	layer->set_current_time(current_time);
+
+	if (_color_representations.size() > 0) {
+		_patch_slice = get_distance_representaton_by_time(_color_representations, _patch_center.t, current_time, _empty_pixmap);
+		show_patch_pixbuf(_patch_slice, _patch_scale);
+	}
+}
+
+
+void Patch_Weight_Rig::left_button_pressed(int x, int y)
+{
+	int half_size = _patch_size / 2;
+	Sequence *sequence = _hull->request_sequence();
+
+	if (sequence) {
+		if (x - half_size < 0 ||
+			y - half_size < 0 ||
+			x + half_size >= sequence->GetXSize() ||
+			y + half_size >= sequence->GetYSize()) {
+			// TODO: request it from hull
+			//show_status_message("Patch must not exceed spatial borders.");
+			return;
+		}
+
+		int current_time = _hull->request_current_time();
+
+		_patch_center.x = x;
+		_patch_center.y = y;
+		_patch_center.t = current_time;
+
+		Shape patch_size = Shape(_patch_size, _patch_size, _patch_duration);
+		_distances = calculate_distances(*sequence,_patch_center, patch_size, 0, _distance_mode, _distance_weight, _color_weight);
+		_color_representations = draw_distances_with_color(*_distances, _gamma);
+		_patch_slice = get_distance_representaton_by_time(_color_representations, _patch_center.t, current_time, _empty_pixmap);
+		show_patch_pixbuf(_patch_slice, _patch_scale);
+
+		update_coordinates();
+	}
 }
 
 
@@ -369,7 +467,8 @@ Patch_Position_Layer* Patch_Weight_Rig::find_or_create_patch_position_layer(Laye
 	Patch_Position_Layer *layer = dynamic_cast<Patch_Position_Layer* >(layer_manager->find_layer(key));
 	if (!layer) {
 		layer = new Patch_Position_Layer(key, "Patch Position");
-		//layer->set_visibitity(_layers_visibility); // TODO: handle it the hull
+		// TODO: handle visibility the Layer_Manager
+		layer->set_visibitity(true);
 		layer_manager->add_layer(layer);
 	}
 
