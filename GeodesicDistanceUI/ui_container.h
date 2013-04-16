@@ -5,6 +5,10 @@
  *      Author: Vadim Fedorov
  */
 
+#include <string>
+#include <vector>
+#include <map>
+#include <gtkmm/widget.h>
 #include <gtkmm/window.h>
 #include <gtkmm/stock.h>
 #include <gtkmm/uimanager.h>
@@ -18,11 +22,12 @@
 #include <gtkmm/radioaction.h>
 #include <gtkmm/infobar.h>
 #include <sigc++/sigc++.h>
-#include <map>
 
 #include "selectable_image.h"
 #include "layer_manager.h"
+#include "rig/fitting.h"
 
+using namespace std;
 
 class UI_Container
 {
@@ -35,6 +40,7 @@ public:
 	Glib::RefPtr<Gtk::Action> proceed_optical_flow_action;
 	Glib::RefPtr<Gtk::Action> restore_optical_flow_action;
 	Glib::RefPtr<Gtk::ActionGroup> view_action_group;
+	Glib::RefPtr<Gtk::ActionGroup> fitting_action_group;
 	Glib::RefPtr<Gtk::ActionGroup> layer_action_group;
 	Glib::RefPtr<Gtk::ToggleAction> layers_visibility_toggle_action;
 
@@ -49,6 +55,12 @@ public:
 	type_signal_view_changed signal_view_changed()
 	{
 		return _signal_view_changed;
+	}
+
+	typedef sigc::signal<void> type_signal_fitting_changed;
+	type_signal_fitting_changed signal_fitting_changed()
+	{
+		return _signal_fitting_changed;
 	}
 
 	enum View
@@ -69,7 +81,7 @@ public:
 		window->set_default_size(800, 700);
 
 		// set up menu
-		Glib::RefPtr<Gtk::UIManager> menu_manager = Gtk::UIManager::create();
+		_menu_manager = Gtk::UIManager::create();
 
 		Glib::RefPtr<Gtk::ActionGroup> action_group = Gtk::ActionGroup::create();
 		action_group->add(Gtk::Action::create("FileMenu", "File"));
@@ -79,7 +91,7 @@ public:
 		action_group->add(open_sequence_action);
 		quit_action = Gtk::Action::create("Quit", Gtk::Stock::QUIT);
 		action_group->add(quit_action);
-		menu_manager->insert_action_group(action_group);
+		_menu_manager->insert_action_group(action_group);
 
 		optical_flow_action_group = Gtk::ActionGroup::create();
 		optical_flow_action_group->add(Gtk::Action::create("OpticalFlowMenu", "Optical Flow"));
@@ -89,7 +101,7 @@ public:
 		optical_flow_action_group->add(proceed_optical_flow_action);
 		restore_optical_flow_action = Gtk::Action::create("RestoreOptFlow", "Restore Optical Flow");
 		optical_flow_action_group->add(restore_optical_flow_action);
-		menu_manager->insert_action_group(optical_flow_action_group);
+		_menu_manager->insert_action_group(optical_flow_action_group);
 
 		view_action_group = Gtk::ActionGroup::create();
 		view_action_group->add(Gtk::Action::create("ViewMenu", "View"));
@@ -109,14 +121,18 @@ public:
 		view_action = Gtk::RadioAction::create(view_group, "BackwardOFGrayView", "Backward Optical Flow (magnitude)");
 		view_action_group->add(view_action);
 		_view_map[VIEW_BACKWARD_OF_GRAY] = view_action;
-		menu_manager->insert_action_group(view_action_group);
+		_menu_manager->insert_action_group(view_action_group);
 		view_action->signal_changed().connect( sigc::mem_fun(*this, &UI_Container::set_view_internal) );
+
+		fitting_action_group = Gtk::ActionGroup::create();
+		fitting_action_group->add(Gtk::Action::create("FittingMenu", "Fitting"));
+		_menu_manager->insert_action_group(fitting_action_group);
 
 		layer_action_group = Gtk::ActionGroup::create();
 		layer_action_group->add(Gtk::Action::create("LayerMenu", "Layers"));
 		layers_visibility_toggle_action = Gtk::ToggleAction::create("LayersVisibility", "Patch Position");
 		layer_action_group->add(layers_visibility_toggle_action);
-		menu_manager->insert_action_group(layer_action_group);
+		_menu_manager->insert_action_group(layer_action_group);
 		layer_action_group->set_sensitive(false);
 
 		Glib::ustring ui_info =
@@ -141,18 +157,20 @@ public:
 			"      <menuitem action='BackwardOFColorView'/>"
 			"      <menuitem action='BackwardOFGrayView'/>"
 			"    </menu>"
+			"    <menu action='FittingMenu'>"
+			"    </menu>"
 			"    <menu action='LayerMenu'>"
 			"      <menuitem action='LayersVisibility'/>"
 			"    </menu>"
 		    "  </menubar>"
 		    "</ui>";
-		menu_manager->add_ui_from_string(ui_info);
+		_menu_manager->add_ui_from_string(ui_info);
 
 		// create layout
 		Gtk::Box *window_layout = new Gtk::VBox();		// containes menubar, infobar, main working area and statusbar
 		window->add(*window_layout);
 
-		Gtk::Widget* menu_bar = menu_manager->get_widget("/MenuBar");
+		Gtk::Widget* menu_bar = _menu_manager->get_widget("/MenuBar");
 		if (menu_bar) {
 			window_layout->pack_start(*menu_bar, Gtk::PACK_SHRINK);
 		}
@@ -206,6 +224,22 @@ public:
 	}
 
 
+	void refresh_placeholders()
+	{
+		right_side_layout->show_all_children(true);
+	}
+
+
+	void clear_placeholders()
+	{
+		vector<Gtk::Widget* > children = right_side_layout->get_children();
+		vector<Gtk::Widget* >::iterator it;
+		for(it = children.begin(); it != children.end(); ++it) {
+			right_side_layout->remove(**it);
+		}
+	}
+
+
 	View get_view()
 	{
 		return _current_view;
@@ -233,10 +267,63 @@ public:
 		_view_map[VIEW_BACKWARD_OF_GRAY]->set_sensitive(is_allowed);
 	}
 
+	void set_fittings(std::vector<Fitting* > fittings)
+	{
+		// TODO: handle multiple call (do nothing or reinitialize)
+
+		if (fittings.size() == 0) {
+			return;
+		}
+
+		Glib::ustring ui_info =
+			"<ui>"
+			"  <menubar name='MenuBar'>"
+			"    <menu action='FittingMenu'>";
+
+
+		Gtk::RadioAction::Group group = Gtk::RadioAction::Group();
+		Glib::RefPtr<Gtk::RadioAction> action;
+		std::string name;
+		for (int i = 0; i < fittings.size(); i++) {
+			// int to string
+			std::stringstream s;
+			s << i;
+			s >> name;
+
+			_fitting_map[name] = fittings[i];
+			action = Gtk::RadioAction::create(group, name, fittings[i]->display_name);
+			ui_info += Glib::ustring::compose ("      <menuitem action='%1'/>", name);
+			fitting_action_group->add(action);
+		}
+
+		ui_info +=
+			"    </menu>"
+			"  </menubar>"
+			"</ui>";
+
+		_fitting_submenu_merge_id = _menu_manager->add_ui_from_string (ui_info);
+		//_menu_manager->insert_action_group(fitting_action_group);
+
+		action->signal_changed().connect( sigc::mem_fun(*this, &UI_Container::set_fitting_internal) );
+
+		_current_fitting = fittings[0];
+		_signal_fitting_changed.emit();
+	}
+
+	Fitting* get_fitting()
+	{
+		return _current_fitting;
+	}
+
 private:
+	Glib::RefPtr<Gtk::UIManager> _menu_manager;
+	int _fitting_submenu_merge_id;
 	std::map<View, Glib::RefPtr<Gtk::RadioAction> > _view_map;
+	std::map<Glib::ustring, Fitting* > _fitting_map;
 	type_signal_view_changed _signal_view_changed;
+	type_signal_fitting_changed _signal_fitting_changed;
 	View _current_view;
+	Fitting *_current_fitting;
 
 	void set_view_internal(const Glib::RefPtr<Gtk::RadioAction>& current)
 	{
@@ -257,6 +344,16 @@ private:
 
 		_signal_view_changed.emit();
 	}
+
+	void set_fitting_internal(const Glib::RefPtr<Gtk::RadioAction>& current)
+	{
+		Glib::ustring name = current->get_name();
+
+		_current_fitting = _fitting_map[name];
+
+		_signal_fitting_changed.emit();
+	}
+
 };
 
 

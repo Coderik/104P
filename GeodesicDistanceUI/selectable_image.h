@@ -27,6 +27,7 @@ public:
 	virtual ~Selectable_Image();
 	void set_pixbuf(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf);
 	void set_layer_manager(Layer_Manager *layer_manager);
+	void drop_layer_manager();
 
 	void save_content();
 

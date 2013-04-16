@@ -7,9 +7,8 @@
 
 #include "patch_weight_rig.h"
 
-Patch_Weight_Rig::Patch_Weight_Rig(IHull *hull)
+Patch_Weight_Rig::Patch_Weight_Rig()
 {
-	_hull = hull;
 	_ui = Patch_Weight_UI_Container();
 
 	// Connect to ui signals.
@@ -21,10 +20,16 @@ Patch_Weight_Rig::Patch_Weight_Rig(IHull *hull)
 	_ui.distance_weight_slider->signal_value_changed().connect( sigc::mem_fun(*this, &Patch_Weight_Rig::set_distance_weight) );
 	_ui.color_weight_slider->signal_value_changed().connect( sigc::mem_fun(*this, &Patch_Weight_Rig::set_color_weight) );
 	_ui.gamma_slider->signal_value_changed().connect( sigc::mem_fun(*this, &Patch_Weight_Rig::set_gamma) );
+}
+
+
+void Patch_Weight_Rig::initialize(IHull *hull)
+{
+	_hull = hull;
 
 	_patch_scale = 1;
 
-	// Initialize ui.
+	// Initialize UI.
 	_ui.patch_control->set_redraw_on_allocate(false);
 	_ui.patch_duration_picker->set_sensitive(false);
 
@@ -127,11 +132,13 @@ void Patch_Weight_Rig::optical_flow_changed()
 void Patch_Weight_Rig::current_time_changed()
 {
 	int current_time = _hull->request_current_time();
-	Layer_Manager *layer_manager = _hull->request_layer_manager();
 
 	// Update layer.
-	Patch_Position_Layer *layer = find_or_create_patch_position_layer(layer_manager);
-	layer->set_current_time(current_time);
+	Layer_Manager *layer_manager = _hull->request_layer_manager();
+	if (layer_manager) {
+		Patch_Position_Layer *layer = find_or_create_patch_position_layer(layer_manager);
+		layer->set_current_time(current_time);
+	}
 
 	if (_color_representations.size() > 0) {
 		_patch_slice = get_distance_representaton_by_time(_color_representations, _patch_center.t, current_time, _empty_pixmap);
@@ -313,8 +320,10 @@ void Patch_Weight_Rig::set_patch_size()
 
 	// Update layer.
 	Layer_Manager *layer_manager = _hull->request_layer_manager();
-	Patch_Position_Layer *layer = find_or_create_patch_position_layer(layer_manager);
-	layer->set_patch_size(_patch_size);
+	if (layer_manager) {
+		Patch_Position_Layer *layer = find_or_create_patch_position_layer(layer_manager);
+		layer->set_patch_size(_patch_size);
+	}
 }
 
 
@@ -472,13 +481,15 @@ Sequence* Patch_Weight_Rig::calculate_distances( Sequence &sequence,
 
 	// Update layer.
 	Layer_Manager *layer_manager = _hull->request_layer_manager();
-	Patch_Position_Layer *layer = find_or_create_patch_position_layer(layer_manager);
-	layer->clear_slice_origins();
-	for (int i = 0;i < distances->GetTSize(); i++) {
-		layer->set_slice_origin( distances->GetFrame(i)->get_coordinates() );
+	if (layer_manager) {
+		Patch_Position_Layer *layer = find_or_create_patch_position_layer(layer_manager);
+		layer->clear_slice_origins();
+		for (int i = 0;i < distances->GetTSize(); i++) {
+			layer->set_slice_origin( distances->GetFrame(i)->get_coordinates() );
+		}
+		int current_time = _hull->request_current_time();
+		layer->set_current_time(current_time);
 	}
-	int current_time = _hull->request_current_time();
-	layer->set_current_time(current_time);
 
 
 	return distances;

@@ -22,6 +22,7 @@ Geodesic_Distance_UI::Geodesic_Distance_UI()
 	_ui.background_work_infobar->signal_response().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::perceive_background_worker) );
 	_ui.layers_visibility_toggle_action->signal_toggled().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::set_layers_visibility) );
 	_ui.signal_view_changed().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::update_view) );
+	_ui.signal_fitting_changed().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::update_fitting) );
 
 	_ui.image_control->signal_point_selected().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::left_button_pressed) );
 	_ui.time_slider->signal_value_changed().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::set_time) );
@@ -32,7 +33,8 @@ Geodesic_Distance_UI::Geodesic_Distance_UI()
 	_work_done_dispatcher.connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::end_calculate_optical_flow) );
 	_portion_ready_dispatcher.connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::take_optical_flow_frame) );
 
-	_sequence = 0;
+	_sequence = NULL;
+	_current_fitting = NULL;
 	_has_optical_flow_data = false;
 
 	_ui.background_work_infobar->hide();
@@ -40,21 +42,34 @@ Geodesic_Distance_UI::Geodesic_Distance_UI()
 	_ui.view_action_group->set_sensitive(false);
 	_ui.time_slider->set_sensitive(false);
 	_ui.layers_visibility_toggle_action->set_active(true);
-
-	// Initialize rigs.
-	// TODO: generalize to multiple fittings
-	_current_fitting = Fitting();
-	_current_fitting.rig = new Patch_Weight_Rig(this);
-	_current_fitting.rig->activate();
-	_ui.right_side_layout->show_all_children(true);
-	if (_current_fitting.layer_manager) {
-		_ui.image_control->set_layer_manager(_current_fitting.layer_manager);
-	}
 }
 
 Geodesic_Distance_UI::~Geodesic_Distance_UI()
 {
 
+}
+
+
+/*************************
+ * I_Rig_Manager members *
+ *************************/
+void Geodesic_Distance_UI::add_rig(Rig* rig, std::string display_name)
+{
+	if (rig) {
+		Fitting* fitting = new Fitting();
+		fitting->display_name = display_name;
+		fitting->rig = rig;
+		_fittings.push_back(fitting);
+	}
+}
+
+void Geodesic_Distance_UI::initialize_rigs()
+{
+	vector<Fitting* >::iterator it;
+	for (it = _fittings.begin(); it != _fittings.end(); ++it) {
+		(*it)->rig->initialize(this);
+	}
+	_ui.set_fittings(_fittings);
 }
 
 
@@ -101,7 +116,7 @@ void Geodesic_Distance_UI::open_image()
 		update_image_control(_current_time);
 
 		// Notify rig that sequence have been changed.
-		_current_fitting.rig->sequence_changed();
+		_current_fitting->rig->sequence_changed();
 	}
 }
 
@@ -202,11 +217,14 @@ void Geodesic_Distance_UI::open_sequence()
 		update_image_control(_current_time);
 
 		// Notify rig that sequence have been changed.
-		_current_fitting.rig->sequence_changed();
+		_current_fitting->rig->sequence_changed();
 	}
 }
 
 
+/*****************
+ * IHull members *
+ *****************/
 Sequence* Geodesic_Distance_UI::request_sequence()
 {
 	return _sequence;
@@ -235,12 +253,16 @@ bool Geodesic_Distance_UI::request_has_optical_flow_data()
 
 Layer_Manager* Geodesic_Distance_UI::request_layer_manager()
 {
-	if (!_current_fitting.layer_manager) {
-		_current_fitting.layer_manager = new Layer_Manager();
-		_ui.image_control->set_layer_manager(_current_fitting.layer_manager);
+	if (!_current_fitting) {
+		return NULL;
 	}
 
-	return _current_fitting.layer_manager;
+	if (!_current_fitting->layer_manager) {
+		_current_fitting->layer_manager = new Layer_Manager();
+		_ui.image_control->set_layer_manager(_current_fitting->layer_manager);
+	}
+
+	return _current_fitting->layer_manager;
 }
 
 
@@ -278,8 +300,8 @@ void Geodesic_Distance_UI::set_layers_visibility()
 	bool visibility = _ui.layers_visibility_toggle_action->get_active();
 	if (visibility != _layers_visibility) {
 		_layers_visibility = visibility;
-		if (_current_fitting.layer_manager) {
-			_current_fitting.layer_manager->set_visibility(_layers_visibility);
+		if (_current_fitting && _current_fitting->layer_manager) {
+			_current_fitting->layer_manager->set_visibility(_layers_visibility);
 		}
 	}
 }
@@ -287,7 +309,7 @@ void Geodesic_Distance_UI::set_layers_visibility()
 
 void Geodesic_Distance_UI::left_button_pressed(int mouse_x, int mouse_y)
 {
-	_current_fitting.rig->left_button_pressed(mouse_x, mouse_y);
+	_current_fitting->rig->left_button_pressed(mouse_x, mouse_y);
 }
 
 
@@ -295,13 +317,13 @@ void Geodesic_Distance_UI::set_time()
 {
 	_current_time = _ui.time_slider->get_value();
 	update_image_control(_current_time);
-	_current_fitting.rig->current_time_changed();
+	_current_fitting->rig->current_time_changed();
 }
 
 
 bool Geodesic_Distance_UI::key_pressed(GdkEventKey* event)
 {
-	_current_fitting.rig->key_pressed(event);
+	_current_fitting->rig->key_pressed(event);
 
 	return false;
 }
@@ -373,7 +395,7 @@ void Geodesic_Distance_UI::restore_optical_flow()
 
 	if (has_some_data != _has_optical_flow_data) {
 		_has_optical_flow_data = has_some_data;
-		_current_fitting.rig->optical_flow_changed();
+		_current_fitting->rig->optical_flow_changed();
 	}
 
 	fill_task_list(_forward_optical_flow_list, _backward_optical_flow_list, _task_list);
@@ -411,6 +433,24 @@ void Geodesic_Distance_UI::fill_task_list(std::vector<OpticalFlowContainer*> &fo
 void Geodesic_Distance_UI::update_view()
 {
 	update_image_control(_current_time);
+}
+
+void Geodesic_Distance_UI::update_fitting()
+{
+	if (_current_fitting) {
+		_current_fitting->rig->deactivate();
+		_ui.clear_placeholders();
+		_ui.image_control->drop_layer_manager();
+	}
+
+	_current_fitting = _ui.get_fitting();
+	_current_fitting->rig->activate();
+
+	_ui.refresh_placeholders();
+
+	if (_current_fitting->layer_manager) {
+		_ui.image_control->set_layer_manager(_current_fitting->layer_manager);
+	}
 }
 
 /* private */
@@ -632,7 +672,7 @@ void Geodesic_Distance_UI::take_optical_flow_frame()
 
 	_ui.allow_optical_flow_views(true);
 	_has_optical_flow_data = true;
-	_current_fitting.rig->optical_flow_changed();
+	_current_fitting->rig->optical_flow_changed();
 
 	store_optical_flow(*flow, index);
 

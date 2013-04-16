@@ -23,8 +23,8 @@
 #include <algorithm>
 
 #include "rig/i_hull.h"
-#include "rig/i_rig.h"
-#include "rig/patch_weight_rig.h"
+#include "rig/rig.h"
+#include "rig/i_rig_manager.h"
 #include "rig/fitting.h"
 #include "ui_container.h"
 #include "image.h"
@@ -44,11 +44,14 @@
 
 using namespace std;
 
-class Geodesic_Distance_UI : public Gtk::Window, public IHull
+class Geodesic_Distance_UI : public Gtk::Window, public IHull, public I_Rig_Manager
 {
 public:
 	Geodesic_Distance_UI();
 	virtual ~Geodesic_Distance_UI();
+
+	virtual void add_rig(Rig* rig, std::string display_name);
+	virtual void initialize_rigs();
 
 	virtual Sequence* request_sequence();
 	virtual vector<OpticalFlowContainer*> request_forward_optical_flow();
@@ -66,6 +69,7 @@ protected:
 	void set_time();
 	void restore_optical_flow();
 	void update_view();
+	void update_fitting();
 	void set_layers_visibility();
 	void perceive_background_worker(int responce_id);	//TODO: rename it!
 	bool allow_background_computation();
@@ -76,7 +80,8 @@ protected:
 	bool key_pressed(GdkEventKey* event);
 
 private:
-	Fitting _current_fitting;
+	vector<Fitting* > _fittings;
+	Fitting *_current_fitting;
 	Sequence *_sequence;
 	Glib::RefPtr<Gdk::Pixbuf> _optical_flow_view;
 	std::vector<OpticalFlowContainer*> _forward_optical_flow_list;

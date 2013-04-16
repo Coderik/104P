@@ -64,6 +64,15 @@ void Selectable_Image::set_layer_manager(Layer_Manager *layer_manager)
 			_layer_manager->signal_layer_changed().connect( sigc::mem_fun(*this, &Selectable_Image::queue_draw) );
 }
 
+void Selectable_Image::drop_layer_manager()
+{
+	if (_connection_layer_manager_signal_layer_changed.connected()) {
+		_connection_layer_manager_signal_layer_changed.disconnect();
+	}
+
+	_layer_manager = static_cast<Layer_Manager* >(0);
+}
+
 
 void Selectable_Image::save_content()
 {

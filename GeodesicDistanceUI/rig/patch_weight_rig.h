@@ -12,8 +12,7 @@
 
 #include <glibmm/ustring.h>
 
-#include "i_rig.h"
-#include "i_hull.h"
+#include "rig.h"
 #include "sequence.h"
 #include "shape.h"
 #include "point.h"
@@ -25,7 +24,7 @@
 
 using namespace std;
 
-class Patch_Weight_Rig : public IRig
+class Patch_Weight_Rig : public Rig
 {
 public:
 	enum DistanceMode
@@ -42,8 +41,10 @@ public:
 		patch_shift_weighted
 	};
 
-	Patch_Weight_Rig(IHull *hull);
+	Patch_Weight_Rig();
 	virtual ~Patch_Weight_Rig() {}
+
+	virtual void initialize(IHull *hull);
 
 	virtual void activate();
 	virtual void deactivate();
@@ -59,7 +60,6 @@ public:
 private:
 	static const int MAX_PATCH_SCALE = 8;
 
-	IHull *_hull;
 	Patch_Weight_UI_Container _ui;
 	Sequence *_distances;
 	vector<Glib::RefPtr<Gdk::Pixbuf> > _color_representations;
