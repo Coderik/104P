@@ -10,7 +10,7 @@
 
 #include <string>
 #include "rig.h"
-#include "../layer_manager.h"
+#include "layer_manager.h"
 
 struct Fitting
 {

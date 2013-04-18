@@ -11,7 +11,7 @@
 #include <gtkmm/box.h>
 #include "sequence.h"
 #include "optical_flow_container.h"
-#include "../layer_manager.h"
+#include "layer_manager.h"
 
 class IHull
 {

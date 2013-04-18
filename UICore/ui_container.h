@@ -25,7 +25,7 @@
 
 #include "selectable_image.h"
 #include "layer_manager.h"
-#include "rig/fitting.h"
+#include "fitting.h"
 
 using namespace std;
 
@@ -130,7 +130,7 @@ public:
 
 		layer_action_group = Gtk::ActionGroup::create();
 		layer_action_group->add(Gtk::Action::create("LayerMenu", "Layers"));
-		layers_visibility_toggle_action = Gtk::ToggleAction::create("LayersVisibility", "Patch Position");
+		layers_visibility_toggle_action = Gtk::ToggleAction::create("LayersVisibility", "Show all layers");
 		layer_action_group->add(layers_visibility_toggle_action);
 		_menu_manager->insert_action_group(layer_action_group);
 		layer_action_group->set_sensitive(false);
@@ -157,10 +157,10 @@ public:
 			"      <menuitem action='BackwardOFColorView'/>"
 			"      <menuitem action='BackwardOFGrayView'/>"
 			"    </menu>"
-			"    <menu action='FittingMenu'>"
-			"    </menu>"
 			"    <menu action='LayerMenu'>"
 			"      <menuitem action='LayersVisibility'/>"
+			"    </menu>"
+			"    <menu action='FittingMenu'>"
 			"    </menu>"
 		    "  </menubar>"
 		    "</ui>";

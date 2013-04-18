@@ -1,12 +1,12 @@
 /*
- * geodesic_distance_ui.h
+ * hull.h
  *
  *  Created on: Jan 9, 2013
  *      Author: Vadim Fedorov
  */
 
-#ifndef GEODESIC_DISTANCE_UI_H_
-#define GEODESIC_DISTANCE_UI_H_
+#ifndef HULL_H_
+#define HULL_H_
 
 #include <gtkmm/main.h>
 #include <gtkmm/window.h>
@@ -22,10 +22,10 @@
 #include <iostream>
 #include <algorithm>
 
-#include "rig/i_hull.h"
-#include "rig/rig.h"
-#include "rig/i_rig_manager.h"
-#include "rig/fitting.h"
+#include "i_hull.h"
+#include "rig.h"
+#include "i_rig_manager.h"
+#include "fitting.h"
 #include "ui_container.h"
 #include "image.h"
 #include "sequence.h"
@@ -40,15 +40,14 @@
 #include "point.h"
 #include "shape.h"
 #include "layer_manager.h"
-#include "patch_position_layer.h"
 
 using namespace std;
 
-class Geodesic_Distance_UI : public Gtk::Window, public IHull, public I_Rig_Manager
+class Hull : public Gtk::Window, public IHull, public I_Rig_Manager
 {
 public:
-	Geodesic_Distance_UI();
-	virtual ~Geodesic_Distance_UI();
+	Hull();
+	virtual ~Hull();
 
 	virtual void add_rig(Rig* rig, std::string display_name);
 	virtual void initialize_rigs();
@@ -125,4 +124,4 @@ private:
 };
 
 
-#endif /* GEODESIC_DISTANCE_UI_H_ */
+#endif /* HULL_H_ */

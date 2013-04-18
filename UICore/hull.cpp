@@ -1,37 +1,37 @@
 /*
- * geodesic_distance_ui.cpp
+ * hull.cpp
  *
  *  Created on: Jan 9, 2013
  *      Author: Vadim Fedorov
  */
 
-#include "geodesic_distance_ui.h"
+#include "hull.h"
 
 /* Public */
 
-Geodesic_Distance_UI::Geodesic_Distance_UI()
+Hull::Hull()
 {
 	_ui.setup_ui(this);
 
 	_ui.quit_action->signal_activate().connect( sigc::ptr_fun(&Gtk::Main::quit) );
-	_ui.open_image_action->signal_activate().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::open_image) );
-	_ui.open_sequence_action->signal_activate().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::open_sequence) );
-	_ui.calculate_optical_flow_action->signal_activate().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::begin_full_optical_flow_calculation) );
-	_ui.proceed_optical_flow_action->signal_activate().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::begin_missing_optical_flow_calculation) );
-	_ui.restore_optical_flow_action->signal_activate().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::restore_optical_flow) );
-	_ui.background_work_infobar->signal_response().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::perceive_background_worker) );
-	_ui.layers_visibility_toggle_action->signal_toggled().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::set_layers_visibility) );
-	_ui.signal_view_changed().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::update_view) );
-	_ui.signal_fitting_changed().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::update_fitting) );
+	_ui.open_image_action->signal_activate().connect( sigc::mem_fun(*this, &Hull::open_image) );
+	_ui.open_sequence_action->signal_activate().connect( sigc::mem_fun(*this, &Hull::open_sequence) );
+	_ui.calculate_optical_flow_action->signal_activate().connect( sigc::mem_fun(*this, &Hull::begin_full_optical_flow_calculation) );
+	_ui.proceed_optical_flow_action->signal_activate().connect( sigc::mem_fun(*this, &Hull::begin_missing_optical_flow_calculation) );
+	_ui.restore_optical_flow_action->signal_activate().connect( sigc::mem_fun(*this, &Hull::restore_optical_flow) );
+	_ui.background_work_infobar->signal_response().connect( sigc::mem_fun(*this, &Hull::perceive_background_worker) );
+	_ui.layers_visibility_toggle_action->signal_toggled().connect( sigc::mem_fun(*this, &Hull::set_layers_visibility) );
+	_ui.signal_view_changed().connect( sigc::mem_fun(*this, &Hull::update_view) );
+	_ui.signal_fitting_changed().connect( sigc::mem_fun(*this, &Hull::update_fitting) );
 
-	_ui.image_control->signal_point_selected().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::left_button_pressed) );
-	_ui.time_slider->signal_value_changed().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::set_time) );
+	_ui.image_control->signal_point_selected().connect( sigc::mem_fun(*this, &Hull::left_button_pressed) );
+	_ui.time_slider->signal_value_changed().connect( sigc::mem_fun(*this, &Hull::set_time) );
 
-	this->signal_key_press_event().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::key_pressed) );
+	this->signal_key_press_event().connect( sigc::mem_fun(*this, &Hull::key_pressed) );
 
 	// Note: if there are several different works to compute in background, recreate dispatchers and connect to them in 'begin_...' methods
-	_work_done_dispatcher.connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::end_calculate_optical_flow) );
-	_portion_ready_dispatcher.connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::take_optical_flow_frame) );
+	_work_done_dispatcher.connect( sigc::mem_fun(*this, &Hull::end_calculate_optical_flow) );
+	_portion_ready_dispatcher.connect( sigc::mem_fun(*this, &Hull::take_optical_flow_frame) );
 
 	_sequence = NULL;
 	_current_fitting = NULL;
@@ -44,7 +44,7 @@ Geodesic_Distance_UI::Geodesic_Distance_UI()
 	_ui.layers_visibility_toggle_action->set_active(true);
 }
 
-Geodesic_Distance_UI::~Geodesic_Distance_UI()
+Hull::~Hull()
 {
 
 }
@@ -53,7 +53,7 @@ Geodesic_Distance_UI::~Geodesic_Distance_UI()
 /*************************
  * I_Rig_Manager members *
  *************************/
-void Geodesic_Distance_UI::add_rig(Rig* rig, std::string display_name)
+void Hull::add_rig(Rig* rig, std::string display_name)
 {
 	if (rig) {
 		Fitting* fitting = new Fitting();
@@ -63,7 +63,7 @@ void Geodesic_Distance_UI::add_rig(Rig* rig, std::string display_name)
 	}
 }
 
-void Geodesic_Distance_UI::initialize_rigs()
+void Hull::initialize_rigs()
 {
 	vector<Fitting* >::iterator it;
 	for (it = _fittings.begin(); it != _fittings.end(); ++it) {
@@ -74,7 +74,7 @@ void Geodesic_Distance_UI::initialize_rigs()
 
 
 /* slots */
-void Geodesic_Distance_UI::open_image()
+void Hull::open_image()
 {
 	Gtk::FileChooserDialog dialog("Please choose an image", Gtk::FILE_CHOOSER_ACTION_OPEN);
 	dialog.set_transient_for(*this);
@@ -121,7 +121,7 @@ void Geodesic_Distance_UI::open_image()
 }
 
 
-void Geodesic_Distance_UI::open_sequence()
+void Hull::open_sequence()
 {
 	Gtk::FileChooserDialog dialog("Please choose a sequence folder", Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER);
 	dialog.set_transient_for(*this);
@@ -225,33 +225,33 @@ void Geodesic_Distance_UI::open_sequence()
 /*****************
  * IHull members *
  *****************/
-Sequence* Geodesic_Distance_UI::request_sequence()
+Sequence* Hull::request_sequence()
 {
 	return _sequence;
 }
 
 
-vector<OpticalFlowContainer*> Geodesic_Distance_UI::request_forward_optical_flow()
+vector<OpticalFlowContainer*> Hull::request_forward_optical_flow()
 {
 	// TODO: check if absent
 	return _forward_optical_flow_list;
 }
 
 
-vector<OpticalFlowContainer*> Geodesic_Distance_UI::request_backward_optical_flow()
+vector<OpticalFlowContainer*> Hull::request_backward_optical_flow()
 {
 	// TODO: check if absent
 	return _backward_optical_flow_list;
 }
 
 
-bool Geodesic_Distance_UI::request_has_optical_flow_data()
+bool Hull::request_has_optical_flow_data()
 {
 	return _has_optical_flow_data;
 }
 
 
-Layer_Manager* Geodesic_Distance_UI::request_layer_manager()
+Layer_Manager* Hull::request_layer_manager()
 {
 	if (!_current_fitting) {
 		return NULL;
@@ -266,20 +266,20 @@ Layer_Manager* Geodesic_Distance_UI::request_layer_manager()
 }
 
 
-Gtk::Box* Geodesic_Distance_UI::request_ui_placeholder()
+Gtk::Box* Hull::request_ui_placeholder()
 {
 	return _ui.right_side_layout;
 }
 
 
-int Geodesic_Distance_UI::request_current_time()
+int Hull::request_current_time()
 {
 	return _current_time;
 }
 
 
 template <typename T>
-void Geodesic_Distance_UI::reset_vector_of_pointers(std::vector<T*> &v, int size)
+void Hull::reset_vector_of_pointers(std::vector<T*> &v, int size)
 {
 	typename std::vector<T*>::iterator it;
 	for (it = v.begin(); it != v.end(); ++it) {
@@ -295,7 +295,7 @@ void Geodesic_Distance_UI::reset_vector_of_pointers(std::vector<T*> &v, int size
 }
 
 
-void Geodesic_Distance_UI::set_layers_visibility()
+void Hull::set_layers_visibility()
 {
 	bool visibility = _ui.layers_visibility_toggle_action->get_active();
 	if (visibility != _layers_visibility) {
@@ -307,13 +307,13 @@ void Geodesic_Distance_UI::set_layers_visibility()
 }
 
 
-void Geodesic_Distance_UI::left_button_pressed(int mouse_x, int mouse_y)
+void Hull::left_button_pressed(int mouse_x, int mouse_y)
 {
 	_current_fitting->rig->left_button_pressed(mouse_x, mouse_y);
 }
 
 
-void Geodesic_Distance_UI::set_time()
+void Hull::set_time()
 {
 	_current_time = _ui.time_slider->get_value();
 	update_image_control(_current_time);
@@ -321,7 +321,7 @@ void Geodesic_Distance_UI::set_time()
 }
 
 
-bool Geodesic_Distance_UI::key_pressed(GdkEventKey* event)
+bool Hull::key_pressed(GdkEventKey* event)
 {
 	_current_fitting->rig->key_pressed(event);
 
@@ -329,14 +329,14 @@ bool Geodesic_Distance_UI::key_pressed(GdkEventKey* event)
 }
 
 
-void Geodesic_Distance_UI::perceive_background_worker(int responce_id)
+void Hull::perceive_background_worker(int responce_id)
 {
 	if (responce_id == 0)
 		cancel_calculate_optical_flow();
 }
 
 
-void Geodesic_Distance_UI::store_optical_flow(OpticalFlowContainer &flow, int index)
+void Hull::store_optical_flow(OpticalFlowContainer &flow, int index)
 {
 	if (_sequence_folder.empty())
 		return;
@@ -349,7 +349,7 @@ void Geodesic_Distance_UI::store_optical_flow(OpticalFlowContainer &flow, int in
 	update_or_overwrite_flow(file_name, flow, index, chunks_count);
 }
 
-void Geodesic_Distance_UI::restore_optical_flow()
+void Hull::restore_optical_flow()
 {
 	if (_sequence_folder.empty())
 		return;
@@ -410,7 +410,7 @@ void Geodesic_Distance_UI::restore_optical_flow()
 /******************************************************
  * Fills the list of tasks for optical flow computation
  */
-void Geodesic_Distance_UI::fill_task_list(std::vector<OpticalFlowContainer*> &forward_flow, std::vector<OpticalFlowContainer*> &backward_flow, std::vector<int> &task_list)
+void Hull::fill_task_list(std::vector<OpticalFlowContainer*> &forward_flow, std::vector<OpticalFlowContainer*> &backward_flow, std::vector<int> &task_list)
 {
 	task_list.clear();
 	task_list.reserve(2 * forward_flow.size());
@@ -430,12 +430,12 @@ void Geodesic_Distance_UI::fill_task_list(std::vector<OpticalFlowContainer*> &fo
 }
 
 
-void Geodesic_Distance_UI::update_view()
+void Hull::update_view()
 {
 	update_image_control(_current_time);
 }
 
-void Geodesic_Distance_UI::update_fitting()
+void Hull::update_fitting()
 {
 	if (_current_fitting) {
 		_current_fitting->rig->deactivate();
@@ -454,23 +454,23 @@ void Geodesic_Distance_UI::update_fitting()
 }
 
 /* private */
-int Geodesic_Distance_UI::write_flow(float *u, float *v, int w, int h)
+int Hull::write_flow(float *u, float *v, int w, int h)
 {
 	FILE *fp;
 	int i, j, offset;
 
-	fp = fopen("flow.data", "w");
+	fp = std::fopen("flow.data", "w");
 
 	offset = 0;
 
 	for(i = 0; i < h; i++) {
 		for(j = 0; j < w; j++, offset++) {
-			fprintf(fp, "%d %d %f %f\n", j, h - 1 - i, u[offset], -v[offset]);
+			std::fprintf(fp, "%d %d %f %f\n", j, h - 1 - i, u[offset], -v[offset]);
 		}
-		fprintf(fp, "\n");
+		std::fprintf(fp, "\n");
 	}
 
-	fclose(fp);
+	std::fclose(fp);
 
 	return 1;
 }
@@ -478,7 +478,7 @@ int Geodesic_Distance_UI::write_flow(float *u, float *v, int w, int h)
 /**
  * Converts Image into Gdk::Pixbuf
  */
-Glib::RefPtr<Gdk::Pixbuf> Geodesic_Distance_UI::wrap_raw_image_data(Image *image)
+Glib::RefPtr<Gdk::Pixbuf> Hull::wrap_raw_image_data(Image *image)
 {
 	const int BITS_PER_CHANNEL = 8;
 
@@ -507,7 +507,7 @@ Glib::RefPtr<Gdk::Pixbuf> Geodesic_Distance_UI::wrap_raw_image_data(Image *image
 }
 
 
-void Geodesic_Distance_UI::update_image_control(int current_time)
+void Hull::update_image_control(int current_time)
 {
 	UI_Container::View view = _ui.get_view();
 
@@ -556,21 +556,21 @@ void Geodesic_Distance_UI::update_image_control(int current_time)
 }
 
 
-Glib::RefPtr<Gdk::Pixbuf> Geodesic_Distance_UI::create_empty_pixbuf(int width, int height)
+Glib::RefPtr<Gdk::Pixbuf> Hull::create_empty_pixbuf(int width, int height)
 {
 	Glib::RefPtr<Gdk::Pixbuf> empty_image = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, false, 8, width, height);
 	empty_image->fill(0);
 	return empty_image;
 }
 
-void Geodesic_Distance_UI::show_status_message(std::string message)
+void Hull::show_status_message(std::string message)
 {
 	_ui.status_bar->pop(0);
 	_ui.status_bar->push(message, 0);
 }
 
 
-void Geodesic_Distance_UI::begin_full_optical_flow_calculation()
+void Hull::begin_full_optical_flow_calculation()
 {
 	// NOTE: if specify no tasks, optical flow for all frame pairs will be computed
 	std::vector<int> empty_task_list;
@@ -578,7 +578,7 @@ void Geodesic_Distance_UI::begin_full_optical_flow_calculation()
 }
 
 
-void Geodesic_Distance_UI::begin_missing_optical_flow_calculation()
+void Hull::begin_missing_optical_flow_calculation()
 {
 	if (_task_list.size() == 0) {
 		_ui.proceed_optical_flow_action->set_sensitive(false);
@@ -589,7 +589,7 @@ void Geodesic_Distance_UI::begin_missing_optical_flow_calculation()
 }
 
 
-void Geodesic_Distance_UI::begin_optical_flow_calculation_internal(std::vector<int> task_list)
+void Hull::begin_optical_flow_calculation_internal(std::vector<int> task_list)
 {
 	//TODO: ensure no background operations in progress.
 
@@ -599,7 +599,7 @@ void Geodesic_Distance_UI::begin_optical_flow_calculation_internal(std::vector<i
 
 	try
 	{
-		_background_worker = Glib::Threads::Thread::create( sigc::bind<std::vector<int> >( sigc::mem_fun(*this, &Geodesic_Distance_UI::calculate_optical_flow), task_list));
+		_background_worker = Glib::Threads::Thread::create( sigc::bind<std::vector<int> >( sigc::mem_fun(*this, &Hull::calculate_optical_flow), task_list));
 	}
 	catch(Glib::Threads::ThreadError &err)
 	{
@@ -615,7 +615,7 @@ void Geodesic_Distance_UI::begin_optical_flow_calculation_internal(std::vector<i
 }
 
 
-void Geodesic_Distance_UI::end_calculate_optical_flow()
+void Hull::end_calculate_optical_flow()
 {
 	_background_worker->join();
 
@@ -631,7 +631,7 @@ void Geodesic_Distance_UI::end_calculate_optical_flow()
 }
 
 
-void Geodesic_Distance_UI::take_optical_flow_frame()
+void Hull::take_optical_flow_frame()
 {
 	int size_x = _sequence->GetXSize();
 	int size_y = _sequence->GetYSize();
@@ -680,7 +680,7 @@ void Geodesic_Distance_UI::take_optical_flow_frame()
 }
 
 
-void Geodesic_Distance_UI::cancel_calculate_optical_flow()
+void Hull::cancel_calculate_optical_flow()
 {
 	_ui.background_work_infobar_message->set_text("Optical flow. Canceling... ");
 	{
@@ -690,7 +690,7 @@ void Geodesic_Distance_UI::cancel_calculate_optical_flow()
 }
 
 
-bool Geodesic_Distance_UI::allow_background_computation()
+bool Hull::allow_background_computation()
 {
 	bool stop_flag;
 
@@ -708,14 +708,14 @@ bool Geodesic_Distance_UI::allow_background_computation()
  * In task list absolute value defines from what frame to compute flow, and sign defines direction.
  * Example: '0' - forward flow from frame 0 to frame 1; '-2' - backward flow from frame 2 to frame 1.
  */
-void Geodesic_Distance_UI::calculate_optical_flow(std::vector<int> task_list)
+void Hull::calculate_optical_flow(std::vector<int> task_list)
 {
 	if (!_sequence)
 		return;
 
 	// Prepare watchdog for catching possible cancellation command from user
 	SignalWatchdog *watchdog = new SignalWatchdog();
-	watchdog->signal_ask_permission().connect( sigc::mem_fun(*this, &Geodesic_Distance_UI::allow_background_computation ) );
+	watchdog->signal_ask_permission().connect( sigc::mem_fun(*this, &Hull::allow_background_computation ) );
 
 	// Create with default parameters
 	Zach_TVL1_OpticalFlow* opticalFlow = new Zach_TVL1_OpticalFlow(false);
