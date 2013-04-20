@@ -11,13 +11,14 @@
 
 #include "headers/pgm_util.h"
 
+
 void SkipSpacesAndComments(FILE * f)
 {
   int c;
   do
     {
-      while(isspace(c=getc(f))); /* skip spaces */
-      if(c=='#') while((c=getc(f))!='\n'); /* skip comments */
+      while(isspace(c=fgetc(f))); /* skip spaces */
+      if(c=='#') while((c=fgetc(f))!='\n'); /* skip comments */
     }
   while(c == '#');
   ungetc(c,f);
@@ -30,10 +31,10 @@ int GetNumber(FILE * f)
 {
   int num, c;
 
-  while(isspace(c=getc(f)));
+  while(isspace(c=fgetc(f)));
   if(!isdigit(c)) exit(1);
   num = c - '0';
-  while( isdigit(c=getc(f)) ) num = 10 * num + c - '0';
+  while( isdigit(c=fgetc(f)) ) num = 10 * num + c - '0';
 
   return num;
 }
@@ -45,17 +46,18 @@ int GetNumber(FILE * f)
 Image* ReadPgmImage(string *name)
 {
 	/* open file */
-	FILE *f = fopen((*name).data(),"r");
+	// COMPATIBILITY: for win 'rb' file mode instead of just 'r'
+	FILE *f = fopen((*name).data(),"rb");
 	if( f == NULL ) exit(1);
 
 	/* read header */
 	bool isBinary = false;
 	int c, x_size,y_size,depth;
 
-	if ( getc(f) != 'P' )
+	if ( fgetc(f) != 'P' )
 		exit(1);
 
-	if( (c=getc(f)) == '2' ) {
+	if( (c=fgetc(f)) == '2' ) {
 		isBinary = false;
 	} else if ( c == '5' ) {
 		isBinary = true;
@@ -78,7 +80,7 @@ Image* ReadPgmImage(string *name)
 	int value;
 	for(int y=0;y<y_size;y++) {
 		for(int x=0;x<x_size;x++) {
-			value = isBinary ? getc(f) : GetNumber(f);
+			value = isBinary ? fgetc(f) : GetNumber(f);
 			image->SetPixelValue(x,y,value);
 		}
 	}

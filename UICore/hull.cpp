@@ -144,7 +144,8 @@ void Hull::open_sequence()
 		while ((file_info = child_enumeration->next_file()) != NULL)
 		{
 			std::string file_mime_type = file_info->get_content_type();
-			if (file_mime_type.compare("image/x-portable-graymap") == 0) {
+			// COMPATIBILITY: first for unix, second for win
+			if (file_mime_type.compare("image/x-portable-graymap") == 0 || file_mime_type.compare(".pgm") == 0) {
 				std::string file_name = file_info->get_name();
 				file_names.push_back(file_name);
 			}
