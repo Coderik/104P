@@ -95,7 +95,7 @@ void Hull::open_image()
 	if (result == Gtk::RESPONSE_OK) {
 		std::string filename = dialog.get_filename();
 
-		Image *image = ReadPgmImage(&filename);
+		Image<float> *image = ReadPgmImage(&filename);
 		// TODO: check image
 
 		// Adjust UI
@@ -110,7 +110,7 @@ void Hull::open_image()
 		_has_optical_flow_data = false;
 
 		// Replace single image with sequence of the only element for computational uniformity.
-		_sequence = new Sequence(image);
+		_sequence = new Sequence<float>(image);
 
 		// Show image
 		update_image_control(_current_time);
@@ -160,18 +160,18 @@ void Hull::open_sequence()
 		// Load first frame, that will define width and height for the sequence.
 		std::string first_frame_path = sequence_folder;
 		first_frame_path.append(file_names[0]);
-		Image *first_frame = ReadPgmImage(&first_frame_path);
+		Image<float> *first_frame = ReadPgmImage(&first_frame_path);
 
 		// [Re]create sequence instance
 		if (_sequence)
 			delete _sequence;
-		_sequence = new Sequence(first_frame);
+		_sequence = new Sequence<float>(first_frame);
 
 		// Load the rest frames.
 		for (int i=1; i<file_names.size(); i++) {
 			string frame_path = sequence_folder;
 			frame_path.append(file_names[i]);
-			Image *frame = ReadPgmImage(&frame_path);
+			Image<float> *frame = ReadPgmImage(&frame_path);
 			_sequence->AddFrame(frame);
 		}
 
@@ -226,7 +226,7 @@ void Hull::open_sequence()
 /*****************
  * IHull members *
  *****************/
-Sequence* Hull::request_sequence()
+Sequence<float>* Hull::request_sequence()
 {
 	return _sequence;
 }
@@ -479,7 +479,7 @@ int Hull::write_flow(float *u, float *v, int w, int h)
 /**
  * Converts Image into Gdk::Pixbuf
  */
-Glib::RefPtr<Gdk::Pixbuf> Hull::wrap_raw_image_data(Image *image)
+Glib::RefPtr<Gdk::Pixbuf> Hull::wrap_raw_image_data(Image<float> *image)
 {
 	const int BITS_PER_CHANNEL = 8;
 

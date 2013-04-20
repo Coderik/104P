@@ -52,7 +52,7 @@ public:
 	virtual void add_rig(Rig* rig, std::string display_name);
 	virtual void initialize_rigs();
 
-	virtual Sequence* request_sequence();
+	virtual Sequence<float>* request_sequence();
 	virtual vector<OpticalFlowContainer*> request_forward_optical_flow();
 	virtual vector<OpticalFlowContainer*> request_backward_optical_flow();
 	virtual bool request_has_optical_flow_data();
@@ -81,7 +81,7 @@ protected:
 private:
 	vector<Fitting* > _fittings;
 	Fitting *_current_fitting;
-	Sequence *_sequence;
+	Sequence<float> *_sequence;
 	Glib::RefPtr<Gdk::Pixbuf> _optical_flow_view;
 	std::vector<OpticalFlowContainer*> _forward_optical_flow_list;
 	std::vector<OpticalFlowContainer*> _backward_optical_flow_list;
@@ -107,7 +107,7 @@ private:
 	template <typename T>
 	void reset_vector_of_pointers(std::vector<T*> &v, int size);
 
-	Glib::RefPtr<Gdk::Pixbuf> wrap_raw_image_data(Image *image);
+	Glib::RefPtr<Gdk::Pixbuf> wrap_raw_image_data(Image<float> *image);
 	void update_image_control(int current_time);
 	Glib::RefPtr<Gdk::Pixbuf> create_empty_pixbuf(int width, int height);
 	void show_status_message(std::string message);

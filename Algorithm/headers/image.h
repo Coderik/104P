@@ -12,12 +12,13 @@
 #include "shape.h"
 #include "point.h"
 
+template <class T = float>
 class Image
 {
 public:
 	Image();
 	Image(int x_size,int y_size);
-	Image(int x_size,int y_size, float value);
+	Image(int x_size,int y_size, T value);
 	Image(Image &source);
 	~Image();
 
@@ -26,23 +27,24 @@ public:
 	Shape get_size() const;
 	void set_coordinates(Point coordinates);
 	Point get_coordinates();
-	float GetPixelValue(int x, int y) const;
-	void SetPixelValue(int x, int y, double value);
-	void fill(float value);
-	Image* GetPatchBetweenPoints(int a_x, int a_y, int b_x, int b_y);
-	Image* GetPatchArountPoint(int center_x, int center_y, int x_size, int y_size);
-	Image* GetPatchArountPoint(int center_x, int center_y, int size);
-	char* GetRawDataRgb();
+	T GetPixelValue(int x, int y) const;
+	void SetPixelValue(int x, int y, T value);
+	void fill(T value);
+	Image<T>* GetPatchBetweenPoints(int a_x, int a_y, int b_x, int b_y);
+	Image<T>* GetPatchArountPoint(int center_x, int center_y, int x_size, int y_size);
+	Image<T>* GetPatchArountPoint(int center_x, int center_y, int size);
 	int GetRawDataLength();
-	float* GetRawData();
+	T* GetRawData();
 private:
 	int _x_size, _y_size;
-	float *_points;
+	T *_points;
 	Point _coordinates;
 	inline int GetIndex(int x, int y) const;
 	inline bool IsOddNumber(int number);
-	Image* GetPatchInternal(int a_x, int a_y, int b_x, int b_y);
+	Image<T>* GetPatchInternal(int a_x, int a_y, int b_x, int b_y);
 };
 
+// NOTE: include implementation, because Image is a template
+//#include "../image.cpp"
 
 #endif /* IMAGE_H_ */

@@ -18,7 +18,7 @@ class IHull
 public:
 	virtual ~IHull() {}
 
-	virtual Sequence* request_sequence() = 0;
+	virtual Sequence<float>* request_sequence() = 0;
 	virtual vector<OpticalFlowContainer*> request_forward_optical_flow() = 0;
 	virtual vector<OpticalFlowContainer*> request_backward_optical_flow() = 0;
 	virtual bool request_has_optical_flow_data() = 0;

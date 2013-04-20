@@ -43,7 +43,7 @@ int GetNumber(FILE * f)
  * Reads image in PGM format from file with provided path\name
  * to the object of 'Image' class
  */
-Image* ReadPgmImage(string *name)
+Image<float>* ReadPgmImage(string *name)
 {
 	/* open file */
 	// COMPATIBILITY: for win 'rb' file mode instead of just 'r'
@@ -73,7 +73,7 @@ Image* ReadPgmImage(string *name)
 	fscanf(f,"%d",&depth);
 
 	/* get memory */
-	Image *image = new Image(x_size, y_size);
+	Image<float> *image = new Image<float>(x_size, y_size);
 
 	/* read data */
 	SkipSpacesAndComments(f);
@@ -95,7 +95,7 @@ Image* ReadPgmImage(string *name)
  * Writes image in PGM format to file with provided path\name
  * from the object of 'Image' class
  */
-void WritePgmImage(string *name, Image *image)
+void WritePgmImage(string *name, Image<float> *image)
 {
 	/* open file */
 	FILE *f = fopen((*name).data(),"w");
