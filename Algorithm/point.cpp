@@ -33,6 +33,18 @@ Point::Point(int x, int y, int t)
 }
 
 
+bool Point::operator== (const Point &p) const
+{
+	return (this->x == p.x) && (this->y == p.y) && (this->t == p.t);
+}
+
+
+bool Point::operator!= (const Point &p) const
+{
+	return !((*this) == p);
+}
+
+
 Point& Point::operator= (const Point &p)
 {
 	if (this != &p) {

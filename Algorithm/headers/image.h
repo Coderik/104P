@@ -35,7 +35,7 @@ public:
 	Image<T>* GetPatchArountPoint(int center_x, int center_y, int size);
 	int GetRawDataLength();
 	T* GetRawData();
-private:
+protected:
 	int _x_size, _y_size;
 	T *_points;
 	Point _coordinates;

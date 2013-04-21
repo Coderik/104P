@@ -16,6 +16,8 @@ struct Point
 	Point(int x, int y);
 	Point(int x, int y, int t);
 
+	bool operator== (const Point &p) const;
+	bool operator!= (const Point &p) const;
 	Point& operator= (const Point &p);
 	Point& operator+= (const Point &p);
 	Point& operator-= (const Point &p);

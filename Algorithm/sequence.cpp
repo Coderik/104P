@@ -298,6 +298,7 @@ inline bool Sequence<T>::IsOddNumber(int number)
 
 // Explicit instantiations
 template class Sequence<float>;
+template class Sequence<bool>;
 
 
 

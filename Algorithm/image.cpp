@@ -239,3 +239,4 @@ Image<T>* Image<T>::GetPatchInternal(int a_x, int a_y, int b_x, int b_y)
 
 // Explicit instantiations
 template class Image<float>;
+template class Image<bool>;
