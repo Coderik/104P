@@ -12,6 +12,7 @@
 #include "i_iterable_mask.h"
 #include "mask_iterator.h"
 
+// TODO: may be Sequence_Mask would be enough?
 class Image_Mask : public Image<bool>, public I_Iterable_Mask
 {
 public:

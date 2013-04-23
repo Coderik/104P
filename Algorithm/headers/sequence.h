@@ -44,7 +44,7 @@ public:
 	Sequence<T>* GetPatchArountPoint(int center_x, int center_y, int center_t, int frame_size, int t_size);
 	Sequence<T>* GetPatchArountPoint(int center_x, int center_y, int center_t, int x_size, int y_size, int t_size);
 
-private:
+protected:
 	int _x_size, _y_size, _t_size;
 	Point _coordinates;
 	vector<Image<T>* > _frames;

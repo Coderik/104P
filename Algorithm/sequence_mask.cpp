@@ -39,3 +39,126 @@ Sequence_Mask::~Sequence_Mask()
 {
 
 }
+
+
+Sequence_Mask::iterator Sequence_Mask::begin()
+{
+	return iterator(this, first());
+}
+
+
+Sequence_Mask::iterator Sequence_Mask::end()
+{
+	return iterator(this, Point(-1, -1, -1));
+}
+
+
+Sequence_Mask::iterator Sequence_Mask::rbegin()
+{
+	return iterator(this, last());
+}
+
+
+Sequence_Mask::iterator Sequence_Mask::rend()
+{
+	return iterator(this, Point(-1, -1, -1));
+}
+
+
+void Sequence_Mask::mask(int x, int y, int t)
+{
+	SetPixelValue(x, y, t, true);
+}
+
+
+void Sequence_Mask::unmask(int x, int y, int t)
+{
+	SetPixelValue(x, y, t, false);
+}
+
+
+void Sequence_Mask::invert()
+{
+	// TODO: may be move to specialization Image<bool>
+	for (int t = 0; t < _t_size; t++) {
+		for (int y = 0; y < _y_size; y++) {
+			for (int x = 0; x < _x_size; x++) {
+				SetPixelValue(x, y, t, !GetPixelValue(x, y, t));
+			}
+		}
+	}
+}
+
+
+/* I_Iterable_Mask methods */
+// TODO: optimize
+Point Sequence_Mask::first()
+{
+	for (int t = 0; t < _t_size; t++) {
+		for (int y = 0; y < _y_size; y++) {
+			for (int x = 0; x < _x_size; x++) {
+				if (GetPixelValue(x, y, t)) {
+					return Point(x, y, t);
+				}
+			}
+		}
+	}
+
+	return Point(-1, -1, -1);
+}
+
+
+Point Sequence_Mask::last()
+{
+	for (int t = _t_size - 1; t >= 0; t--) {
+		for (int y = _y_size - 1; y >= 0; y--) {
+			for (int x = _x_size - 1; x >= 0; x--) {
+				if (GetPixelValue(x, y, t)) {
+					return Point(x, y, t);
+				}
+			}
+		}
+	}
+
+	return Point(-1, -1, -1);
+}
+
+
+Point Sequence_Mask::next(const Point current)
+{
+	int from_x = current.x + 1;
+	int from_y = current.y;
+	for (int t = current.t; t < _t_size; t++) {
+		for (int y = from_y; y < _y_size; y++) {
+			for (int x = from_x; x < _x_size; x++) {
+				if (GetPixelValue(x, y, t)) {
+					return Point(x, y, t);
+				}
+			}
+			from_x = 0;
+		}
+		from_y = 0;
+	}
+
+	return Point(-1, -1, -1);
+}
+
+
+Point Sequence_Mask::prev(const Point current)
+{
+	int from_x = current.x - 1;
+	int from_y = current.y;
+	for (int t = current.t; t >= 0; t--) {
+		for (int y = from_y; y >= 0; y--) {
+			for (int x = from_x; x >= 0; x--) {
+				if (GetPixelValue(x, y, t)) {
+					return Point(x, y, t);
+				}
+			}
+			from_x = _x_size - 1;
+		}
+		from_y = _y_size - 1;
+	}
+
+	return Point(-1, -1, -1);
+}
