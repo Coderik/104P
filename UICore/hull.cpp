@@ -494,7 +494,7 @@ Glib::RefPtr<Gdk::Pixbuf> Hull::wrap_raw_image_data(Image<float> *image)
 	int index;
 	for (int y = 0;y < y_size;y++) {
 		for (int x = 0;x < x_size;x++) {
-			char intensity = (unsigned char)image->GetPixelValue(x, y);
+			char intensity = (unsigned char)image->get_value(x, y);
 			for (int c = 0; c < number_of_channels; c++) {
 				/// NOTE: 'rowstride' is the length of internal representation of a row
 				/// inside the Pixbuf, and it could differ from x_size*number_of_channels.

@@ -35,6 +35,13 @@ Sequence_Mask::Sequence_Mask(Image<bool> *first_frame)
 }
 
 
+Sequence_Mask::Sequence_Mask(Sequence_Mask& source)
+	: Sequence<bool>(source)
+{
+
+}
+
+
 Sequence_Mask::~Sequence_Mask()
 {
 
@@ -67,13 +74,13 @@ Sequence_Mask::iterator Sequence_Mask::rend()
 
 void Sequence_Mask::mask(int x, int y, int t)
 {
-	SetPixelValue(x, y, t, true);
+	set_value(x, y, t, true);
 }
 
 
 void Sequence_Mask::unmask(int x, int y, int t)
 {
-	SetPixelValue(x, y, t, false);
+	set_value(x, y, t, false);
 }
 
 
@@ -83,7 +90,7 @@ void Sequence_Mask::invert()
 	for (int t = 0; t < _t_size; t++) {
 		for (int y = 0; y < _y_size; y++) {
 			for (int x = 0; x < _x_size; x++) {
-				SetPixelValue(x, y, t, !GetPixelValue(x, y, t));
+				set_value(x, y, t, !get_value(x, y, t));
 			}
 		}
 	}
@@ -97,7 +104,7 @@ Point Sequence_Mask::first()
 	for (int t = 0; t < _t_size; t++) {
 		for (int y = 0; y < _y_size; y++) {
 			for (int x = 0; x < _x_size; x++) {
-				if (GetPixelValue(x, y, t)) {
+				if (get_value(x, y, t)) {
 					return Point(x, y, t);
 				}
 			}
@@ -113,7 +120,7 @@ Point Sequence_Mask::last()
 	for (int t = _t_size - 1; t >= 0; t--) {
 		for (int y = _y_size - 1; y >= 0; y--) {
 			for (int x = _x_size - 1; x >= 0; x--) {
-				if (GetPixelValue(x, y, t)) {
+				if (get_value(x, y, t)) {
 					return Point(x, y, t);
 				}
 			}
@@ -131,7 +138,7 @@ Point Sequence_Mask::next(const Point current)
 	for (int t = current.t; t < _t_size; t++) {
 		for (int y = from_y; y < _y_size; y++) {
 			for (int x = from_x; x < _x_size; x++) {
-				if (GetPixelValue(x, y, t)) {
+				if (get_value(x, y, t)) {
 					return Point(x, y, t);
 				}
 			}
@@ -151,7 +158,7 @@ Point Sequence_Mask::prev(const Point current)
 	for (int t = current.t; t >= 0; t--) {
 		for (int y = from_y; y >= 0; y--) {
 			for (int x = from_x; x >= 0; x--) {
-				if (GetPixelValue(x, y, t)) {
+				if (get_value(x, y, t)) {
 					return Point(x, y, t);
 				}
 			}

@@ -27,8 +27,9 @@ public:
 	Shape get_size() const;
 	void set_coordinates(Point coordinates);
 	Point get_coordinates();
-	T GetPixelValue(int x, int y) const;
-	void SetPixelValue(int x, int y, T value);
+	T get_value(int x, int y) const;
+	bool try_get_value(int x, int y, T& value) const;
+	void set_value(int x, int y, T value);
 	void fill(T value);
 	Image<T>* GetPatchBetweenPoints(int a_x, int a_y, int b_x, int b_y);
 	Image<T>* GetPatchArountPoint(int center_x, int center_y, int x_size, int y_size);

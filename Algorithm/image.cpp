@@ -65,10 +65,10 @@ Image<T>::~Image()
 
 /* public */
 template <class T>
-T Image<T>::GetPixelValue(int x, int y) const
+T Image<T>::get_value(int x, int y) const
 {
 	if ( x < 0 || y < 0 || x >= _x_size || y >= _y_size || !_points) {
-		return -1;
+		return T();
 	}
 
 	return _points[GetIndex(x,y)];
@@ -76,9 +76,21 @@ T Image<T>::GetPixelValue(int x, int y) const
 
 
 template <class T>
-void Image<T>::SetPixelValue(int x, int y, T value)
+bool Image<T>::try_get_value(int x, int y, T& value) const
 {
-	if ( x < 0 || y < 0 || x >= _x_size || y >= _y_size || !_points || value < 0) {
+	if ( x < 0 || y < 0 || x >= _x_size || y >= _y_size || !_points) {
+		return false;
+	}
+
+	value = _points[GetIndex(x,y)];
+	return true;
+}
+
+
+template <class T>
+void Image<T>::set_value(int x, int y, T value)
+{
+	if ( x < 0 || y < 0 || x >= _x_size || y >= _y_size || !_points) {
 		return;
 	}
 
@@ -229,8 +241,8 @@ Image<T>* Image<T>::GetPatchInternal(int a_x, int a_y, int b_x, int b_y)
 	// TODO: may be add mirror effect at the border?
 	for (int x = 0; x < x_size; x++) {
 		for (int y = 0; y < y_size; y++) {
-			T value = this->GetPixelValue(a_x + x, a_y + y);
-			patch->SetPixelValue(x,y,value);
+			T value = this->get_value(a_x + x, a_y + y);
+			patch->set_value(x,y,value);
 		}
 	}
 
@@ -240,3 +252,4 @@ Image<T>* Image<T>::GetPatchInternal(int a_x, int a_y, int b_x, int b_y)
 // Explicit instantiations
 template class Image<float>;
 template class Image<bool>;
+template class Image<Point>;

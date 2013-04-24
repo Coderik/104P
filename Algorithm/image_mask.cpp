@@ -67,13 +67,13 @@ Image_Mask::iterator Image_Mask::rend()
 
 void Image_Mask::mask(int x, int y)
 {
-	SetPixelValue(x, y, true);
+	set_value(x, y, true);
 }
 
 
 void Image_Mask::unmask(int x, int y)
 {
-	SetPixelValue(x, y, false);
+	set_value(x, y, false);
 }
 
 
@@ -82,7 +82,7 @@ void Image_Mask::invert()
 	// TODO: may be move to specialization Image<bool>
 	for (int y = 0; y < _y_size; y++) {
 		for (int x = 0; x < _x_size; x++) {
-			SetPixelValue(x, y, !GetPixelValue(x, y));
+			set_value(x, y, !get_value(x, y));
 		}
 	}
 }
@@ -94,7 +94,7 @@ Point Image_Mask::first()
 {
 	for (int y = 0; y < _y_size; y++) {
 		for (int x = 0; x < _x_size; x++) {
-			if (GetPixelValue(x, y)) {
+			if (get_value(x, y)) {
 				return Point(x, y, 0);
 			}
 		}
@@ -108,7 +108,7 @@ Point Image_Mask::last()
 {
 	for (int y = _y_size - 1; y >= 0; y--) {
 		for (int x = _x_size - 1; x >= 0; x--) {
-			if (GetPixelValue(x, y)) {
+			if (get_value(x, y)) {
 				return Point(x, y, 0);
 			}
 		}
@@ -123,7 +123,7 @@ Point Image_Mask::next(const Point current)
 	int from_x = current.x + 1;
 	for (int y = current.y; y < _y_size; y++) {
 		for (int x = from_x; x < _x_size; x++) {
-			if (GetPixelValue(x, y)) {
+			if (get_value(x, y)) {
 				return Point(x, y, 0);
 			}
 		}
@@ -139,7 +139,7 @@ Point Image_Mask::prev(const Point current)
 	int from_x = current.x - 1;
 	for (int y = current.y; y >= 0; y--) {
 		for (int x = from_x; x >= 0; x--) {
-			if (GetPixelValue(x, y)) {
+			if (get_value(x, y)) {
 				return Point(x, y, 0);
 			}
 		}

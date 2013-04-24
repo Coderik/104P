@@ -21,6 +21,7 @@ public:
 	Sequence_Mask(int x_size, int y_size, int t_size);
 	Sequence_Mask(int x_size, int y_size);
 	Sequence_Mask(Image<bool> *first_frame);
+	Sequence_Mask(Sequence_Mask& source);
 	~Sequence_Mask();
 
 	iterator begin();

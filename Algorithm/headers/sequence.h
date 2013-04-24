@@ -24,6 +24,7 @@ public:
 	Sequence(int x_size, int y_size, int t_size);
 	Sequence(int x_size, int y_size);
 	Sequence(Image<T> *first_frame);
+	Sequence(Sequence& source);
 	~Sequence();
 
 	int GetXSize();
@@ -32,8 +33,9 @@ public:
 	Shape get_size();
 	void set_coordinates(Point coordinates);
 	Point get_coordinates();
-	T GetPixelValue(int x, int y, int t);
-	void SetPixelValue(int x, int y, int t, T value);
+	T get_value(int x, int y, int t);
+	bool try_get_value(int x, int y, int t, T& value);
+	void set_value(int x, int y, int t, T value);
 	void fill(T value);
 	Image<T>* GetFrame(int t);
 	bool SetFrame(int t, Image<T> *frame);

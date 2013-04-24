@@ -81,7 +81,7 @@ Image<float>* ReadPgmImage(string *name)
 	for(int y=0;y<y_size;y++) {
 		for(int x=0;x<x_size;x++) {
 			value = isBinary ? fgetc(f) : GetNumber(f);
-			image->SetPixelValue(x,y,value);
+			image->set_value(x,y,value);
 		}
 	}
 
@@ -113,7 +113,7 @@ void WritePgmImage(string *name, Image<float> *image)
 	char value;
 	for (int y = 0;y < y_size;y++) {
 		for (int x = 0;x < x_size;x++) {
-			value = (char)image->GetPixelValue(x,y);
+			value = (char)image->get_value(x,y);
 			putc(value, f);
 		}
 	}

@@ -52,6 +52,19 @@ Sequence<T>::Sequence(Image<T> *first_frame)
 	_frames = vector<Image<T>* >(1, first_frame);
 }
 
+template <class T>
+Sequence<T>::Sequence(Sequence<T>& source)
+{
+	_x_size = source.GetXSize();
+	_y_size = source.GetYSize();
+	_t_size = source.GetTSize();
+
+	_frames = vector<Image<T>* >(_t_size);
+	for (int i = 0; i < _t_size; i++) {
+		_frames[i] = new Image<T>(*source.GetFrame(i));
+	}
+}
+
 
 template <class T>
 Sequence<T>::~Sequence()
@@ -103,18 +116,31 @@ Point Sequence<T>::get_coordinates()
 }
 
 
+/*
+ * Note: if outside the range, returns default value.
+ */
 template <class T>
-T Sequence<T>::GetPixelValue(int x, int y, int t)
+T Sequence<T>::get_value(int x, int y, int t)
 {
-	if (t < 0 || t > _t_size || !_frames[t])
-		return -1;
+	if (t < 0 || t >= _t_size || !_frames[t])
+		return T();
 
-	return _frames[t]->GetPixelValue(x, y);
+	return _frames[t]->get_value(x, y);
 }
 
 
 template <class T>
-void Sequence<T>::SetPixelValue(int x, int y, int t, T value)
+bool Sequence<T>::try_get_value(int x, int y, int t, T& value)
+{
+	if (t < 0 || t > _t_size || !_frames[t])
+		return false;
+
+	return _frames[t]->try_get_value(x, y, value);
+}
+
+
+template <class T>
+void Sequence<T>::set_value(int x, int y, int t, T value)
 {
 	if (t < 0 || t > _t_size)
 		return;
@@ -123,7 +149,7 @@ void Sequence<T>::SetPixelValue(int x, int y, int t, T value)
 		_frames[t] = new Image<T>(_x_size, _y_size);
 	}
 
-	_frames[t]->SetPixelValue(x, y, value);
+	_frames[t]->set_value(x, y, value);
 }
 
 
@@ -299,6 +325,7 @@ inline bool Sequence<T>::IsOddNumber(int number)
 // Explicit instantiations
 template class Sequence<float>;
 template class Sequence<bool>;
+template class Sequence<Point>;
 
 
 
