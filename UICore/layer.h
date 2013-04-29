@@ -40,6 +40,9 @@ protected:
 	int _drawing_x, _drawing_y, _drawing_width, _drawing_height;
 	type_signal_changed _signal_changed;
 
+	inline int true_x(const int x) { return _drawing_x + x; }
+	inline int true_y(const int y) { return _drawing_y + y; }
+
 };
 
 

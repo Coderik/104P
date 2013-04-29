@@ -53,4 +53,6 @@ void Layer::draw(const Cairo::RefPtr<Cairo::Context>& context)
 
 }
 
+/* Protected */
+
 
