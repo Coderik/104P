@@ -65,6 +65,8 @@ protected:
 	void open_image();
 	void open_sequence();
 	void left_button_pressed(int mouse_x, int mouse_y);
+	void left_button_released(int mouse_x, int mouse_y);
+	void left_button_drag(int mouse_x, int mouse_y);
 	void set_time();
 	void restore_optical_flow();
 	void update_view();

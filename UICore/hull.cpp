@@ -24,7 +24,9 @@ Hull::Hull()
 	_ui.signal_view_changed().connect( sigc::mem_fun(*this, &Hull::update_view) );
 	_ui.signal_fitting_changed().connect( sigc::mem_fun(*this, &Hull::update_fitting) );
 
-	_ui.image_control->signal_point_selected().connect( sigc::mem_fun(*this, &Hull::left_button_pressed) );
+	_ui.image_control->signal_left_button_pressed().connect( sigc::mem_fun(*this, &Hull::left_button_pressed) );
+	_ui.image_control->signal_left_button_released().connect( sigc::mem_fun(*this, &Hull::left_button_released) );
+	_ui.image_control->signal_left_button_drag().connect( sigc::mem_fun(*this, &Hull::left_button_drag) );
 	_ui.time_slider->signal_value_changed().connect( sigc::mem_fun(*this, &Hull::set_time) );
 
 	this->signal_key_press_event().connect( sigc::mem_fun(*this, &Hull::key_pressed) );
@@ -314,6 +316,18 @@ void Hull::left_button_pressed(int mouse_x, int mouse_y)
 }
 
 
+void Hull::left_button_released(int mouse_x, int mouse_y)
+{
+	_current_fitting->rig->left_button_released(mouse_x, mouse_y);
+}
+
+
+void Hull::left_button_drag(int mouse_x, int mouse_y)
+{
+	_current_fitting->rig->left_button_drag(mouse_x, mouse_y);
+}
+
+
 void Hull::set_time()
 {
 	_current_time = _ui.time_slider->get_value();
@@ -517,7 +531,7 @@ void Hull::update_image_control(int current_time)
 	if (view == UI_Container::VIEW_ORIGINAL_IMAGE) {
 		buffer = wrap_raw_image_data(_sequence->GetFrame(current_time));
 	} else if (view == UI_Container::VIEW_FORWARD_OF_COLOR) {
-		if (current_time < _forward_optical_flow_list.size() &&
+		if ((unsigned)current_time < _forward_optical_flow_list.size() &&
 				_forward_optical_flow_list[current_time] &&
 				_forward_optical_flow_list[current_time]->contains_data()) {
 			buffer = static_cast<OpticalFlow*>(_forward_optical_flow_list[current_time])->get_color_code_view();
@@ -525,7 +539,7 @@ void Hull::update_image_control(int current_time)
 			buffer = create_empty_pixbuf(_sequence->GetXSize(), _sequence->GetYSize());
 		}
 	} else if (view == UI_Container::VIEW_FORWARD_OF_GRAY) {
-		if (current_time < _forward_optical_flow_list.size() &&
+		if ((unsigned)current_time < _forward_optical_flow_list.size() &&
 				_forward_optical_flow_list[current_time] &&
 				_forward_optical_flow_list[current_time]->contains_data()) {
 			buffer = static_cast<OpticalFlow*>(_forward_optical_flow_list[current_time])->get_magnitudes_view();
@@ -534,7 +548,7 @@ void Hull::update_image_control(int current_time)
 		}
 	} else if (view == UI_Container::VIEW_BACKWARD_OF_COLOR) {
 		if (current_time > 0 &&
-				current_time - 1 < _backward_optical_flow_list.size() &&
+				(unsigned)(current_time - 1) < _backward_optical_flow_list.size() &&
 				_backward_optical_flow_list[current_time - 1] &&
 				_backward_optical_flow_list[current_time - 1]->contains_data()) {
 			buffer = static_cast<OpticalFlow*>(_backward_optical_flow_list[current_time - 1])->get_color_code_view();
@@ -543,7 +557,7 @@ void Hull::update_image_control(int current_time)
 		}
 	} else if (view == UI_Container::VIEW_BACKWARD_OF_GRAY) {
 		if (current_time > 0 &&
-				current_time - 1 < _backward_optical_flow_list.size() &&
+				(unsigned)(current_time - 1) < _backward_optical_flow_list.size() &&
 				_backward_optical_flow_list[current_time - 1] &&
 				_backward_optical_flow_list[current_time - 1]->contains_data()) {
 			buffer = static_cast<OpticalFlow*>(_backward_optical_flow_list[current_time - 1])->get_magnitudes_view();

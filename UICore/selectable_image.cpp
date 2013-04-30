@@ -10,6 +10,8 @@
 Selectable_Image::Selectable_Image()
 {
 	add_events(Gdk::BUTTON_PRESS_MASK);
+	add_events(Gdk::BUTTON_RELEASE_MASK);
+	add_events(Gdk::BUTTON1_MOTION_MASK);
 	_layer_manager = (Layer_Manager*)0;
 
 	// Create context menu.
@@ -146,7 +148,7 @@ bool Selectable_Image::on_button_press_event(GdkEventButton *event)
 
 		if (x > 0 && x < _content_width &&
 			y > 0 && y < _content_height) {
-			_signal_point_selected.emit(x, y);
+			_signal_left_button_pressed.emit(x, y);
 		}
 
 		return true;
@@ -159,6 +161,55 @@ bool Selectable_Image::on_button_press_event(GdkEventButton *event)
 		return true;
 	}
 
+	return false;
+}
+
+bool Selectable_Image::on_button_release_event(GdkEventButton *event)
+{
+	if (event->type == GDK_BUTTON_RELEASE && event->button == 1) {
+		// Left mouse button.
+		Gtk::Allocation allocation = get_allocation();
+		const int width = allocation.get_width();
+		const int height = allocation.get_height();
+
+		double pixbuf_x = (width - _content_width)/2;
+		double pixbuf_y = (height - _content_height)/2;
+
+		int x = event->x - pixbuf_x;
+		int y = event->y - pixbuf_y;
+
+		if (x > 0 && x < _content_width &&
+			y > 0 && y < _content_height) {
+			_signal_left_button_released.emit(x, y);
+		}
+
+		return true;
+	}
+
+	return false;
+}
+
+
+bool Selectable_Image::on_motion_notify_event(GdkEventMotion *event)
+{
+	if (event->type == GDK_MOTION_NOTIFY) {
+		Gtk::Allocation allocation = get_allocation();
+		const int width = allocation.get_width();
+		const int height = allocation.get_height();
+
+		double pixbuf_x = (width - _content_width)/2;
+		double pixbuf_y = (height - _content_height)/2;
+
+		int x = event->x - pixbuf_x;
+		int y = event->y - pixbuf_y;
+
+		if (x > 0 && x < _content_width &&
+			y > 0 && y < _content_height) {
+			_signal_left_button_drag.emit(x, y);
+		}
+
+		return true;
+	}
 	return false;
 }
 

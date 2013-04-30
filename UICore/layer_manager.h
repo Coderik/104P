@@ -27,6 +27,9 @@ public:
 	vector<Layer* > get_all_layers();
 	void set_visibility(bool is_visible);
 
+	template<class T>
+	T* find_or_create_layer(string key, string display_name);
+
 	typedef sigc::signal<void> type_signal_layer_changed;
 	type_signal_layer_changed signal_layer_changed()
 	{
@@ -44,5 +47,6 @@ private:
 	void notify_layer_changed();
 };
 
+#include "layer_manager.hpp"	// Implementations for template methods
 
 #endif /* LAYER_MANAGER_H_ */

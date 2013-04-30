@@ -31,21 +31,36 @@ public:
 
 	void save_content();
 
-	typedef sigc::signal<void, int, int> type_signal_point_selected;
-	type_signal_point_selected signal_point_selected()
+	typedef sigc::signal<void, int, int> type_mouse_signal;
+	type_mouse_signal signal_left_button_pressed()
 	{
-		return _signal_point_selected;
+		return _signal_left_button_pressed;
+	}
+
+	type_mouse_signal signal_left_button_released()
+	{
+		return _signal_left_button_released;
+	}
+
+	type_mouse_signal signal_left_button_drag()
+	{
+		return _signal_left_button_drag;
 	}
 
 protected:
-	//Override default signal handler:
+	//Override default signal handlers:
 	virtual bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr);
 	virtual bool on_button_press_event(GdkEventButton *event);
+	virtual bool on_button_release_event(GdkEventButton *event);
+	virtual bool on_motion_notify_event(GdkEventMotion *event);
+
 
 private:
 	Glib::RefPtr<Gdk::Pixbuf> _pixbuf;
 	int _content_width, _content_height;
-	type_signal_point_selected _signal_point_selected;
+	type_mouse_signal _signal_left_button_pressed;
+	type_mouse_signal _signal_left_button_released;
+	type_mouse_signal _signal_left_button_drag;
 	Layer_Manager *_layer_manager;
 	sigc::connection _connection_layer_manager_signal_layer_changed;
 	Glib::RefPtr<Gtk::UIManager> _menu_manager;
