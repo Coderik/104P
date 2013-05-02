@@ -61,7 +61,10 @@ Sequence<T>::Sequence(Sequence<T>& source)
 
 	_frames = vector<Image<T>* >(_t_size);
 	for (int i = 0; i < _t_size; i++) {
-		_frames[i] = new Image<T>(*source.GetFrame(i));
+		Image<T> *frame = source.GetFrame(i);
+		if (frame) {
+			_frames[i] = new Image<T>(*frame);
+		}
 	}
 }
 
