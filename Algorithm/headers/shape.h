@@ -20,6 +20,9 @@ struct Shape
 	Shape(int size_x, int size_y, int size_t);
 	Shape(const Shape &source);
 
+	bool operator== (const Shape &other) const;
+	bool operator!= (const Shape &other) const;
+
 	bool is_empty() const;
 	bool contains(const Point &p) const;
 	bool abs_contains(const Point &p) const;

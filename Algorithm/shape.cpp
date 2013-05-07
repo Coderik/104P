@@ -41,6 +41,18 @@ Shape::Shape(const Shape &source)
 }
 
 
+bool Shape::operator== (const Shape &other) const
+{
+	return (this->size_x == other.size_x) && (this->size_y == other.size_y) && (this->size_t == other.size_t);
+}
+
+
+bool Shape::operator!= (const Shape &other) const
+{
+	return !((*this) == other);
+}
+
+
 bool Shape::is_empty() const
 {
 	return size_x <= 0 || size_y <= 0 || size_t <= 0;
