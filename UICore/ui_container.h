@@ -18,6 +18,8 @@
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/statusbar.h>
 #include <gtkmm/label.h>
+#include <gtkmm/recentaction.h>
+#include <gtkmm/recentfilter.h>
 #include <gtkmm/toggleaction.h>
 #include <gtkmm/radioaction.h>
 #include <gtkmm/infobar.h>
@@ -34,6 +36,7 @@ class UI_Container
 public:
 	Glib::RefPtr<Gtk::Action> open_image_action;
 	Glib::RefPtr<Gtk::Action> open_sequence_action;
+	Glib::RefPtr<Gtk::RecentAction> open_recent_action;
 	Glib::RefPtr<Gtk::Action> quit_action;
 	Glib::RefPtr<Gtk::ActionGroup> optical_flow_action_group;
 	Glib::RefPtr<Gtk::Action> calculate_optical_flow_action;
@@ -89,6 +92,11 @@ public:
 		action_group->add(open_image_action);
 		open_sequence_action = Gtk::Action::create("OpenSequence", "Open Sequence Folder...");
 		action_group->add(open_sequence_action);
+		open_recent_action = Gtk::RecentAction::create("OpenRecent", "Open Recent");
+		Glib::RefPtr<Gtk::RecentFilter> filter = Gtk::RecentFilter::create();
+		//filter->add_application("gd-pd");
+		//open_recent_action->add_filter(filter);
+		action_group->add(open_recent_action);
 		quit_action = Gtk::Action::create("Quit", Gtk::Stock::QUIT);
 		action_group->add(quit_action);
 		_menu_manager->insert_action_group(action_group);
@@ -141,6 +149,7 @@ public:
 		    "    <menu action='FileMenu'>"
 		    "      <menuitem action='OpenImage'/>"
 		    "      <menuitem action='OpenSequence'/>"
+			"      <menuitem action='OpenRecent'/>"
 		    "      <separator/>"
 		    "      <menuitem action='Quit'/>"
 		    "    </menu>"

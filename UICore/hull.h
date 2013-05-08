@@ -17,6 +17,7 @@
 #include <gtkmm/radioaction.h>
 #include <glibmm/threads.h>
 #include <gdk/gdkkeysyms.h>
+#include <gtkmm/recentmanager.h>
 
 #include <string.h>
 #include <iostream>
@@ -64,6 +65,7 @@ protected:
 	/* slots */
 	void open_image();
 	void open_sequence();
+	void open_recent();
 	void left_button_pressed(int mouse_x, int mouse_y);
 	void left_button_released(int mouse_x, int mouse_y);
 	void left_button_drag(int mouse_x, int mouse_y);
@@ -105,6 +107,9 @@ private:
 	int _aux_optical_flow_index;
 
 	UI_Container _ui;
+
+	void load_sequence(string path);
+	void load_image(string filename);
 
 	template <typename T>
 	void reset_vector_of_pointers(std::vector<T*> &v, int size);

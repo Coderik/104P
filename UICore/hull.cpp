@@ -16,6 +16,7 @@ Hull::Hull()
 	_ui.quit_action->signal_activate().connect( sigc::ptr_fun(&Gtk::Main::quit) );
 	_ui.open_image_action->signal_activate().connect( sigc::mem_fun(*this, &Hull::open_image) );
 	_ui.open_sequence_action->signal_activate().connect( sigc::mem_fun(*this, &Hull::open_sequence) );
+	_ui.open_recent_action->signal_item_activated().connect( sigc::mem_fun(*this, &Hull::open_recent) );
 	_ui.calculate_optical_flow_action->signal_activate().connect( sigc::mem_fun(*this, &Hull::begin_full_optical_flow_calculation) );
 	_ui.proceed_optical_flow_action->signal_activate().connect( sigc::mem_fun(*this, &Hull::begin_missing_optical_flow_calculation) );
 	_ui.restore_optical_flow_action->signal_activate().connect( sigc::mem_fun(*this, &Hull::restore_optical_flow) );
@@ -96,30 +97,38 @@ void Hull::open_image()
 
 	if (result == Gtk::RESPONSE_OK) {
 		std::string filename = dialog.get_filename();
-
-		Image<float> *image = ReadPgmImage(&filename);
-		// TODO: check image
-
-		// Adjust UI
-		_ui.layer_action_group->set_sensitive(true);
-		_ui.optical_flow_action_group->set_sensitive(false);
-		_ui.view_action_group->set_sensitive(false);
-		_ui.time_slider->set_sensitive(false);
-		_ui.time_slider->set_range(0, 0);
-
-		// Set default values
-		_current_time = 0;
-		_has_optical_flow_data = false;
-
-		// Replace single image with sequence of the only element for computational uniformity.
-		_sequence = new Sequence<float>(image);
-
-		// Show image
-		update_image_control(_current_time);
-
-		// Notify rig that sequence have been changed.
-		_current_fitting->rig->sequence_changed();
+		load_image(filename);
 	}
+}
+
+
+void Hull::load_image(string filename)
+{
+	Image<float> *image = ReadPgmImage(&filename);
+
+	if (!image) {
+		return;
+	}
+
+	// Adjust UI
+	_ui.layer_action_group->set_sensitive(true);
+	_ui.optical_flow_action_group->set_sensitive(false);
+	_ui.view_action_group->set_sensitive(false);
+	_ui.time_slider->set_sensitive(false);
+	_ui.time_slider->set_range(0, 0);
+
+	// Set default values
+	_current_time = 0;
+	_has_optical_flow_data = false;
+
+	// Replace single image with sequence of the only element for computational uniformity.
+	_sequence = new Sequence<float>(image);
+
+	// Show image
+	update_image_control(_current_time);
+
+	// Notify rig that sequence have been changed.
+	_current_fitting->rig->sequence_changed();
 }
 
 
@@ -136,91 +145,118 @@ void Hull::open_sequence()
 
 	if (result == Gtk::RESPONSE_OK) {
 		std::string sequence_folder = dialog.get_filename();
-		sequence_folder = sequence_folder.append("/");
+		load_sequence(sequence_folder);
+	}
+}
 
-		// Get the list of frame names.
-		Glib::RefPtr<Gio::File> dir = Gio::File::create_for_path(sequence_folder);
-		Glib::RefPtr<Gio::FileEnumerator> child_enumeration = dir->enumerate_children();
-		Glib::RefPtr<Gio::FileInfo> file_info;
-		std::vector<Glib::ustring> file_names;
-		while ((file_info = child_enumeration->next_file()) != NULL)
-		{
-			std::string file_mime_type = file_info->get_content_type();
-			// COMPATIBILITY: first for unix, second for win
-			if (file_mime_type.compare("image/x-portable-graymap") == 0 || file_mime_type.compare(".pgm") == 0) {
-				std::string file_name = file_info->get_name();
-				file_names.push_back(file_name);
-			}
+
+void Hull::load_sequence(string path)
+{
+	path = path.append("/");	//TODO: check if it is needed
+
+	// Get the list of frame names.
+	Glib::RefPtr<Gio::File> dir = Gio::File::create_for_path(path);
+	Glib::RefPtr<Gio::FileEnumerator> child_enumeration = dir->enumerate_children();
+	Glib::RefPtr<Gio::FileInfo> file_info;
+	std::vector<Glib::ustring> file_names;
+	while ((file_info = child_enumeration->next_file()) != NULL)
+	{
+		std::string file_mime_type = file_info->get_content_type();
+		// COMPATIBILITY: first for unix, second for win
+		if (file_mime_type.compare("image/x-portable-graymap") == 0 || file_mime_type.compare(".pgm") == 0) {
+			std::string file_name = file_info->get_name();
+			file_names.push_back(file_name);
 		}
+	}
 
-		if (file_names.size() == 0)
-			return;
+	if (file_names.size() == 0)
+		return;
 
-		// Sort filenames in ascending order using default < operation
-		std::sort(file_names.begin(), file_names.end());
+	// Sort filenames in ascending order using default < operation
+	std::sort(file_names.begin(), file_names.end());
 
-		// Load first frame, that will define width and height for the sequence.
-		std::string first_frame_path = sequence_folder;
-		first_frame_path.append(file_names[0]);
-		Image<float> *first_frame = ReadPgmImage(&first_frame_path);
+	// Load first frame, that will define width and height for the sequence.
+	std::string first_frame_path = path;
+	first_frame_path.append(file_names[0]);
+	Image<float> *first_frame = ReadPgmImage(&first_frame_path);
 
-		// [Re]create sequence instance
-		if (_sequence)
-			delete _sequence;
-		_sequence = new Sequence<float>(first_frame);
+	// [Re]create sequence instance
+	if (_sequence)
+		delete _sequence;
+	_sequence = new Sequence<float>(first_frame);
 
-		// Load the rest frames.
-		for (int i=1; i<file_names.size(); i++) {
-			string frame_path = sequence_folder;
-			frame_path.append(file_names[i]);
-			Image<float> *frame = ReadPgmImage(&frame_path);
-			_sequence->AddFrame(frame);
-		}
+	// Load the rest frames.
+	for (int i=1; i<file_names.size(); i++) {
+		string frame_path = path;
+		frame_path.append(file_names[i]);
+		Image<float> *frame = ReadPgmImage(&frame_path);
+		_sequence->AddFrame(frame);
+	}
 
-		// Set default values
-		_sequence_folder = sequence_folder;
-		_current_time = 0;
-		_has_optical_flow_data = false;
+	// Set default values
+	_sequence_folder = path;
+	_current_time = 0;
+	_has_optical_flow_data = false;
 
-		// Adjust UI
-		_ui.set_view(UI_Container::VIEW_ORIGINAL_IMAGE);
-		_ui.layer_action_group->set_sensitive(true);
-		_ui.optical_flow_action_group->set_sensitive(true);
-		_ui.view_action_group->set_sensitive(true);
-		_ui.time_slider->set_sensitive(true);
-		_ui.time_slider->set_range(0, _sequence->GetTSize() - 1);
-		_ui.time_slider->set_digits(0);
-		std::string optical_flow_file_name = sequence_folder;
-		optical_flow_file_name.append("optical_flow_data");
+	// Adjust UI
+	_ui.set_view(UI_Container::VIEW_ORIGINAL_IMAGE);
+	_ui.layer_action_group->set_sensitive(true);
+	_ui.optical_flow_action_group->set_sensitive(true);
+	_ui.view_action_group->set_sensitive(true);
+	_ui.time_slider->set_sensitive(true);
+	_ui.time_slider->set_range(0, _sequence->GetTSize() - 1);
+	_ui.time_slider->set_digits(0);
+	std::string optical_flow_file_name = path;
+	optical_flow_file_name.append("optical_flow_data");
 
-		OFStatus status = check_optical_flow(optical_flow_file_name, _sequence->GetXSize(), _sequence->GetYSize(), 2 * (_sequence->GetTSize() - 1));
-		bool is_optical_flow_calculated = false;
-		_optical_flow_legacy_format = false;
-		if (status == STATUS_OK) {
+	OFStatus status = check_optical_flow(optical_flow_file_name, _sequence->GetXSize(), _sequence->GetYSize(), 2 * (_sequence->GetTSize() - 1));
+	bool is_optical_flow_calculated = false;
+	_optical_flow_legacy_format = false;
+	if (status == STATUS_OK) {
+		is_optical_flow_calculated = true;
+	} else if (status == STATUS_NOT_VALID) {
+		status = check_optical_flow_legacy(optical_flow_file_name, _sequence->GetXSize(), _sequence->GetYSize(), _sequence->GetTSize());
+		if (status == STATUS_LEGACY_FORMAT) {
+			_optical_flow_legacy_format = true;
 			is_optical_flow_calculated = true;
-		} else if (status == STATUS_NOT_VALID) {
-			status = check_optical_flow_legacy(optical_flow_file_name, _sequence->GetXSize(), _sequence->GetYSize(), _sequence->GetTSize());
-			if (status == STATUS_LEGACY_FORMAT) {
-				_optical_flow_legacy_format = true;
-				is_optical_flow_calculated = true;
-			}
 		}
+	}
 
-		_ui.restore_optical_flow_action->set_sensitive(is_optical_flow_calculated);
-		// NOTE: no auto restore, so menu item could be shaded and motion compensation denied
-		_ui.allow_optical_flow_views(false);
-		_ui.proceed_optical_flow_action->set_sensitive(false);
-		//_ui.motion_compensation_picker->set_sensitive(false); // TODO: ?????
+	_ui.restore_optical_flow_action->set_sensitive(is_optical_flow_calculated);
+	// NOTE: no auto restore, so menu item could be shaded and motion compensation denied
+	_ui.allow_optical_flow_views(false);
+	_ui.proceed_optical_flow_action->set_sensitive(false);
+	//_ui.motion_compensation_picker->set_sensitive(false); // TODO: ?????
 
-		// [Re]set optical flow
-		reset_vector_of_pointers(_forward_optical_flow_list, _sequence->GetTSize() - 1);
-		reset_vector_of_pointers(_backward_optical_flow_list, _sequence->GetTSize() - 1);
+	// [Re]set optical flow
+	reset_vector_of_pointers(_forward_optical_flow_list, _sequence->GetTSize() - 1);
+	reset_vector_of_pointers(_backward_optical_flow_list, _sequence->GetTSize() - 1);
 
-		// Show first frame
-		update_image_control(_current_time);
+	// Show first frame
+	update_image_control(_current_time);
 
-		// Notify rig that sequence have been changed.
-		_current_fitting->rig->sequence_changed();
+	// Notify rig that sequence have been changed.
+	_current_fitting->rig->sequence_changed();
+}
+
+
+// TODO: adapt for Windows also
+void Hull::open_recent()
+{
+	Glib::RefPtr<Gtk::RecentInfo> current = _ui.open_recent_action->get_current_item();
+	string mime_type = current->get_mime_type();
+	string path = current->get_uri();
+
+	if (path.find("file://") != 0) {
+		return;
+	}
+
+	path = path.erase(0, 7);
+
+	if (mime_type.compare("inode/directory") == 0) {
+		load_sequence(path);
+	} else {
+		load_image(path);
 	}
 }
 

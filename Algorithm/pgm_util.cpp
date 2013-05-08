@@ -48,21 +48,24 @@ Image<float>* ReadPgmImage(string *name)
 	/* open file */
 	// COMPATIBILITY: for win 'rb' file mode instead of just 'r'
 	FILE *f = fopen((*name).data(),"rb");
-	if( f == NULL ) exit(1);
+	if( f == NULL ) {
+		return 0;
+	}
 
 	/* read header */
 	bool isBinary = false;
 	int c, x_size,y_size,depth;
 
-	if ( fgetc(f) != 'P' )
-		exit(1);
+	if ( fgetc(f) != 'P' ) {
+		return 0;
+	}
 
 	if( (c=fgetc(f)) == '2' ) {
 		isBinary = false;
 	} else if ( c == '5' ) {
 		isBinary = true;
 	} else {
-		exit(1);
+		return 0;
 	}
 
 	SkipSpacesAndComments(f);
