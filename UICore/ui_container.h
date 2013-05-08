@@ -20,6 +20,7 @@
 #include <gtkmm/label.h>
 #include <gtkmm/recentaction.h>
 #include <gtkmm/recentfilter.h>
+ #include <gtkmm/recentmanager.h>
 #include <gtkmm/toggleaction.h>
 #include <gtkmm/radioaction.h>
 #include <gtkmm/infobar.h>
@@ -230,6 +231,42 @@ public:
 
 		// show all
 		window->show_all_children();
+	}
+
+
+	void add_recent_file(string filename)
+	{
+		Glib::RefPtr<Gtk::RecentManager> recent_manager = Gtk::RecentManager::get_default();
+		
+		Gtk::RecentManager::Data metadata;
+		metadata.display_name = filename.substr(filename.find_last_of('\\') + 1);
+		//metadata.mime_type = "";
+		metadata.app_name = "gd-pd";	// TODO: get app name
+		metadata.is_private = true;
+
+		// TODO: mb replace \\ with /
+		string uri = "file:///";
+		uri.append(filename);
+
+		recent_manager->add_item(uri, metadata);
+	}
+
+
+	void add_recent_folder(string path)
+	{
+		Glib::RefPtr<Gtk::RecentManager> recent_manager = Gtk::RecentManager::get_default();
+		
+		Gtk::RecentManager::Data metadata;
+		metadata.display_name = path.substr(path.find_last_of('\\'/*, path.length - 1*/) + 1);
+		metadata.mime_type = "inode/directory";
+		metadata.app_name = "gd-pd";	// TODO: get app name
+		metadata.is_private = true;
+
+		// TODO: mb replace \\ with /
+		string uri = "file:///";
+		uri.append(path);
+
+		recent_manager->add_item(uri, metadata);
 	}
 
 

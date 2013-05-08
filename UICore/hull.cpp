@@ -98,6 +98,7 @@ void Hull::open_image()
 	if (result == Gtk::RESPONSE_OK) {
 		std::string filename = dialog.get_filename();
 		load_image(filename);
+		_ui.add_recent_file(filename);
 	}
 }
 
@@ -146,6 +147,7 @@ void Hull::open_sequence()
 	if (result == Gtk::RESPONSE_OK) {
 		std::string sequence_folder = dialog.get_filename();
 		load_sequence(sequence_folder);
+		_ui.add_recent_folder(sequence_folder);
 	}
 }
 
@@ -247,15 +249,16 @@ void Hull::open_recent()
 	string mime_type = current->get_mime_type();
 	string path = current->get_uri();
 
-	if (path.find("file://") != 0) {
+	if (path.find("file:///") != 0) {	// WIN: "file:///"; Linux: "file://"
 		return;
 	}
 
-	path = path.erase(0, 7);
+	// TODO: test on Linux
+	path = path.erase(0, 8);
 
-	if (mime_type.compare("inode/directory") == 0) {
+	if (mime_type.compare("inode/directory") == 0) {	// WIN: "application/octet-stream"; Linux: ""
 		load_sequence(path);
-	} else {
+	} else {	// WIN: "application/x-ext-pgm"; Linux: ""
 		load_image(path);
 	}
 }
