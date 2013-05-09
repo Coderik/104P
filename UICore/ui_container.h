@@ -5,6 +5,10 @@
  *      Author: Vadim Fedorov
  */
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
+#define OS_Windows
+#endif
+
 #include <string>
 #include <vector>
 #include <map>
@@ -76,8 +80,9 @@ public:
 		VIEW_BACKWARD_OF_GRAY,
 	};
 
-	void setup_ui(Gtk::Window* window)
+	void setup_ui(Gtk::Window* window, string application_id)
 	{
+		_application_id = application_id;
 		_current_view = VIEW_ORIGINAL_IMAGE;
 
 		// adjust main window
@@ -95,8 +100,8 @@ public:
 		action_group->add(open_sequence_action);
 		open_recent_action = Gtk::RecentAction::create("OpenRecent", "Open Recent");
 		Glib::RefPtr<Gtk::RecentFilter> filter = Gtk::RecentFilter::create();
-		//filter->add_application("gd-pd");
-		//open_recent_action->add_filter(filter);
+		filter->add_application(_application_id);
+		open_recent_action->add_filter(filter);
 		action_group->add(open_recent_action);
 		quit_action = Gtk::Action::create("Quit", Gtk::Stock::QUIT);
 		action_group->add(quit_action);
@@ -236,37 +241,13 @@ public:
 
 	void add_recent_file(string filename)
 	{
-		Glib::RefPtr<Gtk::RecentManager> recent_manager = Gtk::RecentManager::get_default();
-		
-		Gtk::RecentManager::Data metadata;
-		metadata.display_name = filename.substr(filename.find_last_of('\\') + 1);
-		//metadata.mime_type = "";
-		metadata.app_name = "gd-pd";	// TODO: get app name
-		metadata.is_private = true;
-
-		// TODO: mb replace \\ with /
-		string uri = "file:///";
-		uri.append(filename);
-
-		recent_manager->add_item(uri, metadata);
+		add_recent_document_internal(filename, "");
 	}
 
 
 	void add_recent_folder(string path)
 	{
-		Glib::RefPtr<Gtk::RecentManager> recent_manager = Gtk::RecentManager::get_default();
-		
-		Gtk::RecentManager::Data metadata;
-		metadata.display_name = path.substr(path.find_last_of('\\'/*, path.length - 1*/) + 1);
-		metadata.mime_type = "inode/directory";
-		metadata.app_name = "gd-pd";	// TODO: get app name
-		metadata.is_private = true;
-
-		// TODO: mb replace \\ with /
-		string uri = "file:///";
-		uri.append(path);
-
-		recent_manager->add_item(uri, metadata);
+		add_recent_document_internal(path, "inode/directory");
 	}
 
 
@@ -362,6 +343,7 @@ public:
 	}
 
 private:
+	string _application_id;
 	Glib::RefPtr<Gtk::UIManager> _menu_manager;
 	int _fitting_submenu_merge_id;
 	std::map<View, Glib::RefPtr<Gtk::RadioAction> > _view_map;
@@ -370,6 +352,30 @@ private:
 	type_signal_fitting_changed _signal_fitting_changed;
 	View _current_view;
 	Fitting *_current_fitting;
+
+
+	void add_recent_document_internal(string path, string mime_type)
+	{
+		Glib::RefPtr<Gtk::RecentManager> recent_manager = Gtk::RecentManager::get_default();
+		Gtk::RecentManager::Data metadata;
+
+#ifdef OS_Windows
+		int name_pos = path.find_last_of('\\');
+		string uri = "file:///";
+#else
+		int name_pos = path.find_last_of('/');
+		string uri = "file://";
+#endif
+
+		metadata.mime_type = mime_type;
+		metadata.app_name = _application_id;
+		metadata.is_private = true;
+		metadata.display_name = path.substr(name_pos + 1);
+		uri.append(path);
+
+		recent_manager->add_item(uri, metadata);
+	}
+
 
 	void set_view_internal(const Glib::RefPtr<Gtk::RadioAction>& current)
 	{

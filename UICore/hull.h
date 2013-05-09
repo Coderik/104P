@@ -8,6 +8,10 @@
 #ifndef HULL_H_
 #define HULL_H_
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
+#define OS_Windows
+#endif
+
 #include <gtkmm/main.h>
 #include <gtkmm/window.h>
 #include <glibmm/ustring.h>
@@ -47,7 +51,7 @@ using namespace std;
 class Hull : public Gtk::Window, public IHull, public I_Rig_Manager
 {
 public:
-	Hull();
+	Hull(string application_id);
 	virtual ~Hull();
 
 	virtual void add_rig(Rig* rig, std::string display_name);

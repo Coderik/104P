@@ -9,9 +9,9 @@
 
 /* Public */
 
-Hull::Hull()
+Hull::Hull(string application_id)
 {
-	_ui.setup_ui(this);
+	_ui.setup_ui(this, application_id);
 
 	_ui.quit_action->signal_activate().connect( sigc::ptr_fun(&Gtk::Main::quit) );
 	_ui.open_image_action->signal_activate().connect( sigc::mem_fun(*this, &Hull::open_image) );
@@ -242,23 +242,27 @@ void Hull::load_sequence(string path)
 }
 
 
-// TODO: adapt for Windows also
+// TODO: test on Windows again
 void Hull::open_recent()
 {
 	Glib::RefPtr<Gtk::RecentInfo> current = _ui.open_recent_action->get_current_item();
 	string mime_type = current->get_mime_type();
 	string path = current->get_uri();
 
-	if (path.find("file:///") != 0) {	// WIN: "file:///"; Linux: "file://"
+	if (path.find("file:///") != 0) {
 		return;
 	}
 
-	// TODO: test on Linux
-	path = path.erase(0, 8);
+	// remove "file:///" on Windows and "file://" on Linux
+#ifdef OS_Windows
+		path = path.erase(0, 8);	// remove everything prior to disc letter for Windows
+#else
+		path = path.erase(0, 7);	// keep leading '/' for Linux
+#endif
 
-	if (mime_type.compare("inode/directory") == 0) {	// WIN: "application/octet-stream"; Linux: ""
+	if (mime_type.compare("inode/directory") == 0) {	// WIN: "application/octet-stream"; Linux: "inode/directory"
 		load_sequence(path);
-	} else {	// WIN: "application/x-ext-pgm"; Linux: ""
+	} else {											// WIN: "application/x-ext-pgm"; Linux: "image/x-portable-graymap"
 		load_image(path);
 	}
 }
