@@ -5,10 +5,6 @@
  *      Author: Vadim Fedorov
  */
 
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
-#define OS_Windows
-#endif
-
 #include <string>
 #include <vector>
 #include <map>
@@ -24,7 +20,7 @@
 #include <gtkmm/label.h>
 #include <gtkmm/recentaction.h>
 #include <gtkmm/recentfilter.h>
- #include <gtkmm/recentmanager.h>
+#include <gtkmm/recentmanager.h>
 #include <gtkmm/toggleaction.h>
 #include <gtkmm/radioaction.h>
 #include <gtkmm/infobar.h>
@@ -359,19 +355,12 @@ private:
 		Glib::RefPtr<Gtk::RecentManager> recent_manager = Gtk::RecentManager::get_default();
 		Gtk::RecentManager::Data metadata;
 
-#ifdef OS_Windows
-		int name_pos = path.find_last_of('\\');
-		string uri = "file:///";
-#else
-		int name_pos = path.find_last_of('/');
-		string uri = "file://";
-#endif
+		string uri = Glib::filename_to_uri(path);
 
-		metadata.mime_type = mime_type;
+		metadata.display_name = Glib::filename_display_basename(path);
+		metadata.mime_type = mime_type;		// NOTE: it seems that on Windows this mime type is ignored
 		metadata.app_name = _application_id;
 		metadata.is_private = true;
-		metadata.display_name = path.substr(name_pos + 1);
-		uri.append(path);
 
 		recent_manager->add_item(uri, metadata);
 	}

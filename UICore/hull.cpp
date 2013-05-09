@@ -242,28 +242,17 @@ void Hull::load_sequence(string path)
 }
 
 
-// TODO: test on Windows again
 void Hull::open_recent()
 {
 	Glib::RefPtr<Gtk::RecentInfo> current = _ui.open_recent_action->get_current_item();
 	string mime_type = current->get_mime_type();
-	string path = current->get_uri();
+	string uri = current->get_uri();
+	string path = Glib::filename_from_uri(uri);
 
-	if (path.find("file:///") != 0) {
-		return;
-	}
-
-	// remove "file:///" on Windows and "file://" on Linux
-#ifdef OS_Windows
-		path = path.erase(0, 8);	// remove everything prior to disc letter for Windows
-#else
-		path = path.erase(0, 7);	// keep leading '/' for Linux
-#endif
-
-	if (mime_type.compare("inode/directory") == 0) {	// WIN: "application/octet-stream"; Linux: "inode/directory"
-		load_sequence(path);
-	} else {											// WIN: "application/x-ext-pgm"; Linux: "image/x-portable-graymap"
-		load_image(path);
+	if (mime_type.compare("application/x-ext-pgm") == 0 || mime_type.compare("image/x-portable-graymap") == 0) {	
+		load_image(path);		// WIN: "application/x-ext-pgm"; Linux: "image/x-portable-graymap"
+	} else {
+		load_sequence(path);	// WIN: "application/octet-stream"; Linux: "inode/directory"
 	}
 }
 

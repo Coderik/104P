@@ -18,6 +18,7 @@
 #include <gtkmm/filechooserdialog.h>
 #include <giomm/file.h>
 #include <glibmm/dispatcher.h>
+#include <glibmm.h>
 #include <gtkmm/radioaction.h>
 #include <glibmm/threads.h>
 #include <gdk/gdkkeysyms.h>
