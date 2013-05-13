@@ -108,8 +108,8 @@ void WritePgmImage(string *name, Image<float> *image)
 	putc('5', f);
 
 	/* write attributes */
-	int x_size = image->GetXSize();
-	int y_size = image->GetYSize();
+	int x_size = image->get_size_x();
+	int y_size = image->get_size_y();
 	fprintf(f, "\n%d %d\n%d\n", x_size, y_size, 255);
 
 	/* write data */

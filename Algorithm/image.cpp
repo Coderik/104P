@@ -71,7 +71,7 @@ T Image<T>::get_value(int x, int y) const
 		return T();
 	}
 
-	return _points[GetIndex(x,y)];
+	return _points[get_index(x,y)];
 }
 
 
@@ -82,7 +82,7 @@ bool Image<T>::try_get_value(int x, int y, T& value) const
 		return false;
 	}
 
-	value = _points[GetIndex(x,y)];
+	value = _points[get_index(x,y)];
 	return true;
 }
 
@@ -94,7 +94,7 @@ void Image<T>::set_value(int x, int y, T value)
 		return;
 	}
 
-	_points[GetIndex(x,y)] = value;
+	_points[get_index(x,y)] = value;
 }
 
 
@@ -106,14 +106,14 @@ void Image<T>::fill(T value)
 
 
 template <class T>
-int Image<T>::GetXSize() const
+int Image<T>::get_size_x() const
 {
 	return _x_size;
 }
 
 
 template <class T>
-int Image<T>::GetYSize() const
+int Image<T>::get_size_y() const
 {
 	return _y_size;
 }
@@ -141,7 +141,7 @@ Point Image<T>::get_coordinates()
 
 
 template <class T>
-Image<T>* Image<T>::GetPatchBetweenPoints(int a_x, int a_y, int b_x, int b_y)
+Image<T>* Image<T>::get_patch_between_points(int a_x, int a_y, int b_x, int b_y)
 {
 	// /* ensure that points lie inside the image */
 	// a_x = std::max(std::min(a_x, _x_size - 1), 0);
@@ -159,20 +159,20 @@ Image<T>* Image<T>::GetPatchBetweenPoints(int a_x, int a_y, int b_x, int b_y)
 		return 0;
 	}
 
-	return GetPatchInternal(a_x, a_y, b_x, b_y);
+	return get_patch_internal(a_x, a_y, b_x, b_y);
 }
 
 
 template <class T>
-Image<T>* Image<T>::GetPatchArountPoint(int center_x, int center_y, int x_size, int y_size)
+Image<T>* Image<T>::get_patch_around_point(int center_x, int center_y, int x_size, int y_size)
 {
 	if (x_size <= 0 || y_size <= 0) {
 		return 0;
 	}
 
 	// force 'x_size' and 'y_size' to be odd
-	if (!IsOddNumber(x_size)) x_size--;
-	if (!IsOddNumber(y_size)) y_size--;
+	if (!is_odd_number(x_size)) x_size--;
+	if (!is_odd_number(y_size)) y_size--;
 
 	// calculate left-top and bottom-right points of the patch
 	int x_offset = x_size / 2;
@@ -188,19 +188,19 @@ Image<T>* Image<T>::GetPatchArountPoint(int center_x, int center_y, int x_size, 
 		return 0;
 	}
 
-	return GetPatchInternal(a_x, a_y, b_x, b_y);
+	return get_patch_internal(a_x, a_y, b_x, b_y);
 }
 
 
 template <class T>
-Image<T>* Image<T>::GetPatchArountPoint(int center_x, int center_y, int size)
+Image<T>* Image<T>::get_patch_around_point(int center_x, int center_y, int size)
 {
-	return GetPatchArountPoint(center_x, center_y, size, size);
+	return get_patch_around_point(center_x, center_y, size, size);
 }
 
 
 template <class T>
-int Image<T>::GetRawDataLength()
+int Image<T>::get_raw_data_length()
 {
 	return _x_size * _y_size;
 }
@@ -210,7 +210,7 @@ int Image<T>::GetRawDataLength()
  * Returns pointer to internal raw data representation.
  */
  template <class T>
-T* Image<T>::GetRawData()
+T* Image<T>::get_raw_data()
 {
 	return _points;
 }
@@ -218,20 +218,20 @@ T* Image<T>::GetRawData()
 
 /* private */
 template <class T>
-inline int Image<T>::GetIndex(int x, int y) const
+inline int Image<T>::get_index(int x, int y) const
 {
 	return _x_size * y + x;
 }
 
 
 template <class T>
-inline bool Image<T>::IsOddNumber(int number)
+inline bool Image<T>::is_odd_number(int number)
 {
 	return number % 2 == 1;
 }
 
 template <class T>
-Image<T>* Image<T>::GetPatchInternal(int a_x, int a_y, int b_x, int b_y)
+Image<T>* Image<T>::get_patch_internal(int a_x, int a_y, int b_x, int b_y)
 {
 	int x_size = b_x - a_x + 1;
 	int y_size = b_y - a_y + 1;

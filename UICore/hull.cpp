@@ -192,7 +192,7 @@ void Hull::load_sequence(string path)
 		string frame_path = path;
 		frame_path.append(file_names[i]);
 		Image<float> *frame = ReadPgmImage(&frame_path);
-		_sequence->AddFrame(frame);
+		_sequence->add_frame(frame);
 	}
 
 	// Set default values
@@ -206,18 +206,18 @@ void Hull::load_sequence(string path)
 	_ui.optical_flow_action_group->set_sensitive(true);
 	_ui.view_action_group->set_sensitive(true);
 	_ui.time_slider->set_sensitive(true);
-	_ui.time_slider->set_range(0, _sequence->GetTSize() - 1);
+	_ui.time_slider->set_range(0, _sequence->get_size_t() - 1);
 	_ui.time_slider->set_digits(0);
 	std::string optical_flow_file_name = path;
 	optical_flow_file_name.append("optical_flow_data");
 
-	OFStatus status = check_optical_flow(optical_flow_file_name, _sequence->GetXSize(), _sequence->GetYSize(), 2 * (_sequence->GetTSize() - 1));
+	OFStatus status = check_optical_flow(optical_flow_file_name, _sequence->get_size_x(), _sequence->get_size_y(), 2 * (_sequence->get_size_t() - 1));
 	bool is_optical_flow_calculated = false;
 	_optical_flow_legacy_format = false;
 	if (status == STATUS_OK) {
 		is_optical_flow_calculated = true;
 	} else if (status == STATUS_NOT_VALID) {
-		status = check_optical_flow_legacy(optical_flow_file_name, _sequence->GetXSize(), _sequence->GetYSize(), _sequence->GetTSize());
+		status = check_optical_flow_legacy(optical_flow_file_name, _sequence->get_size_x(), _sequence->get_size_y(), _sequence->get_size_t());
 		if (status == STATUS_LEGACY_FORMAT) {
 			_optical_flow_legacy_format = true;
 			is_optical_flow_calculated = true;
@@ -231,8 +231,8 @@ void Hull::load_sequence(string path)
 	//_ui.motion_compensation_picker->set_sensitive(false); // TODO: ?????
 
 	// [Re]set optical flow
-	reset_vector_of_pointers(_forward_optical_flow_list, _sequence->GetTSize() - 1);
-	reset_vector_of_pointers(_backward_optical_flow_list, _sequence->GetTSize() - 1);
+	reset_vector_of_pointers(_forward_optical_flow_list, _sequence->get_size_t() - 1);
+	reset_vector_of_pointers(_backward_optical_flow_list, _sequence->get_size_t() - 1);
 
 	// Show first frame
 	update_image_control(_current_time);
@@ -240,8 +240,8 @@ void Hull::load_sequence(string path)
 	// Notify rig that sequence have been changed.
 	_current_fitting->rig->sequence_changed();
 }
-
-
+	
+	
 void Hull::open_recent()
 {
 	Glib::RefPtr<Gtk::RecentInfo> current = _ui.open_recent_action->get_current_item();
@@ -391,7 +391,7 @@ void Hull::store_optical_flow(OpticalFlowContainer &flow, int index)
 	std::string file_name = _sequence_folder;
 	file_name.append("optical_flow_data");
 
-	int chunks_count = 2 * (_sequence->GetTSize() - 1);
+	int chunks_count = 2 * (_sequence->get_size_t() - 1);
 
 	update_or_overwrite_flow(file_name, flow, index, chunks_count);
 }
@@ -425,7 +425,7 @@ void Hull::restore_optical_flow()
 			has_some_data = true;
 
 			// Save data in up to date format
-			int chunks_count = 2 * (_sequence->GetTSize() - 1);
+			int chunks_count = 2 * (_sequence->get_size_t() - 1);
 			int i = 0;
 			for(it = _forward_optical_flow_list.begin(); it != _forward_optical_flow_list.end(); ++it, i++) {
 				OpticalFlowContainer *flow = *it;
@@ -529,8 +529,8 @@ Glib::RefPtr<Gdk::Pixbuf> Hull::wrap_raw_image_data(Image<float> *image)
 {
 	const int BITS_PER_CHANNEL = 8;
 
-	int x_size = image->GetXSize();
-	int y_size = image->GetYSize();
+	int x_size = image->get_size_x();
+	int y_size = image->get_size_y();
 
 	Glib::RefPtr<Gdk::Pixbuf> buffer = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, false, BITS_PER_CHANNEL, x_size, y_size);
 	int rowstride = buffer->get_rowstride();	// get internal row length
@@ -561,14 +561,14 @@ void Hull::update_image_control(int current_time)
 	Glib::RefPtr<Gdk::Pixbuf> buffer;
 
 	if (view == UI_Container::VIEW_ORIGINAL_IMAGE) {
-		buffer = wrap_raw_image_data(_sequence->GetFrame(current_time));
+		buffer = wrap_raw_image_data(_sequence->get_frame(current_time));
 	} else if (view == UI_Container::VIEW_FORWARD_OF_COLOR) {
 		if ((unsigned)current_time < _forward_optical_flow_list.size() &&
 				_forward_optical_flow_list[current_time] &&
 				_forward_optical_flow_list[current_time]->contains_data()) {
 			buffer = static_cast<OpticalFlow*>(_forward_optical_flow_list[current_time])->get_color_code_view();
 		} else {
-			buffer = create_empty_pixbuf(_sequence->GetXSize(), _sequence->GetYSize());
+			buffer = create_empty_pixbuf(_sequence->get_size_x(), _sequence->get_size_y());
 		}
 	} else if (view == UI_Container::VIEW_FORWARD_OF_GRAY) {
 		if ((unsigned)current_time < _forward_optical_flow_list.size() &&
@@ -576,7 +576,7 @@ void Hull::update_image_control(int current_time)
 				_forward_optical_flow_list[current_time]->contains_data()) {
 			buffer = static_cast<OpticalFlow*>(_forward_optical_flow_list[current_time])->get_magnitudes_view();
 		} else {
-			buffer = create_empty_pixbuf(_sequence->GetXSize(), _sequence->GetYSize());
+			buffer = create_empty_pixbuf(_sequence->get_size_x(), _sequence->get_size_y());
 		}
 	} else if (view == UI_Container::VIEW_BACKWARD_OF_COLOR) {
 		if (current_time > 0 &&
@@ -585,7 +585,7 @@ void Hull::update_image_control(int current_time)
 				_backward_optical_flow_list[current_time - 1]->contains_data()) {
 			buffer = static_cast<OpticalFlow*>(_backward_optical_flow_list[current_time - 1])->get_color_code_view();
 		} else {
-			buffer = create_empty_pixbuf(_sequence->GetXSize(), _sequence->GetYSize());
+			buffer = create_empty_pixbuf(_sequence->get_size_x(), _sequence->get_size_y());
 		}
 	} else if (view == UI_Container::VIEW_BACKWARD_OF_GRAY) {
 		if (current_time > 0 &&
@@ -594,7 +594,7 @@ void Hull::update_image_control(int current_time)
 				_backward_optical_flow_list[current_time - 1]->contains_data()) {
 			buffer = static_cast<OpticalFlow*>(_backward_optical_flow_list[current_time - 1])->get_magnitudes_view();
 		} else {
-			buffer = create_empty_pixbuf(_sequence->GetXSize(), _sequence->GetYSize());
+			buffer = create_empty_pixbuf(_sequence->get_size_x(), _sequence->get_size_y());
 		}
 	}
 
@@ -642,7 +642,7 @@ void Hull::begin_optical_flow_calculation_internal(std::vector<int> task_list)
 
 	_aux_stop_background_work_flag = false;
 	_progress_counter = 0;
-	_progress_total = task_list.size() != 0 ? task_list.size() : 2 * (_sequence->GetTSize() - 1);
+	_progress_total = task_list.size() != 0 ? task_list.size() : 2 * (_sequence->get_size_t() - 1);
 
 	try
 	{
@@ -680,8 +680,8 @@ void Hull::end_calculate_optical_flow()
 
 void Hull::take_optical_flow_frame()
 {
-	int size_x = _sequence->GetXSize();
-	int size_y = _sequence->GetYSize();
+	int size_x = _sequence->get_size_x();
+	int size_y = _sequence->get_size_y();
 	int index;
 	float *optical_flow_x, *optical_flow_y;
 
@@ -768,9 +768,9 @@ void Hull::calculate_optical_flow(std::vector<int> task_list)
 	Zach_TVL1_OpticalFlow* opticalFlow = new Zach_TVL1_OpticalFlow(false);
 	opticalFlow->set_watchdog(watchdog);
 
-	int x_size = _sequence->GetXSize();
-	int y_size = _sequence->GetYSize();
-	int frame_count = _sequence->GetTSize();
+	int x_size = _sequence->get_size_x();
+	int y_size = _sequence->get_size_y();
+	int frame_count = _sequence->get_size_t();
 
 	// Fill task list, if empty
 	if (task_list.size() == 0) {
@@ -788,8 +788,8 @@ void Hull::calculate_optical_flow(std::vector<int> task_list)
 		// Get frames data
 		int first_index = std::abs(*it);
 		int second_index = (*it >= 0)? first_index + 1 : first_index - 1;
-		float* first_frame_data = _sequence->GetFrame(first_index)->GetRawData();
-		float* second_frame_data = _sequence->GetFrame(second_index)->GetRawData();
+		float* first_frame_data = _sequence->get_frame(first_index)->get_raw_data();
+		float* second_frame_data = _sequence->get_frame(second_index)->get_raw_data();
 
 		// Allocate memory for the flow
 		float *u1 = new float[x_size * y_size];

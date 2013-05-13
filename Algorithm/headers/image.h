@@ -22,8 +22,8 @@ public:
 	Image(Image &source);
 	~Image();
 
-	int GetXSize() const;
-	int GetYSize() const;
+	int get_size_x() const;
+	int get_size_y() const;
 	Shape get_size() const;
 	void set_coordinates(Point coordinates);
 	Point get_coordinates();
@@ -31,18 +31,18 @@ public:
 	bool try_get_value(int x, int y, T& value) const;
 	void set_value(int x, int y, T value);
 	void fill(T value);
-	Image<T>* GetPatchBetweenPoints(int a_x, int a_y, int b_x, int b_y);
-	Image<T>* GetPatchArountPoint(int center_x, int center_y, int x_size, int y_size);
-	Image<T>* GetPatchArountPoint(int center_x, int center_y, int size);
-	int GetRawDataLength();
-	T* GetRawData();
+	Image<T>* get_patch_between_points(int a_x, int a_y, int b_x, int b_y);
+	Image<T>* get_patch_around_point(int center_x, int center_y, int x_size, int y_size);
+	Image<T>* get_patch_around_point(int center_x, int center_y, int size);
+	int get_raw_data_length();
+	T* get_raw_data();
 protected:
 	int _x_size, _y_size;
 	T *_points;
 	Point _coordinates;
-	inline int GetIndex(int x, int y) const;
-	inline bool IsOddNumber(int number);
-	Image<T>* GetPatchInternal(int a_x, int a_y, int b_x, int b_y);
+	inline int get_index(int x, int y) const;
+	inline bool is_odd_number(int number);
+	Image<T>* get_patch_internal(int a_x, int a_y, int b_x, int b_y);
 };
 
 // NOTE: include implementation, because Image is a template

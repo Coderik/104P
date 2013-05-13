@@ -45,8 +45,8 @@ Sequence<T>::Sequence(int x_size,int y_size)
 template <class T>
 Sequence<T>::Sequence(Image<T> *first_frame)
 {
-	_x_size = first_frame->GetXSize();
-	_y_size = first_frame->GetYSize();
+	_x_size = first_frame->get_size_x();
+	_y_size = first_frame->get_size_y();
 	_t_size = 1;
 
 	_frames = vector<Image<T>* >(1, first_frame);
@@ -55,13 +55,13 @@ Sequence<T>::Sequence(Image<T> *first_frame)
 template <class T>
 Sequence<T>::Sequence(Sequence<T>& source)
 {
-	_x_size = source.GetXSize();
-	_y_size = source.GetYSize();
-	_t_size = source.GetTSize();
+	_x_size = source.get_size_x();
+	_y_size = source.get_size_y();
+	_t_size = source.get_size_t();
 
 	_frames = vector<Image<T>* >(_t_size);
 	for (int i = 0; i < _t_size; i++) {
-		Image<T> *frame = source.GetFrame(i);
+		Image<T> *frame = source.get_frame(i);
 		if (frame) {
 			_frames[i] = new Image<T>(*frame);
 		}
@@ -78,21 +78,21 @@ Sequence<T>::~Sequence()
 
 
 template <class T>
-int Sequence<T>::GetXSize()
+int Sequence<T>::get_size_x()
 {
 	return _x_size;
 }
 
 
 template <class T>
-int Sequence<T>::GetYSize()
+int Sequence<T>::get_size_y()
 {
 	return _y_size;
 }
 
 
 template <class T>
-int Sequence<T>::GetTSize()
+int Sequence<T>::get_size_t()
 {
 	return _t_size;
 }
@@ -170,7 +170,7 @@ void Sequence<T>::fill(T value)
 
 
 template <class T>
-Image<T>* Sequence<T>::GetFrame(int t)
+Image<T>* Sequence<T>::get_frame(int t)
 {
 	if (t < 0 || t >= _t_size)
 		return 0;
@@ -180,14 +180,14 @@ Image<T>* Sequence<T>::GetFrame(int t)
 
 
 template <class T>
-bool Sequence<T>::SetFrame(int t, Image<T> *frame)
+bool Sequence<T>::set_frame(int t, Image<T> *frame)
 {
 	if (t < 0 || t >= _t_size)
 		return false;
 
 	if (frame && (
-			_x_size != frame->GetXSize() ||
-			_y_size != frame->GetYSize() ))
+			_x_size != frame->get_size_x() ||
+			_y_size != frame->get_size_y() ))
 		return false;
 
 	_frames[t] = frame;
@@ -196,11 +196,11 @@ bool Sequence<T>::SetFrame(int t, Image<T> *frame)
 
 
 template <class T>
-bool Sequence<T>::AddFrame(Image<T> *frame)
+bool Sequence<T>::add_frame(Image<T> *frame)
 {
 	if (frame && (
-			_x_size != frame->GetXSize() ||
-			_y_size != frame->GetYSize() ))
+			_x_size != frame->get_size_x() ||
+			_y_size != frame->get_size_y() ))
 		return false;
 
 	_frames.push_back(frame);
@@ -210,7 +210,7 @@ bool Sequence<T>::AddFrame(Image<T> *frame)
 
 
 template <class T>
-int Sequence<T>::DropEmptyFrames()
+int Sequence<T>::drop_empty_frames()
 {
 	// TODO: check
 	typename vector<Image<T>* >::iterator i = _frames.begin();
@@ -229,7 +229,7 @@ int Sequence<T>::DropEmptyFrames()
 
 
 template <class T>
-Sequence<T>* Sequence<T>::GetPatchBetweenPoints(int a_x, int a_y, int a_t, int b_x, int b_y, int b_t)
+Sequence<T>* Sequence<T>::get_patch_between_points(int a_x, int a_y, int a_t, int b_x, int b_y, int b_t)
 {
 	if (a_x > b_x || a_y > b_y || a_t > b_t) {
 		return 0;
@@ -242,35 +242,35 @@ Sequence<T>* Sequence<T>::GetPatchBetweenPoints(int a_x, int a_y, int a_t, int b
 		return 0;
 	}
 
-	return GetPatchInternal(a_x, a_y, a_t, b_x, b_y, b_t);
+	return get_patch_internal(a_x, a_y, a_t, b_x, b_y, b_t);
 }
 
 
 template <class T>
-Sequence<T>* Sequence<T>::GetPatchArountPoint(int center_x, int center_y, int center_t, int size)
+Sequence<T>* Sequence<T>::get_patch_around_point(int center_x, int center_y, int center_t, int size)
 {
-	return GetPatchArountPoint(center_x, center_y, center_t, size, size, size);
+	return get_patch_around_point(center_x, center_y, center_t, size, size, size);
 }
 
 
 template <class T>
-Sequence<T>* Sequence<T>::GetPatchArountPoint(int center_x, int center_y, int center_t, int frame_size, int t_size)
+Sequence<T>* Sequence<T>::get_patch_around_point(int center_x, int center_y, int center_t, int frame_size, int t_size)
 {
-	return GetPatchArountPoint(center_x, center_y, center_t, frame_size, frame_size, t_size);
+	return get_patch_around_point(center_x, center_y, center_t, frame_size, frame_size, t_size);
 }
 
 
 template <class T>
-Sequence<T>* Sequence<T>::GetPatchArountPoint(int center_x, int center_y, int center_t, int x_size, int y_size, int t_size)
+Sequence<T>* Sequence<T>::get_patch_around_point(int center_x, int center_y, int center_t, int x_size, int y_size, int t_size)
 {
 	if (x_size <= 0 || y_size <= 0 || t_size <= 0) {
 		return 0;
 	}
 
 	// force 'x_size', 'y_size' and 't_size' to be odd
-	if (!IsOddNumber(x_size)) x_size--;
-	if (!IsOddNumber(y_size)) y_size--;
-	if (!IsOddNumber(t_size)) t_size--;
+	if (!is_odd_number(x_size)) x_size--;
+	if (!is_odd_number(y_size)) y_size--;
+	if (!is_odd_number(t_size)) t_size--;
 
 	// calculate left-top and bottom-right points of the patch
 	int x_offset = x_size / 2;
@@ -290,13 +290,13 @@ Sequence<T>* Sequence<T>::GetPatchArountPoint(int center_x, int center_y, int ce
 		return 0;
 	}
 
-	return GetPatchInternal(a_x, a_y, a_t, b_x, b_y, b_t);
+	return get_patch_internal(a_x, a_y, a_t, b_x, b_y, b_t);
 }
 
 
 /* private */
 template <class T>
-Sequence<T>* Sequence<T>::GetPatchInternal(int a_x, int a_y, int a_t, int b_x, int b_y, int b_t)
+Sequence<T>* Sequence<T>::get_patch_internal(int a_x, int a_y, int a_t, int b_x, int b_y, int b_t)
 {
 	int x_size = b_x - a_x + 1;
 	int y_size = b_y - a_y + 1;
@@ -307,8 +307,8 @@ Sequence<T>* Sequence<T>::GetPatchInternal(int a_x, int a_y, int a_t, int b_x, i
 	for (int t = 0; t < t_size; t++) {
 		Image<T>* frame = _frames[a_t + t];
 		if (frame != 0) {
-			Image<T>* frame_patch = frame->GetPatchBetweenPoints(a_x, a_y, b_x, b_y);
-			patch->SetFrame(t, frame_patch);
+			Image<T>* frame_patch = frame->get_patch_between_points(a_x, a_y, b_x, b_y);
+			patch->set_frame(t, frame_patch);
 		}
 	}
 
@@ -319,7 +319,7 @@ Sequence<T>* Sequence<T>::GetPatchInternal(int a_x, int a_y, int a_t, int b_x, i
 
 
 template <class T>
-inline bool Sequence<T>::IsOddNumber(int number)
+inline bool Sequence<T>::is_odd_number(int number)
 {
 	return number % 2 == 1;
 }
