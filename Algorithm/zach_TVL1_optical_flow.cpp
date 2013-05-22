@@ -12,8 +12,8 @@
 Zach_TVL1_OpticalFlow::Zach_TVL1_OpticalFlow(bool fake)
 {
 	_tau = 0.25;
-	_lambda = 0.3;
-	_tita = 0.15;
+	_lambda = 0.15;	//0.3
+	_tita = 0.3;	//0.15
 	_nscales = 5;
 	_zoom_factor = 0.5;
 	_nwarps = 10;
