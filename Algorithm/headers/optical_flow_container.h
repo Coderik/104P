@@ -12,7 +12,7 @@ class OpticalFlowContainer
 {
 public:
 	OpticalFlowContainer();
-	~OpticalFlowContainer();
+	virtual ~OpticalFlowContainer();
 
 	float* get_flow_x();
 	float* get_flow_y();

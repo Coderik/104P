@@ -7,18 +7,18 @@
 
 #include "selectable_image.h"
 
-Selectable_Image::Selectable_Image()
+SelectableImage::SelectableImage()
 {
 	add_events(Gdk::BUTTON_PRESS_MASK);
 	add_events(Gdk::BUTTON_RELEASE_MASK);
 	add_events(Gdk::BUTTON1_MOTION_MASK);
-	_layer_manager = (Layer_Manager*)0;
+	_layer_manager = (LayerManager*)0;
 
 	// Create context menu.
 	Glib::RefPtr<Gtk::ActionGroup> action_group = Gtk::ActionGroup::create();
 	action_group->add(Gtk::Action::create("ContextMenu", "Context Menu"));
 	action_group->add(Gtk::Action::create("SaveAction", "Save To PNG"),
-						sigc::mem_fun(*this, &Selectable_Image::save_content ));
+						sigc::mem_fun(*this, &SelectableImage::save_content ));
 
 	_menu_manager = Gtk::UIManager::create();
 	_menu_manager->insert_action_group(action_group);
@@ -36,13 +36,13 @@ Selectable_Image::Selectable_Image()
 }
 
 
-Selectable_Image::~Selectable_Image()
+SelectableImage::~SelectableImage()
 {
 
 }
 
 
-void Selectable_Image::set_pixbuf(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf)
+void SelectableImage::set_pixbuf(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf)
 {
 	_pixbuf = pixbuf;
 
@@ -55,7 +55,7 @@ void Selectable_Image::set_pixbuf(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf)
 }
 
 
-void Selectable_Image::set_layer_manager(Layer_Manager *layer_manager)
+void SelectableImage::set_layer_manager(LayerManager *layer_manager)
 {
 	if (_connection_layer_manager_signal_layer_changed.connected()) {
 		_connection_layer_manager_signal_layer_changed.disconnect();
@@ -63,20 +63,20 @@ void Selectable_Image::set_layer_manager(Layer_Manager *layer_manager)
 
 	_layer_manager = layer_manager;
 	_connection_layer_manager_signal_layer_changed =
-			_layer_manager->signal_layer_changed().connect( sigc::mem_fun(*this, &Selectable_Image::queue_draw) );
+			_layer_manager->signal_layer_changed().connect( sigc::mem_fun(*this, &SelectableImage::queue_draw) );
 }
 
-void Selectable_Image::drop_layer_manager()
+void SelectableImage::drop_layer_manager()
 {
 	if (_connection_layer_manager_signal_layer_changed.connected()) {
 		_connection_layer_manager_signal_layer_changed.disconnect();
 	}
 
-	_layer_manager = static_cast<Layer_Manager* >(0);
+	_layer_manager = static_cast<LayerManager* >(0);
 }
 
 
-void Selectable_Image::save_content()
+void SelectableImage::save_content()
 {
 	Gtk::FileChooserDialog dialog("Saving content as image...", Gtk::FILE_CHOOSER_ACTION_SAVE);
 	Gtk::Window *root_window = static_cast<Gtk::Window* >( this->get_toplevel() );
@@ -104,7 +104,7 @@ void Selectable_Image::save_content()
 
 /* protected */
 
-bool Selectable_Image::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
+bool SelectableImage::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 {
 	if (!_pixbuf)
 		return false;
@@ -132,7 +132,7 @@ bool Selectable_Image::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 	return true;
 }
 
-bool Selectable_Image::on_button_press_event(GdkEventButton *event)
+bool SelectableImage::on_button_press_event(GdkEventButton *event)
 {
 	if (event->type == GDK_BUTTON_PRESS && event->button == 1) {
 		// Left mouse button: select point.
@@ -164,7 +164,7 @@ bool Selectable_Image::on_button_press_event(GdkEventButton *event)
 	return false;
 }
 
-bool Selectable_Image::on_button_release_event(GdkEventButton *event)
+bool SelectableImage::on_button_release_event(GdkEventButton *event)
 {
 	if (event->type == GDK_BUTTON_RELEASE && event->button == 1) {
 		// Left mouse button.
@@ -190,7 +190,7 @@ bool Selectable_Image::on_button_release_event(GdkEventButton *event)
 }
 
 
-bool Selectable_Image::on_motion_notify_event(GdkEventMotion *event)
+bool SelectableImage::on_motion_notify_event(GdkEventMotion *event)
 {
 	if (event->type == GDK_MOTION_NOTIFY) {
 		Gtk::Allocation allocation = get_allocation();
@@ -217,7 +217,7 @@ bool Selectable_Image::on_motion_notify_event(GdkEventMotion *event)
 /* private */
 
 
-void Selectable_Image::save_content_internal(const string& filename)
+void SelectableImage::save_content_internal(const string& filename)
 {
 	// TODO: add '.png' extension if absent
 	// TODO: crop to the actually used area

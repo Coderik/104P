@@ -20,13 +20,13 @@
 #include <sigc++/sigc++.h>
 #include "layer_manager.h"
 
-class Selectable_Image: public Gtk::DrawingArea
+class SelectableImage: public Gtk::DrawingArea
 {
 public:
-	Selectable_Image();
-	virtual ~Selectable_Image();
+	SelectableImage();
+	virtual ~SelectableImage();
 	void set_pixbuf(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf);
-	void set_layer_manager(Layer_Manager *layer_manager);
+	void set_layer_manager(LayerManager *layer_manager);
 	void drop_layer_manager();
 
 	void save_content();
@@ -61,7 +61,7 @@ private:
 	type_mouse_signal _signal_left_button_pressed;
 	type_mouse_signal _signal_left_button_released;
 	type_mouse_signal _signal_left_button_drag;
-	Layer_Manager *_layer_manager;
+	LayerManager *_layer_manager;
 	sigc::connection _connection_layer_manager_signal_layer_changed;
 	Glib::RefPtr<Gtk::UIManager> _menu_manager;
 	Gtk::Menu *_context_menu;

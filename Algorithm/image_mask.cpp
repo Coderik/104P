@@ -7,77 +7,77 @@
 
 #include "headers/image_mask.h"
 
-Image_Mask::Image_Mask()
+ImageMask::ImageMask()
 	: Image<bool>()
 {
 
 }
 
 
-Image_Mask::Image_Mask(int x_size,int y_size)
+ImageMask::ImageMask(int x_size,int y_size)
 	: Image<bool>(x_size, y_size, false)
 {
 
 }
 
 
-Image_Mask::Image_Mask(int x_size,int y_size, bool value)
+ImageMask::ImageMask(int x_size,int y_size, bool value)
 	: Image<bool>(x_size, y_size, value)
 {
 
 }
 
 
-Image_Mask::Image_Mask(Image_Mask &source)
+ImageMask::ImageMask(ImageMask &source)
 	: Image<bool>(source)
 {
 
 }
 
 
-Image_Mask::~Image_Mask()
+ImageMask::~ImageMask()
 {
 
 }
 
 
-Image_Mask::iterator Image_Mask::begin()
+ImageMask::iterator ImageMask::begin()
 {
 	return iterator(this, first());
 }
 
 
-Image_Mask::iterator Image_Mask::end()
+ImageMask::iterator ImageMask::end()
 {
 	return iterator(this, Point(-1, -1, -1));
 }
 
 
-Image_Mask::iterator Image_Mask::rbegin()
+ImageMask::iterator ImageMask::rbegin()
 {
 	return iterator(this, last());
 }
 
 
-Image_Mask::iterator Image_Mask::rend()
+ImageMask::iterator ImageMask::rend()
 {
 	return iterator(this, Point(-1, -1, -1));
 }
 
 
-void Image_Mask::mask(int x, int y)
+void ImageMask::mask(int x, int y)
 {
 	set_value(x, y, true);
 }
 
 
-void Image_Mask::unmask(int x, int y)
+void ImageMask::unmask(int x, int y)
 {
 	set_value(x, y, false);
 }
 
 
-void Image_Mask::invert()
+void ImageMask::invert()
 {
 	// TODO: may be move to specialization Image<bool>
 	for (int y = 0; y < _y_size; y++) {
@@ -90,7 +90,7 @@ void Image_Mask::invert()
 
 /* I_Iterable_Mask methods */
 // TODO: optimize
-Point Image_Mask::first()
+Point ImageMask::first()
 {
 	for (int y = 0; y < _y_size; y++) {
 		for (int x = 0; x < _x_size; x++) {
@@ -104,7 +104,7 @@ Point Image_Mask::first()
 }
 
 
-Point Image_Mask::last()
+Point ImageMask::last()
 {
 	for (int y = _y_size - 1; y >= 0; y--) {
 		for (int x = _x_size - 1; x >= 0; x--) {
@@ -118,7 +118,7 @@ Point Image_Mask::last()
 }
 
 
-Point Image_Mask::next(const Point current)
+Point ImageMask::next(const Point current)
 {
 	int from_x = current.x + 1;
 	for (int y = current.y; y < _y_size; y++) {
@@ -134,7 +134,7 @@ Point Image_Mask::next(const Point current)
 }
 
 
-Point Image_Mask::prev(const Point current)
+Point ImageMask::prev(const Point current)
 {
 	int from_x = current.x - 1;
 	for (int y = current.y; y >= 0; y--) {

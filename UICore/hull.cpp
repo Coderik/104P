@@ -189,7 +189,7 @@ void Hull::load_sequence(string path)
 	_sequence = new Sequence<float>(first_frame);
 
 	// Load the rest frames.
-	for (int i=1; i<file_names.size(); i++) {
+	for (unsigned int i = 1; i < file_names.size(); i++) {
 		string frame_path = path;
 		frame_path.append(file_names[i]);
 		Image<float> *frame = ReadPgmImage(&frame_path);
@@ -287,14 +287,14 @@ bool Hull::request_has_optical_flow_data()
 }
 
 
-Layer_Manager* Hull::request_layer_manager()
+LayerManager* Hull::request_layer_manager()
 {
 	if (!_current_fitting) {
 		return NULL;
 	}
 
 	if (!_current_fitting->layer_manager) {
-		_current_fitting->layer_manager = new Layer_Manager();
+		_current_fitting->layer_manager = new LayerManager();
 		_ui.image_control->set_layer_manager(_current_fitting->layer_manager);
 	}
 

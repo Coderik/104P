@@ -7,84 +7,84 @@
 
 #include "headers/sequence_mask.h"
 
-Sequence_Mask::Sequence_Mask(int x_size, int y_size, int t_size, bool value)
+SequenceMask::SequenceMask(int x_size, int y_size, int t_size, bool value)
 	: Sequence<bool>(x_size, y_size, t_size, value)
 {
 
 }
 
 
-Sequence_Mask::Sequence_Mask(int x_size, int y_size, int t_size)
+SequenceMask::SequenceMask(int x_size, int y_size, int t_size)
 	: Sequence<bool>(x_size, y_size, t_size, false)
 {
 
 }
 
 
-Sequence_Mask::Sequence_Mask(int x_size, int y_size)
+SequenceMask::SequenceMask(int x_size, int y_size)
 	: Sequence<bool>(x_size, y_size)
 {
 
 }
 
 
-Sequence_Mask::Sequence_Mask(Image<bool> *first_frame)
+SequenceMask::SequenceMask(Image<bool> *first_frame)
 	: Sequence<bool>(first_frame)
 {
 
 }
 
 
-Sequence_Mask::Sequence_Mask(Sequence_Mask& source)
+SequenceMask::SequenceMask(SequenceMask& source)
 	: Sequence<bool>(source)
 {
 
 }
 
 
-Sequence_Mask::~Sequence_Mask()
+SequenceMask::~SequenceMask()
 {
 
 }
 
 
-Sequence_Mask::iterator Sequence_Mask::begin()
+SequenceMask::iterator SequenceMask::begin()
 {
 	return iterator(this, first());
 }
 
 
-Sequence_Mask::iterator Sequence_Mask::end()
+SequenceMask::iterator SequenceMask::end()
 {
 	return iterator(this, Point(-1, -1, -1));
 }
 
 
-Sequence_Mask::iterator Sequence_Mask::rbegin()
+SequenceMask::iterator SequenceMask::rbegin()
 {
 	return iterator(this, last());
 }
 
 
-Sequence_Mask::iterator Sequence_Mask::rend()
+SequenceMask::iterator SequenceMask::rend()
 {
 	return iterator(this, Point(-1, -1, -1));
 }
 
 
-void Sequence_Mask::mask(int x, int y, int t)
+void SequenceMask::mask(int x, int y, int t)
 {
 	set_value(x, y, t, true);
 }
 
 
-void Sequence_Mask::unmask(int x, int y, int t)
+void SequenceMask::unmask(int x, int y, int t)
 {
 	set_value(x, y, t, false);
 }
 
 
-void Sequence_Mask::invert()
+void SequenceMask::invert()
 {
 	// TODO: may be move to specialization Image<bool>
 	for (int t = 0; t < _t_size; t++) {
@@ -99,7 +99,7 @@ void Sequence_Mask::invert()
 
 /* I_Iterable_Mask methods */
 // TODO: optimize
-Point Sequence_Mask::first()
+Point SequenceMask::first()
 {
 	for (int t = 0; t < _t_size; t++) {
 		for (int y = 0; y < _y_size; y++) {
@@ -115,7 +115,7 @@ Point Sequence_Mask::first()
 }
 
 
-Point Sequence_Mask::last()
+Point SequenceMask::last()
 {
 	for (int t = _t_size - 1; t >= 0; t--) {
 		for (int y = _y_size - 1; y >= 0; y--) {
@@ -131,7 +131,7 @@ Point Sequence_Mask::last()
 }
 
 
-Point Sequence_Mask::next(const Point current)
+Point SequenceMask::next(const Point current)
 {
 	int from_x = current.x + 1;
 	int from_y = current.y;
@@ -151,7 +151,7 @@ Point Sequence_Mask::next(const Point current)
 }
 
 
-Point Sequence_Mask::prev(const Point current)
+Point SequenceMask::prev(const Point current)
 {
 	int from_x = current.x - 1;
 	int from_y = current.y;

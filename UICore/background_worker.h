@@ -20,7 +20,7 @@ public:
 	BackgroundWorker();
 	virtual ~BackgroundWorker() {}
 
-	/* IBackgroundWorker members */
+	/* IBackgroundWorker members (UI thread side) */
 	virtual void start(sigc::slot1<void,IBackgroundInsider* > working_function);
 	virtual void cancel();
 	virtual void wait();
@@ -37,7 +37,7 @@ public:
 		return _signal_data_prepared;
 	}
 
-	/* IBackgroundInsider members */
+	/* IBackgroundInsider members (Background thread side) */
 	virtual IWatchdog* get_watchdog();
 	virtual void submit_data_portion(IData* data);
 	virtual void announce_completion();

@@ -12,17 +12,17 @@
 #include "i_iterable_mask.h"
 #include "mask_iterator.h"
 
-class Sequence_Mask : public Sequence<bool>, public I_Iterable_Mask
+class SequenceMask : public Sequence<bool>, public IIterableMask
 {
 public:
-	typedef Mask_Iterator iterator;
+	typedef MaskIterator iterator;
 
-	Sequence_Mask(int x_size, int y_size, int t_size, bool value);
-	Sequence_Mask(int x_size, int y_size, int t_size);
-	Sequence_Mask(int x_size, int y_size);
-	Sequence_Mask(Image<bool> *first_frame);
-	Sequence_Mask(Sequence_Mask& source);
-	~Sequence_Mask();
+	SequenceMask(int x_size, int y_size, int t_size, bool value);
+	SequenceMask(int x_size, int y_size, int t_size);
+	SequenceMask(int x_size, int y_size);
+	SequenceMask(Image<bool> *first_frame);
+	SequenceMask(SequenceMask& source);
+	~SequenceMask();
 
 	iterator begin();
     iterator end();

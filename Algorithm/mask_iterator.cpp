@@ -7,34 +7,34 @@
 
 #include "headers/mask_iterator.h"
 
-Mask_Iterator::Mask_Iterator()
+MaskIterator::MaskIterator()
 {
 	_mask = 0;
 	_current = Point(-1, -1, -1); // TODO: add 'empty' static property to Point
 }
 
 
-Mask_Iterator::Mask_Iterator(I_Iterable_Mask *mask, Point current)
+MaskIterator::MaskIterator(IIterableMask *mask, Point current)
 {
 	_mask = mask;
 	_current = current;
 }
 
 
-Mask_Iterator::Mask_Iterator(const Mask_Iterator& source)
+MaskIterator::MaskIterator(const MaskIterator& source)
 {
 	this->_mask = source._mask;
 	this->_current = source._current;
 }
 
 
-Mask_Iterator::~Mask_Iterator()
+MaskIterator::~MaskIterator()
 {
 
 }
 
 
-Mask_Iterator& Mask_Iterator::operator=(const Mask_Iterator& source)
+MaskIterator& MaskIterator::operator=(const MaskIterator& source)
 {
 	if (this != &source) {
 		this->_mask = source._mask;
@@ -45,19 +45,19 @@ Mask_Iterator& Mask_Iterator::operator=(const Mask_Iterator& source)
 }
 
 
-bool Mask_Iterator::operator==(const Mask_Iterator& other) const
+bool MaskIterator::operator==(const MaskIterator& other) const
 {
 	return (this->_mask == other._mask) && (this->_current == other._current);
 }
 
 
-bool Mask_Iterator::operator!=(const Mask_Iterator& other) const
+bool MaskIterator::operator!=(const MaskIterator& other) const
 {
 	return (this->_mask != other._mask) || (this->_current != other._current);
 }
 
 
-Mask_Iterator& Mask_Iterator::operator++()
+MaskIterator& MaskIterator::operator++()
 {
 	if (_mask) {
 		_current =  _mask->next(_current);
@@ -67,9 +67,9 @@ Mask_Iterator& Mask_Iterator::operator++()
 }
 
 
-Mask_Iterator Mask_Iterator::operator++(int)
+MaskIterator MaskIterator::operator++(int)
 {
-	Mask_Iterator aux(*this);
+	MaskIterator aux(*this);
 
 	if (_mask) {
 		_current =  _mask->next(_current);
@@ -79,7 +79,7 @@ Mask_Iterator Mask_Iterator::operator++(int)
 }
 
 
-Mask_Iterator& Mask_Iterator::operator--()
+MaskIterator& MaskIterator::operator--()
 {
 	if (_mask) {
 		_current =  _mask->prev(_current);
@@ -89,9 +89,9 @@ Mask_Iterator& Mask_Iterator::operator--()
 }
 
 
-Mask_Iterator Mask_Iterator::operator--(int)
+MaskIterator MaskIterator::operator--(int)
 {
-	Mask_Iterator aux(*this);
+	MaskIterator aux(*this);
 
 	if (_mask) {
 		_current =  _mask->prev(_current);
@@ -101,13 +101,13 @@ Mask_Iterator Mask_Iterator::operator--(int)
 }
 
 
-const Mask_Iterator::const_reference Mask_Iterator::operator*() const
+const MaskIterator::const_reference MaskIterator::operator*() const
 {
 	return _current;
 }
 
 
-const Mask_Iterator::const_pointer Mask_Iterator::operator->() const
+const MaskIterator::const_pointer MaskIterator::operator->() const
 {
 	return &_current;
 }

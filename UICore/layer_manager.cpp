@@ -7,14 +7,14 @@
 
 #include "layer_manager.h"
 
-Layer_Manager::Layer_Manager(){
+LayerManager::LayerManager(){
 	_layers_map = map<string, type_layer_and_connection >();
 	_is_layers_cache_valid = false;
 	_is_notification_allowed = true;
 }
 
 
-string Layer_Manager::add_layer(Layer* layer)
+string LayerManager::add_layer(Layer* layer)
 {
 	string key = layer->get_id();
 
@@ -26,7 +26,7 @@ string Layer_Manager::add_layer(Layer* layer)
 
 	// Connect new item to 'notify_layer_changed' and store.
 	sigc::connection connection =
-			layer->signal_changed().connect( sigc::mem_fun(*this, &Layer_Manager::notify_layer_changed) );
+			layer->signal_changed().connect( sigc::mem_fun(*this, &LayerManager::notify_layer_changed) );
 	_layers_map[key] = std::make_pair(layer, connection);		// Note: [] operator inserts new or updates existing.
 	_is_layers_cache_valid = false;
 
@@ -34,14 +34,14 @@ string Layer_Manager::add_layer(Layer* layer)
 }
 
 
-Layer* Layer_Manager::find_layer(string key)
+Layer* LayerManager::find_layer(string key)
 {
 	map<string, type_layer_and_connection >::iterator it;
 	it = _layers_map.find(key);
 	return (it != _layers_map.end()) ? it->second.first : (Layer*)0;
 }
 
-vector<Layer* > Layer_Manager::get_all_layers()
+vector<Layer* > LayerManager::get_all_layers()
 {
 	if (!_is_layers_cache_valid) {
 		_layers_cache = vector<Layer* >();
@@ -62,7 +62,7 @@ vector<Layer* > Layer_Manager::get_all_layers()
  * Sets visibility property for all layers.
  * If visibility of any layer is actually affected, emits signal_layer_changed.
  */
-void Layer_Manager::set_visibility(bool is_visible)
+void LayerManager::set_visibility(bool is_visible)
 {
 	bool has_effect = false;
 
@@ -80,7 +80,7 @@ void Layer_Manager::set_visibility(bool is_visible)
 
 
 /* private */
-void Layer_Manager::notify_layer_changed()
+void LayerManager::notify_layer_changed()
 {
 	if (_is_notification_allowed) {
 		_signal_layer_changed.emit();

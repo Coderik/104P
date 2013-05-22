@@ -10,10 +10,10 @@
 
 #include "point.h"
 
-class I_Iterable_Mask
+class IIterableMask
 {
 public:
-	virtual ~I_Iterable_Mask() {}
+	virtual ~IIterableMask() {}
 
 	virtual Point first() = 0;
 	virtual Point last() = 0;

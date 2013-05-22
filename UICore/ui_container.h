@@ -49,7 +49,7 @@ public:
 	Glib::RefPtr<Gtk::ToggleAction> layers_visibility_toggle_action;
 
 	Gtk::Box *right_side_layout;
-	Selectable_Image *image_control;
+	SelectableImage *image_control;
 	Gtk::Scale *time_slider;
 	Gtk::Statusbar *status_bar;
 	Gtk::InfoBar *background_work_infobar;
@@ -227,7 +227,7 @@ public:
 			infobar_box->pack_start(*background_work_infobar_message, Gtk::PACK_EXPAND_PADDING);
 		}
 
-		image_control = new Selectable_Image();
+		image_control = new SelectableImage();
 		image_view_frame->add(*image_control);
 
 		// show all
@@ -307,7 +307,7 @@ public:
 		Gtk::RadioAction::Group group = Gtk::RadioAction::Group();
 		Glib::RefPtr<Gtk::RadioAction> action;
 		std::string name;
-		for (int i = 0; i < fittings.size(); i++) {
+		for (unsigned int i = 0; i < fittings.size(); i++) {
 			// int to string
 			std::stringstream s;
 			s << i;

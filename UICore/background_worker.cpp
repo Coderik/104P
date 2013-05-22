@@ -17,6 +17,10 @@ BackgroundWorker::BackgroundWorker()
 }
 
 
+/**
+ * Starts background processing.
+ * NOTE: This method is called from the UI thread.
+ */
 void BackgroundWorker::start(sigc::slot1<void,IBackgroundInsider* > working_function)
 {
 	// bind self as an IBackgroundInsider parameter
@@ -37,6 +41,10 @@ void BackgroundWorker::start(sigc::slot1<void,IBackgroundInsider* > working_func
 }
 
 
+/**
+ * Cancels background processing.
+ * NOTE: This method is called from the UI thread.
+ */
 void BackgroundWorker::cancel()
 {
 	{
@@ -46,6 +54,10 @@ void BackgroundWorker::cancel()
 }
 
 
+/**
+ * Waits until background thread is finished.
+ * NOTE: This method is called from the UI thread.
+ */
 void BackgroundWorker::wait()
 {
 	if (_thread) {
@@ -54,6 +66,10 @@ void BackgroundWorker::wait()
 }
 
 
+/**
+ * Returns a watchdog.
+ * NOTE: This method is called from the background thread.
+ */
 IWatchdog* BackgroundWorker::get_watchdog()
 {
 	if (!_watchdog) {
@@ -67,6 +83,10 @@ IWatchdog* BackgroundWorker::get_watchdog()
 }
 
 
+/**
+ * Transfers portion of data to UI thread side.
+ * NOTE: This method is called from the background thread.
+ */
 void BackgroundWorker::submit_data_portion(IData* data)
 {
 	{
@@ -74,11 +94,15 @@ void BackgroundWorker::submit_data_portion(IData* data)
 		_aux_partial_data = data;
 	}
 
-	// Notify main thread
+	// Notify UI thread
 	_portial_result_dispatcher();
 }
 
 
+/**
+ * Notifies UI thread side about work completion.
+ * NOTE: This method is called from the background thread.
+ */
 void BackgroundWorker::announce_completion()
 {
 	_work_finish_dispatcher();
@@ -87,6 +111,10 @@ void BackgroundWorker::announce_completion()
 
 /* Private */
 
+/**
+ * Checks the flag to make sure that work might be continued.
+ * NOTE: This method is called from the background thread.
+ */
 bool BackgroundWorker::allow_background_computation()
 {
 	bool stop_flag;
@@ -100,6 +128,10 @@ bool BackgroundWorker::allow_background_computation()
 }
 
 
+/**
+ * Transfers portion of data to the client.
+ * NOTE: This method is called via dispatcher and therefore runs in the UI thread.
+ */
 void BackgroundWorker::pass_data_portion()
 {
 	IData* partial_data;
@@ -111,6 +143,10 @@ void BackgroundWorker::pass_data_portion()
 }
 
 
+/**
+ * Joins the background thread and notifies the client about work completion.
+ * NOTE: This method is called via dispatcher and therefore runs in the UI thread.
+ */
 void BackgroundWorker::finish()
 {
 	_thread->join();

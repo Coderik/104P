@@ -13,16 +13,16 @@
 #include "mask_iterator.h"
 
 // TODO: may be Sequence_Mask would be enough?
-class Image_Mask : public Image<bool>, public I_Iterable_Mask
+class ImageMask : public Image<bool>, public IIterableMask
 {
 public:
-	typedef Mask_Iterator iterator;
+	typedef MaskIterator iterator;
 
-	Image_Mask();
-	Image_Mask(int x_size,int y_size);
-	Image_Mask(int x_size,int y_size, bool value);
-	Image_Mask(Image_Mask &source);
-	~Image_Mask();
+	ImageMask();
+	ImageMask(int x_size,int y_size);
+	ImageMask(int x_size,int y_size, bool value);
+	ImageMask(ImageMask &source);
+	~ImageMask();
 
 	iterator begin();
     iterator end();

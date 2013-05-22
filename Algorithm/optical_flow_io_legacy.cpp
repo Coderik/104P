@@ -66,7 +66,7 @@ bool read_forward_optical_flow_legacy(const std::string &file_name, std::vector<
 	for (int i = 0; i < chunks_count; i++) {
 		int index = description[i];
 
-		if (index >= 0 && index < out_optical_flow_list.size()) {
+		if (index >= 0 && (unsigned)index < out_optical_flow_list.size()) {
 			flow_x = new float[size_x * size_y];
 			flow_y = new float[size_x * size_y];
 

@@ -49,7 +49,7 @@
 
 using namespace std;
 
-class Hull : public Gtk::Window, public IHull, public I_Rig_Manager
+class Hull : public Gtk::Window, public IHull, public IRigManager
 {
 public:
 	Hull(string application_id);
@@ -62,7 +62,7 @@ public:
 	virtual vector<OpticalFlowContainer*> request_forward_optical_flow();
 	virtual vector<OpticalFlowContainer*> request_backward_optical_flow();
 	virtual bool request_has_optical_flow_data();
-	virtual Layer_Manager* request_layer_manager();
+	virtual LayerManager* request_layer_manager();
 	virtual Gtk::Box* request_ui_placeholder();
 	virtual int request_current_time();
 

@@ -17,10 +17,10 @@
 
 using namespace std;
 
-class Layer_Manager
+class LayerManager
 {
 public:
-	Layer_Manager();
+	LayerManager();
 
 	string add_layer(Layer* layer);
 	Layer* find_layer(string key);

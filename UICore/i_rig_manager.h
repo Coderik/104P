@@ -11,10 +11,10 @@
 #include <string>
 #include "rig.h"
 
-class I_Rig_Manager
+class IRigManager
 {
 public:
-	virtual ~I_Rig_Manager() {};
+	virtual ~IRigManager() {};
 
 	virtual void add_rig(Rig* rig, std::string display_name) = 0;
 	virtual void initialize_rigs() = 0;

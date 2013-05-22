@@ -16,7 +16,7 @@ struct Fitting
 {
 	std::string display_name;
 	Rig *rig;
-	Layer_Manager *layer_manager;
+	LayerManager *layer_manager;
 
 
 	Fitting() {

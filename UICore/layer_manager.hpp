@@ -8,7 +8,7 @@
 #include "layer_manager.h"
 
 template<class T>
-T* Layer_Manager::find_or_create_layer(string key, string display_name)
+T* LayerManager::find_or_create_layer(string key, string display_name)
 {
 	T *layer = dynamic_cast<T* >(this->find_layer(key));
 	if (!layer) {
