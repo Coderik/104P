@@ -17,10 +17,8 @@
 #include <glibmm/ustring.h>
 #include <gtkmm/filechooserdialog.h>
 #include <giomm/file.h>
-#include <glibmm/dispatcher.h>
 #include <glibmm.h>
 #include <gtkmm/radioaction.h>
-#include <glibmm/threads.h>
 #include <gdk/gdkkeysyms.h>
 #include <gtkmm/recentmanager.h>
 
@@ -82,7 +80,6 @@ protected:
 	void update_fitting();
 	void set_layers_visibility();
 	void perceive_background_worker(int responce_id);	//TODO: rename it!
-	/*bool allow_background_computation();*/
 
 	void begin_full_optical_flow_calculation();
 	void begin_missing_optical_flow_calculation();
@@ -103,16 +100,7 @@ private:
 	bool _has_optical_flow_data;
 	bool _optical_flow_legacy_format;
 	bool _layers_visibility;
-	/*Glib::Threads::Thread *_background_worker;
-	Glib::Dispatcher _work_done_dispatcher;
-	Glib::Dispatcher _portion_ready_dispatcher;*/
 	IBackgroundWorker *_background_worker;
-
-	/*Glib::Threads::Mutex _background_work_mutex;	// covers following variables
-	bool _aux_stop_background_work_flag;
-	float* _aux_optical_flow_x;
-	float* _aux_optical_flow_y;
-	int _aux_optical_flow_index;*/
 
 	UI_Container _ui;
 
