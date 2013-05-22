@@ -33,6 +33,8 @@ SelectableImage::SelectableImage()
 
 	// Keep context menu instance.
 	_context_menu = dynamic_cast<Gtk::Menu*>(_menu_manager->get_widget("/ContextMenu"));
+
+	set_zoom_scale(0);
 }
 
 
@@ -76,6 +78,25 @@ void SelectableImage::drop_layer_manager()
 }
 
 
+bool SelectableImage::set_zoom_scale(short zoom_scale)
+{
+	if (zoom_scale < MIN_ZOOM_SCALE || zoom_scale > MAX_ZOOM_SCALE) {
+		return false;
+	}
+
+	_zoom_scale = zoom_scale;
+	_scale = std::pow(2.0, zoom_scale);
+
+	return true;
+}
+
+
+short SelectableImage::get_zoom_scale()
+{
+	return _zoom_scale;
+}
+
+
 void SelectableImage::save_content()
 {
 	Gtk::FileChooserDialog dialog("Saving content as image...", Gtk::FILE_CHOOSER_ACTION_SAVE);
@@ -115,20 +136,28 @@ bool SelectableImage::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 
 	// Draw the image in the middle of the drawing area, or (if the image is
 	// larger than the drawing area) draw the middle part of the image.
-	double pixbuf_x = (width - _content_width)/2;
-	double pixbuf_y = (height - _content_height)/2;
+	//double pixbuf_x = (width - _content_width * _scale)/2;
+	//double pixbuf_y = (height - _content_height * _scale)/2;
+	_pixbuf_x = (width - _content_width * _scale)/2;
+	_pixbuf_y = (height - _content_height * _scale)/2;
+	_pixbuf_x -= _pixbuf_x % (int)_scale;
+	_pixbuf_y -= _pixbuf_y % (int)_scale;
 
-	Gdk::Cairo::set_source_pixbuf(cr, _pixbuf, pixbuf_x, pixbuf_y);
+	Glib::RefPtr<Gdk::Pixbuf> pixbuf = _pixbuf->scale_simple(_content_width * _scale, _content_height * _scale, Gdk::INTERP_NEAREST);
+	Gdk::Cairo::set_source_pixbuf(cr, pixbuf, _pixbuf_x, _pixbuf_y/* - 0.5*/);
 	cr->paint();
+
+	cr->scale(_scale, _scale);
 
 	if (_layer_manager) {
 		vector<Layer* > layers = _layer_manager->get_all_layers();
 		vector<Layer* >::iterator it;
 		for (it = layers.begin(); it != layers.end(); ++it) {
-			(*it)->set_drawing_rectangle(pixbuf_x, pixbuf_y, width, height);
+			(*it)->set_drawing_rectangle(_pixbuf_x / _scale, _pixbuf_y / _scale, width, height);
 			(*it)->draw(cr);
 		}
 	}
+
 	return true;
 }
 
@@ -140,11 +169,11 @@ bool SelectableImage::on_button_press_event(GdkEventButton *event)
 		const int width = allocation.get_width();
 		const int height = allocation.get_height();
 
-		double pixbuf_x = (width - _content_width)/2;
-		double pixbuf_y = (height - _content_height)/2;
+		/*double pixbuf_x = (width - _content_width * _scale)/2;
+		double pixbuf_y = (height - _content_height * _scale)/2;*/
 
-		int x = event->x - pixbuf_x;
-		int y = event->y - pixbuf_y;
+		int x = (event->x - _pixbuf_x) / _scale;
+		int y = (event->y - _pixbuf_y) / _scale;
 
 		if (x > 0 && x < _content_width &&
 			y > 0 && y < _content_height) {
@@ -172,11 +201,11 @@ bool SelectableImage::on_button_release_event(GdkEventButton *event)
 		const int width = allocation.get_width();
 		const int height = allocation.get_height();
 
-		double pixbuf_x = (width - _content_width)/2;
-		double pixbuf_y = (height - _content_height)/2;
+		/*double pixbuf_x = (width - _content_width * _scale)/2;
+		double pixbuf_y = (height - _content_height * _scale)/2;*/
 
-		int x = event->x - pixbuf_x;
-		int y = event->y - pixbuf_y;
+		int x = (event->x - _pixbuf_x) / _scale;
+		int y = (event->y - _pixbuf_y) / _scale;
 
 		if (x > 0 && x < _content_width &&
 			y > 0 && y < _content_height) {
@@ -197,11 +226,11 @@ bool SelectableImage::on_motion_notify_event(GdkEventMotion *event)
 		const int width = allocation.get_width();
 		const int height = allocation.get_height();
 
-		double pixbuf_x = (width - _content_width)/2;
-		double pixbuf_y = (height - _content_height)/2;
+		/*double pixbuf_x = (width - _content_width * _scale)/2;
+		double pixbuf_y = (height - _content_height * _scale)/2;*/
 
-		int x = event->x - pixbuf_x;
-		int y = event->y - pixbuf_y;
+		int x = (event->x - _pixbuf_x) / _scale;
+		int y = (event->y - _pixbuf_y) / _scale;
 
 		if (x > 0 && x < _content_width &&
 			y > 0 && y < _content_height) {

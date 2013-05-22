@@ -29,6 +29,9 @@ public:
 	void set_layer_manager(LayerManager *layer_manager);
 	void drop_layer_manager();
 
+	bool set_zoom_scale(short zoom_scale);
+	short get_zoom_scale();
+
 	void save_content();
 
 	typedef sigc::signal<void, int, int> type_mouse_signal;
@@ -56,6 +59,9 @@ protected:
 
 
 private:
+	static const short MAX_ZOOM_SCALE = 4;
+	static const short MIN_ZOOM_SCALE = 0;	// TODO: handle zoom out
+
 	Glib::RefPtr<Gdk::Pixbuf> _pixbuf;
 	int _content_width, _content_height;
 	type_mouse_signal _signal_left_button_pressed;
@@ -65,6 +71,9 @@ private:
 	sigc::connection _connection_layer_manager_signal_layer_changed;
 	Glib::RefPtr<Gtk::UIManager> _menu_manager;
 	Gtk::Menu *_context_menu;
+	float _scale;
+	short _zoom_scale;
+	int _pixbuf_x, _pixbuf_y;
 
 	void save_content_internal(const string& filename);
 
