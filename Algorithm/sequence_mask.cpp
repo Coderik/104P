@@ -15,7 +15,7 @@ Sequence_Mask::Sequence_Mask(int x_size, int y_size, int t_size, bool value)
 
 
 Sequence_Mask::Sequence_Mask(int x_size, int y_size, int t_size)
-	: Sequence<bool>(x_size, y_size, t_size)
+	: Sequence<bool>(x_size, y_size, t_size, false)
 {
 
 }

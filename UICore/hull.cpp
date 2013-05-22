@@ -32,9 +32,10 @@ Hull::Hull(string application_id)
 
 	this->signal_key_press_event().connect( sigc::mem_fun(*this, &Hull::key_pressed) );
 
-	// Note: if there are several different works to compute in background, recreate dispatchers and connect to them in 'begin_...' methods
-	_work_done_dispatcher.connect( sigc::mem_fun(*this, &Hull::end_calculate_optical_flow) );
-	_portion_ready_dispatcher.connect( sigc::mem_fun(*this, &Hull::take_optical_flow_frame) );
+	// Note: if there are several different works to compute in background, separate backgroung_worker might be used for each
+	_background_worker = new BackgroundWorker();
+	_background_worker->signal_data_prepared().connect( sigc::mem_fun(*this, &Hull::take_optical_flow_frame) );
+	_background_worker->signal_work_finished().connect( sigc::mem_fun(*this, &Hull::end_calculate_optical_flow) );
 
 	_sequence = NULL;
 	_current_fitting = NULL;
@@ -638,21 +639,14 @@ void Hull::begin_missing_optical_flow_calculation()
 
 void Hull::begin_optical_flow_calculation_internal(std::vector<int> task_list)
 {
-	//TODO: ensure no background operations in progress.
-
-	_aux_stop_background_work_flag = false;
 	_progress_counter = 0;
 	_progress_total = task_list.size() != 0 ? task_list.size() : 2 * (_sequence->get_size_t() - 1);
 
-	try
-	{
-		_background_worker = Glib::Threads::Thread::create( sigc::bind<std::vector<int> >( sigc::mem_fun(*this, &Hull::calculate_optical_flow), task_list));
-	}
-	catch(Glib::Threads::ThreadError &err)
-	{
-		//TODO: notify user abour error and log it
-		return;
-	}
+	// Encapsulate entry point function and required parameters into slot object
+	sigc::slot1<void, IBackgroundInsider*> work = sigc::bind<std::vector<int> >( sigc::mem_fun(*this, &Hull::calculate_optical_flow), task_list);
+
+	// Run background processing
+	_background_worker->start(work);
 
 	Glib::ustring message = Glib::ustring::compose("Optical flow. Frames finished: %1; frames left: %2.", 0, _progress_total);
 	_ui.background_work_infobar_message->set_text(message);
@@ -664,8 +658,6 @@ void Hull::begin_optical_flow_calculation_internal(std::vector<int> task_list)
 
 void Hull::end_calculate_optical_flow()
 {
-	_background_worker->join();
-
 	_ui.background_work_infobar->hide();
 	_ui.calculate_optical_flow_action->set_sensitive(true);
 
@@ -678,21 +670,17 @@ void Hull::end_calculate_optical_flow()
 }
 
 
-void Hull::take_optical_flow_frame()
+void Hull::take_optical_flow_frame(IData *data)
 {
+	// Cast calculated values
+	OpticalFlowData *optical_flow_data = dynamic_cast<OpticalFlowData*>(data);
+	if (!optical_flow_data) {
+		return;
+	}
+
 	int size_x = _sequence->get_size_x();
 	int size_y = _sequence->get_size_y();
-	int index;
-	float *optical_flow_x, *optical_flow_y;
-
-	// Take calculated values
-	{
-		Glib::Threads::Mutex::Lock lock(_background_work_mutex);
-		index = _aux_optical_flow_index;
-		optical_flow_x = _aux_optical_flow_x;
-		optical_flow_y = _aux_optical_flow_y;
-
-	}
+	int index = optical_flow_data->index;
 
 	// Choose appropriate place to put flow
 	OpticalFlowContainer *flow;
@@ -710,7 +698,7 @@ void Hull::take_optical_flow_frame()
 	if (flow->contains_data()) {
 		flow->clear();
 	}
-	flow->set_flow(optical_flow_x, optical_flow_y, size_x, size_y);
+	flow->set_flow(optical_flow_data->flow_x, optical_flow_data->flow_y, size_x, size_y);
 
 	// Update progress
 	_progress_counter++;
@@ -730,23 +718,7 @@ void Hull::take_optical_flow_frame()
 void Hull::cancel_calculate_optical_flow()
 {
 	_ui.background_work_infobar_message->set_text("Optical flow. Canceling... ");
-	{
-		Glib::Threads::Mutex::Lock lock(_background_work_mutex);
-		_aux_stop_background_work_flag = true;
-	}
-}
-
-
-bool Hull::allow_background_computation()
-{
-	bool stop_flag;
-
-	{
-		Glib::Threads::Mutex::Lock lock(_background_work_mutex);
-		stop_flag = _aux_stop_background_work_flag;
-	}
-
-	return !stop_flag;
+	_background_worker->cancel();
 }
 
 
@@ -755,14 +727,13 @@ bool Hull::allow_background_computation()
  * In task list absolute value defines from what frame to compute flow, and sign defines direction.
  * Example: '0' - forward flow from frame 0 to frame 1; '-2' - backward flow from frame 2 to frame 1.
  */
-void Hull::calculate_optical_flow(std::vector<int> task_list)
+void Hull::calculate_optical_flow(IBackgroundInsider *insider, std::vector<int> task_list)
 {
 	if (!_sequence)
 		return;
 
-	// Prepare watchdog for catching possible cancellation command from user
-	SignalWatchdog *watchdog = new SignalWatchdog();
-	watchdog->signal_ask_permission().connect( sigc::mem_fun(*this, &Hull::allow_background_computation ) );
+	// Get watchdog for catching possible cancellation command from user
+	IWatchdog *watchdog = insider->get_watchdog();
 
 	// Create with default parameters
 	Zach_TVL1_OpticalFlow* opticalFlow = new Zach_TVL1_OpticalFlow(false);
@@ -801,25 +772,23 @@ void Hull::calculate_optical_flow(std::vector<int> task_list)
 
 		if (success) {
 			// Set calculated values
-			{
-				Glib::Threads::Mutex::Lock lock(_background_work_mutex);
-				_aux_optical_flow_x = u1;
-				_aux_optical_flow_y = u2;
-				_aux_optical_flow_index = *it;
-			}
+			OpticalFlowData *data = new OpticalFlowData();
+			data->flow_x = u1;
+			data->flow_y = u2;
+			data->index = *it;
 
 			// Notify main thread, that i-th optical flow slice is calculated
-			_portion_ready_dispatcher();
+			insider->submit_data_portion(data);
 		}
 
 		// Check stop flag
-		if (!allow_background_computation()) {
+		if (!watchdog->can_continue()) {
 			break;
 		}
 	}
 
 	// Notify main thread, that the background work is done
-	_work_done_dispatcher();
+	insider->announce_completion();
 }
 
 
