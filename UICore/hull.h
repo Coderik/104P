@@ -46,6 +46,8 @@
 #include "point.h"
 #include "shape.h"
 #include "layer_manager.h"
+#include "background_worker.h"
+#include "optical_flow_data.h"
 
 using namespace std;
 
@@ -80,7 +82,7 @@ protected:
 	void update_fitting();
 	void set_layers_visibility();
 	void perceive_background_worker(int responce_id);	//TODO: rename it!
-	bool allow_background_computation();
+	/*bool allow_background_computation();*/
 
 	void begin_full_optical_flow_calculation();
 	void begin_missing_optical_flow_calculation();
@@ -101,15 +103,16 @@ private:
 	bool _has_optical_flow_data;
 	bool _optical_flow_legacy_format;
 	bool _layers_visibility;
-	Glib::Threads::Thread *_background_worker;
+	/*Glib::Threads::Thread *_background_worker;
 	Glib::Dispatcher _work_done_dispatcher;
-	Glib::Dispatcher _portion_ready_dispatcher;
+	Glib::Dispatcher _portion_ready_dispatcher;*/
+	IBackgroundWorker *_background_worker;
 
-	Glib::Threads::Mutex _background_work_mutex;	// covers following variables
+	/*Glib::Threads::Mutex _background_work_mutex;	// covers following variables
 	bool _aux_stop_background_work_flag;
 	float* _aux_optical_flow_x;
 	float* _aux_optical_flow_y;
-	int _aux_optical_flow_index;
+	int _aux_optical_flow_index;*/
 
 	UI_Container _ui;
 
@@ -125,11 +128,11 @@ private:
 	void show_status_message(std::string message);
 
 	void store_optical_flow(OpticalFlowContainer &flow, int index);
-	void calculate_optical_flow(std::vector<int> task_list);
+	void calculate_optical_flow(IBackgroundInsider *insider, std::vector<int> task_list);
 	void begin_optical_flow_calculation_internal(std::vector<int> task_list);
 	void end_calculate_optical_flow();
 	void cancel_calculate_optical_flow();
-	void take_optical_flow_frame();
+	void take_optical_flow_frame(IData *data);
 	void fill_task_list(std::vector<OpticalFlowContainer*> &forward_flow, std::vector<OpticalFlowContainer*> &backward_flow, std::vector<int> &task_list);
 	//tmp
 	int write_flow(float *u, float *v, int w, int h);

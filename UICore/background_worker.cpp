@@ -1,5 +1,5 @@
 /*
- * background_worker.cpp
+ * BackgroundWorker.cpp
  *
  *  Created on: May 21, 2013
  *      Author: Vadim Fedorov
@@ -7,19 +7,22 @@
 
 #include "background_worker.h"
 
-Background_Worker::Background_Worker()
+BackgroundWorker::BackgroundWorker()
 {
-	_work_finish_dispatcher.connect( sigc::mem_fun(*this, &Background_Worker::finish) );
-	_portial_result_dispatcher.connect( sigc::mem_fun(*this, &Background_Worker::pass_data_portion) );
+	_work_finish_dispatcher.connect( sigc::mem_fun(*this, &BackgroundWorker::finish) );
+	_portial_result_dispatcher.connect( sigc::mem_fun(*this, &BackgroundWorker::pass_data_portion) );
 
 	_watchdog = 0;
+	_thread = 0;
 }
 
 
-void Background_Worker::start(sigc::slot1<void,Background_Worker> working_function)
+void BackgroundWorker::start(sigc::slot1<void,IBackgroundInsider* > working_function)
 {
-	// bind self as a parameter
-	sigc::slot entry_point = sigc::bind<Background_Worker >( working_function, *this);
+	// bind self as an IBackgroundInsider parameter
+	sigc::slot<void> entry_point = sigc::bind<IBackgroundInsider* >( working_function, this );
+
+	_aux_stop_background_work_flag = false;
 
 	try
 	{
@@ -34,7 +37,7 @@ void Background_Worker::start(sigc::slot1<void,Background_Worker> working_functi
 }
 
 
-void Background_Worker::cancel()
+void BackgroundWorker::cancel()
 {
 	{
 		Glib::Threads::Mutex::Lock lock(_background_work_mutex);
@@ -43,12 +46,20 @@ void Background_Worker::cancel()
 }
 
 
-IWatchdog* Background_Worker::get_watchdog()
+void BackgroundWorker::wait()
+{
+	if (_thread) {
+		_thread->join();
+	}
+}
+
+
+IWatchdog* BackgroundWorker::get_watchdog()
 {
 	if (!_watchdog) {
 		// Prepare watchdog for catching possible cancellation command from user
 		SignalWatchdog *watchdog = new SignalWatchdog();
-		watchdog->signal_ask_permission().connect( sigc::mem_fun(*this, &Background_Worker::allow_background_computation ) );
+		watchdog->signal_ask_permission().connect( sigc::mem_fun(*this, &BackgroundWorker::allow_background_computation ) );
 		_watchdog = watchdog;
 	}
 
@@ -56,7 +67,7 @@ IWatchdog* Background_Worker::get_watchdog()
 }
 
 
-void Background_Worker::submit_data_portion(I_Data* data)
+void BackgroundWorker::submit_data_portion(IData* data)
 {
 	{
 		Glib::Threads::Mutex::Lock lock(_background_work_mutex);
@@ -68,7 +79,7 @@ void Background_Worker::submit_data_portion(I_Data* data)
 }
 
 
-void Background_Worker::announce_completion()
+void BackgroundWorker::announce_completion()
 {
 	_work_finish_dispatcher();
 }
@@ -76,7 +87,7 @@ void Background_Worker::announce_completion()
 
 /* Private */
 
-bool Background_Worker::allow_background_computation()
+bool BackgroundWorker::allow_background_computation()
 {
 	bool stop_flag;
 
@@ -89,9 +100,9 @@ bool Background_Worker::allow_background_computation()
 }
 
 
-void Background_Worker::pass_data_portion()
+void BackgroundWorker::pass_data_portion()
 {
-	I_Data* partial_data;
+	IData* partial_data;
 	{
 		Glib::Threads::Mutex::Lock lock(_background_work_mutex);
 		partial_data = _aux_partial_data;
@@ -100,7 +111,7 @@ void Background_Worker::pass_data_portion()
 }
 
 
-void Background_Worker::finish()
+void BackgroundWorker::finish()
 {
 	_thread->join();
 	_signal_work_finished.emit();

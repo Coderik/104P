@@ -8,10 +8,10 @@
 #ifndef I_DATA_H_
 #define I_DATA_H_
 
-class I_Data
+struct IData
 {
 public:
-	virtual ~I_Data() {};
+	virtual ~IData() {};
 };
 
 

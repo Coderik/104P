@@ -10,34 +10,37 @@
 
 #include <glibmm/threads.h>
 #include <glibmm/dispatcher.h>
-#include <sigc++/sigc++.h>
 
-#include "i_data.h"
-#include "signal_watchdog.h"
+#include "i_background_worker.h"
+#include "i_background_insider.h"
 
-class Background_Worker
+class BackgroundWorker : public IBackgroundWorker, public IBackgroundInsider
 {
 public:
-	Background_Worker();
+	BackgroundWorker();
+	virtual ~BackgroundWorker() {}
 
-	void start(sigc::slot1<void,Background_Worker> working_function);
-	void cancel();
-
-	IWatchdog* get_watchdog();
-	void submit_data_portion(I_Data* data);
-	void announce_completion();
+	/* IBackgroundWorker members */
+	virtual void start(sigc::slot1<void,IBackgroundInsider* > working_function);
+	virtual void cancel();
+	virtual void wait();
 
 	typedef sigc::signal<void> type_signal_work_finished;
-	type_signal_work_finished signal_work_finished()
+	virtual type_signal_work_finished signal_work_finished()
 	{
 		return _signal_work_finished;
 	}
 
-	typedef sigc::signal<void, I_Data* > type_signal_data_prepared;
-	type_signal_data_prepared signal_data_prepared()
+	typedef sigc::signal<void, IData* > type_signal_data_prepared;
+	virtual type_signal_data_prepared signal_data_prepared()
 	{
 		return _signal_data_prepared;
 	}
+
+	/* IBackgroundInsider members */
+	virtual IWatchdog* get_watchdog();
+	virtual void submit_data_portion(IData* data);
+	virtual void announce_completion();
 
 private:
 	type_signal_work_finished _signal_work_finished;
@@ -49,7 +52,7 @@ private:
 
 	Glib::Threads::Mutex _background_work_mutex;	// covers following variables
 	bool _aux_stop_background_work_flag;
-	I_Data *_aux_partial_data;
+	IData *_aux_partial_data;
 
 	bool allow_background_computation();
 	void pass_data_portion();

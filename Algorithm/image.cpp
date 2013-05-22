@@ -19,6 +19,7 @@ Image<T>::Image()
 }
 
 
+// TODO: Possible issue. _points contains rubbish after memory allocation
 template <class T>
 Image<T>::Image(int x_size, int y_size)
 {

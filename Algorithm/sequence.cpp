@@ -31,6 +31,7 @@ Sequence<T>::Sequence(int x_size,int y_size,int t_size)
 }
 
 
+// TODO: test it
 template <class T>
 Sequence<T>::Sequence(int x_size,int y_size)
 {
