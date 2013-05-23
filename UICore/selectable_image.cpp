@@ -34,7 +34,8 @@ SelectableImage::SelectableImage()
 	// Keep context menu instance.
 	_context_menu = dynamic_cast<Gtk::Menu*>(_menu_manager->get_widget("/ContextMenu"));
 
-	set_zoom_scale(1);
+	_scale = 1;
+	_is_panning_enabled = false;
 }
 
 
@@ -52,7 +53,22 @@ void SelectableImage::set_pixbuf(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf)
 	if (_content) {
 		_content_width = _content->get_width();
 		_content_height = _content->get_height();
-	    set_size_request(_content_width / 2, _content_height / 2);
+		set_size_request(_content_width / 2, _content_height / 2);
+
+		Gtk::Allocation allocation = get_allocation();
+		_width = allocation.get_width();
+		_height = allocation.get_height();
+
+		// Draw the image in the middle of the drawing area, or (if the image is
+		// larger than the drawing area) draw the middle part of the image.
+		_scaled_content_width = _content_width * _scale;
+		_scaled_content_height = _content_height * _scale;
+		_content_x = (_width - _scaled_content_width)/2;
+		_content_y = (_height - _scaled_content_height)/2;
+
+		// Align
+		_content_x = _scale * (_content_x / (int)_scale);
+		_content_y = _scale * (_content_y / (int)_scale);
 	}
 }
 
@@ -85,6 +101,30 @@ bool SelectableImage::set_zoom_scale(short zoom_scale)
 	}
 
 	_scale = zoom_scale;
+
+	int scaled_content_width = _content_width * _scale;
+	int scaled_content_height = _content_height * _scale;
+
+	if (_scaled_content_width != scaled_content_width) {
+		if (scaled_content_width < _width || _scaled_content_width < _width) {
+			_content_x = (_width - scaled_content_width)/2;
+		} else {
+			_content_x = _width / 2 - (_width / 2 - _content_x) * _scale;
+			_content_x = std::max(_width - _scaled_content_width , std::min(0, _content_x));
+		}
+		_scaled_content_width = scaled_content_width;
+	}
+
+	if (_scaled_content_height != scaled_content_height) {
+		if (scaled_content_height < _height || _scaled_content_height < _height) {
+			_content_y = (_height - scaled_content_height)/2;
+		} else {
+			_content_y = _height / 2 - (_height / 2 - _content_y) * _scale;
+			_content_y = std::max(_height - _scaled_content_height , std::min(0, _content_y));
+		}
+		_scaled_content_height = scaled_content_height;
+	}
+
 	return true;
 }
 
@@ -104,6 +144,12 @@ short SelectableImage::get_min_zoom_scale()
 short SelectableImage::get_max_zoom_scale()
 {
 	return MAX_ZOOM_SCALE;
+}
+
+
+void SelectableImage::set_panning_enabled(bool enabled)
+{
+	_is_panning_enabled = enabled;
 }
 
 
@@ -141,38 +187,51 @@ bool SelectableImage::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 		return false;
 
 	Gtk::Allocation allocation = get_allocation();
-	const int width = allocation.get_width();
-	const int height = allocation.get_height();
+	int width = allocation.get_width();
+	int height = allocation.get_height();
 
-	// Draw the image in the middle of the drawing area, or (if the image is
-	// larger than the drawing area) draw the middle part of the image.
-	float scaled_content_width = _content_width * _scale;
-	float scaled_content_height = _content_height * _scale;
-	_content_x = (width - scaled_content_width)/2;
-	_content_y = (height - scaled_content_height)/2;
+	if (_width != width) {
+		if (width >= _scaled_content_width || _width >= _scaled_content_width) {
+			_content_x = (width - _scaled_content_width)/2;
+		} else {
+			int dx = (width - _width) / 2;
+			_content_x = std::max(width - _scaled_content_width , std::min(0, _content_x + dx));
+		}
+		_width = width;
+	}
 
-	// Align
-	_content_x = _scale * (_content_x / (int)_scale);
-	_content_y = _scale * (_content_y / (int)_scale);
+	if (_height != height) {
+		if (height >= _scaled_content_height || _height >= _scaled_content_height) {
+			_content_y = (height - _scaled_content_height)/2;
+		} else {
+			int dy = (height - _height) / 2;
+			_content_y = std::max(height - _scaled_content_height , std::min(0, _content_y + dy));
+		}
+		_height = height;
+	}
 
-	Glib::RefPtr<Gdk::Pixbuf> pixbuf = _content->scale_simple(scaled_content_width,
-															scaled_content_height,
-															Gdk::INTERP_NEAREST);
+	cr->save();
 
 	cr->translate(_content_x, _content_y);
+
+	Glib::RefPtr<Gdk::Pixbuf> pixbuf = _content->scale_simple(_scaled_content_width,
+															_scaled_content_height,
+															Gdk::INTERP_NEAREST);
 	Gdk::Cairo::set_source_pixbuf(cr, pixbuf, 0, 0);
 	cr->paint();
+
 	cr->scale(_scale, _scale);
 
 	if (_layer_manager) {
 		vector<Layer* > layers = _layer_manager->get_all_layers();
 		vector<Layer* >::iterator it;
 		for (it = layers.begin(); it != layers.end(); ++it) {
-			// TODO: remove unused from layer
 			(*it)->set_drawing_size(_content_width, _content_height);
 			(*it)->draw(cr);
 		}
 	}
+
+	cr->restore();
 
 	return true;
 }
@@ -180,16 +239,24 @@ bool SelectableImage::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 bool SelectableImage::on_button_press_event(GdkEventButton *event)
 {
 	if (event->type == GDK_BUTTON_PRESS && event->button == 1) {
-		// Left mouse button: select point.
-		int x = (event->x - _content_x) / _scale;
-		int y = (event->y - _content_y) / _scale;
-
-		if (x > 0 && x < _content_width &&
-			y > 0 && y < _content_height) {
-			_signal_left_button_pressed.emit(x, y);
+		if (_is_panning_enabled) {
+			// Left mouse button: start panning.
+			_pan_start_x = event->x;
+			_pan_start_y = event->y;
+			_pan_content_x = _content_x;
+			_pan_content_y = _content_y;
+		} else {
+			// Left mouse button: select point.
+			int x = (event->x - _content_x) / _scale;
+			int y = (event->y - _content_y) / _scale;
+			if (x > 0 && x < _content_width &&
+				y > 0 && y < _content_height) {
+				_signal_left_button_pressed.emit(x, y);
+			}
 		}
 
 		return true;
+
 	} else if (event->type == GDK_BUTTON_PRESS && event->button == 3) {
 		// Right mouse button: show context menu;
 		if(_context_menu) {
@@ -205,13 +272,14 @@ bool SelectableImage::on_button_press_event(GdkEventButton *event)
 bool SelectableImage::on_button_release_event(GdkEventButton *event)
 {
 	if (event->type == GDK_BUTTON_RELEASE && event->button == 1) {
-		// Left mouse button.
-		int x = (event->x - _content_x) / _scale;
-		int y = (event->y - _content_y) / _scale;
-
-		if (x > 0 && x < _content_width &&
-			y > 0 && y < _content_height) {
-			_signal_left_button_released.emit(x, y);
+		if (!_is_panning_enabled) {
+			// Left mouse button.
+			int x = (event->x - _content_x) / _scale;
+			int y = (event->y - _content_y) / _scale;
+			if (x > 0 && x < _content_width &&
+				y > 0 && y < _content_height) {
+				_signal_left_button_released.emit(x, y);
+			}
 		}
 
 		return true;
@@ -224,16 +292,34 @@ bool SelectableImage::on_button_release_event(GdkEventButton *event)
 bool SelectableImage::on_motion_notify_event(GdkEventMotion *event)
 {
 	if (event->type == GDK_MOTION_NOTIFY) {
-		int x = (event->x - _content_x) / _scale;
-		int y = (event->y - _content_y) / _scale;
+		if (_is_panning_enabled) {
+			// Left mouse button: pan.
+			int dx = event->x - _pan_start_x;
+			int dy = event->y - _pan_start_y;
 
-		if (x > 0 && x < _content_width &&
-			y > 0 && y < _content_height) {
-			_signal_left_button_drag.emit(x, y);
+			if (_scaled_content_width > _width) {
+				_content_x = std::max(_width - _scaled_content_width , std::min(0, _pan_content_x + dx));
+			}
+
+			if (_scaled_content_height > _height) {
+				_content_y = std::max(_height - _scaled_content_height , std::min(0, _pan_content_y + dy));
+			}
+
+			this->get_window()->invalidate(false);
+
+		} else {
+			// Left mouse button: drag.
+			int x = (event->x - _content_x) / _scale;
+			int y = (event->y - _content_y) / _scale;
+			if (x > 0 && x < _content_width &&
+				y > 0 && y < _content_height) {
+				_signal_left_button_drag.emit(x, y);
+			}
 		}
 
 		return true;
 	}
+
 	return false;
 }
 

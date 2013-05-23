@@ -34,6 +34,8 @@ public:
 	short get_min_zoom_scale();
 	short get_max_zoom_scale();
 
+	void set_panning_enabled(bool enabled);
+
 	void save_content();
 
 	typedef sigc::signal<void, int, int> type_mouse_signal;
@@ -66,7 +68,12 @@ private:
 
 	Glib::RefPtr<Gdk::Pixbuf> _content;
 	int _content_x, _content_y;
+	int _pan_start_x, _pan_start_y;
+	int _pan_content_x, _pan_content_y;
 	int _content_width, _content_height;
+	int _scaled_content_width, _scaled_content_height;
+	int _width, _height;
+	bool _is_panning_enabled;
 	type_mouse_signal _signal_left_button_pressed;
 	type_mouse_signal _signal_left_button_released;
 	type_mouse_signal _signal_left_button_drag;
