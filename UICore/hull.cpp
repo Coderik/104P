@@ -48,8 +48,8 @@ Hull::Hull(string application_id)
 	_ui.layers_visibility_toggle_action->set_active(true);
 
 	//tmp
-	_ui.image_control->set_zoom_scale(2);
-	_ui.image_control->set_panning_enabled(true);
+	//_ui.image_control->set_zoom_scale(2);
+	_ui.image_control->set_handy_pan_enabled(true);
 }
 
 Hull::~Hull()

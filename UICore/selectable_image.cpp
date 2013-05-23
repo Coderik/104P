@@ -36,8 +36,10 @@ SelectableImage::SelectableImage()
 	_context_menu = dynamic_cast<Gtk::Menu*>(_menu_manager->get_widget("/ContextMenu"));
 
 	_scale = 1;
-	_is_panning_enabled = false;
+	_is_common_pan_enabled = false;
+	_is_handy_pan_enabled = false;
 	_is_dragging = false;
+	_is_panning = false;
 }
 
 
@@ -149,9 +151,15 @@ short SelectableImage::get_max_zoom_scale()
 }
 
 
-void SelectableImage::set_panning_enabled(bool enabled)
+void SelectableImage::set_pan_enabled(bool enabled)
 {
-	_is_panning_enabled = enabled;
+	_is_common_pan_enabled = enabled;
+}
+
+
+void SelectableImage::set_handy_pan_enabled(bool enabled)
+{
+	_is_handy_pan_enabled = enabled;
 }
 
 
@@ -244,12 +252,17 @@ bool SelectableImage::on_button_press_event(GdkEventButton *event)
 	if (event->type == GDK_BUTTON_PRESS && event->button == 1) {
 		_is_dragging = true;
 
-		if (_is_panning_enabled) {
+		if (is_pan_allowed(event->x, event->y, 30)) {
 			// Left mouse button: start panning.
+			_is_panning = true;
 			_pan_start_x = event->x;
 			_pan_start_y = event->y;
 			_pan_content_x = _content_x;
 			_pan_content_y = _content_y;
+
+			Glib::RefPtr<Gdk::Window> window = this->get_window();
+			Glib::RefPtr<Gdk::Cursor> cursor = Gdk::Cursor::create(Gdk::FLEUR);
+			window->set_cursor(cursor);
 		} else {
 			// Left mouse button: select point.
 			int x = (event->x - _content_x) / _scale;
@@ -277,9 +290,7 @@ bool SelectableImage::on_button_press_event(GdkEventButton *event)
 bool SelectableImage::on_button_release_event(GdkEventButton *event)
 {
 	if (event->type == GDK_BUTTON_RELEASE && event->button == 1) {
-		_is_dragging = false;
-
-		if (!_is_panning_enabled) {
+		if (!_is_panning) {
 			// Left mouse button.
 			int x = (event->x - _content_x) / _scale;
 			int y = (event->y - _content_y) / _scale;
@@ -288,6 +299,12 @@ bool SelectableImage::on_button_release_event(GdkEventButton *event)
 				_signal_left_button_released.emit(x, y);
 			}
 		}
+
+		_is_dragging = false;
+		_is_panning = false;
+
+		Glib::RefPtr<Gdk::Window> window = this->get_window();
+		window-> set_cursor();
 
 		return true;
 	}
@@ -303,7 +320,7 @@ bool SelectableImage::on_motion_notify_event(GdkEventMotion *event)
 	}
 
 	if (_is_dragging) {
-		if (_is_panning_enabled) {
+		if (_is_panning) {
 			// Left mouse button: pan.
 			int dx = event->x - _pan_start_x;
 			int dy = event->y - _pan_start_y;
@@ -330,14 +347,15 @@ bool SelectableImage::on_motion_notify_event(GdkEventMotion *event)
 
 		return true;
 	} else {
-		if (event->x < 30 || event->x > _width - 30 || event->y < 30 || event->y > _height - 30) {
+		// TODO: get rid of blinking on WIN
+		/*if (is_pan_allowed(event->x, event->y, 30)) {
 			Glib::RefPtr<Gdk::Window> window = this->get_window();
 			Glib::RefPtr<Gdk::Cursor> cursor = Gdk::Cursor::create(Gdk::FLEUR);
 			window->set_cursor(cursor);
 		} else {
 			Glib::RefPtr<Gdk::Window> window = this->get_window();
 			window-> set_cursor();
-		}
+		}*/
 
 		return true;
 	}
@@ -355,6 +373,13 @@ void SelectableImage::save_content_internal(const string& filename)
 	// TODO: crop to the actually used area
 	Cairo::RefPtr<Cairo::Context > context = this->get_window()->create_cairo_context();
 	context->get_target()->write_to_png(filename);
+}
+
+
+inline bool SelectableImage::is_pan_allowed(int x, int y, int margin)
+{
+	return _is_common_pan_enabled ||
+			(_is_handy_pan_enabled && (x < margin || x > _width - margin || y < margin || y > _height - margin));
 }
 
 

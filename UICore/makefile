@@ -7,14 +7,16 @@ ARCH = -m32
 
 # Add inputs to the build variables 
 CPP_SRCS += \
+./background_worker.cpp \
 ./hull.cpp \
 ./layer.cpp \
 ./layer_manager.cpp \
 ./optical_flow.cpp \
 ./selectable_image.cpp \
-./signal_watchdog.cpp 
+./signal_watchdog.cpp
 
 OBJS += \
+bin/background_worker.o \
 bin/hull.o \
 bin/layer.o \
 bin/layer_manager.o \
@@ -23,6 +25,7 @@ bin/selectable_image.o \
 bin/signal_watchdog.o 
 
 CPP_DEPS += \
+bin/background_worker.d \
 bin/hull.d \
 bin/layer.d \
 bin/layer_manager.d \

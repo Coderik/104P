@@ -34,7 +34,8 @@ public:
 	short get_min_zoom_scale();
 	short get_max_zoom_scale();
 
-	void set_panning_enabled(bool enabled);
+	void set_pan_enabled(bool enabled);
+	void set_handy_pan_enabled(bool enabled);
 
 	void save_content();
 
@@ -73,8 +74,11 @@ private:
 	int _content_width, _content_height;
 	int _scaled_content_width, _scaled_content_height;
 	int _width, _height;
-	bool _is_panning_enabled;
+	bool _is_common_pan_enabled;
+	bool _is_handy_pan_enabled;
+
 	bool _is_dragging;
+	bool _is_panning;
 	type_mouse_signal _signal_left_button_pressed;
 	type_mouse_signal _signal_left_button_released;
 	type_mouse_signal _signal_left_button_drag;
@@ -86,6 +90,7 @@ private:
 
 	void save_content_internal(const string& filename);
 
+	inline bool is_pan_allowed(int x, int y, int margin);
 };
 
 
