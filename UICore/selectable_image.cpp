@@ -34,7 +34,7 @@ SelectableImage::SelectableImage()
 	// Keep context menu instance.
 	_context_menu = dynamic_cast<Gtk::Menu*>(_menu_manager->get_widget("/ContextMenu"));
 
-	set_zoom_scale(0);
+	set_zoom_scale(1);
 }
 
 
@@ -46,12 +46,12 @@ SelectableImage::~SelectableImage()
 
 void SelectableImage::set_pixbuf(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf)
 {
-	_pixbuf = pixbuf;
+	_content = pixbuf;
 
 	// Show at least a quarter of the image.
-	if (_pixbuf) {
-		_content_width = _pixbuf->get_width();
-		_content_height = _pixbuf->get_height();
+	if (_content) {
+		_content_width = _content->get_width();
+		_content_height = _content->get_height();
 	    set_size_request(_content_width / 2, _content_height / 2);
 	}
 }
@@ -84,16 +84,26 @@ bool SelectableImage::set_zoom_scale(short zoom_scale)
 		return false;
 	}
 
-	_zoom_scale = zoom_scale;
-	_scale = std::pow(2.0, zoom_scale);
-
+	_scale = zoom_scale;
 	return true;
 }
 
 
 short SelectableImage::get_zoom_scale()
 {
-	return _zoom_scale;
+	return (short)_scale;
+}
+
+
+short SelectableImage::get_min_zoom_scale()
+{
+	return MIN_ZOOM_SCALE;
+}
+
+
+short SelectableImage::get_max_zoom_scale()
+{
+	return MAX_ZOOM_SCALE;
 }
 
 
@@ -127,7 +137,7 @@ void SelectableImage::save_content()
 
 bool SelectableImage::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 {
-	if (!_pixbuf)
+	if (!_content)
 		return false;
 
 	Gtk::Allocation allocation = get_allocation();
@@ -136,24 +146,30 @@ bool SelectableImage::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 
 	// Draw the image in the middle of the drawing area, or (if the image is
 	// larger than the drawing area) draw the middle part of the image.
-	//double pixbuf_x = (width - _content_width * _scale)/2;
-	//double pixbuf_y = (height - _content_height * _scale)/2;
-	_pixbuf_x = (width - _content_width * _scale)/2;
-	_pixbuf_y = (height - _content_height * _scale)/2;
-	_pixbuf_x -= _pixbuf_x % (int)_scale;
-	_pixbuf_y -= _pixbuf_y % (int)_scale;
+	float scaled_content_width = _content_width * _scale;
+	float scaled_content_height = _content_height * _scale;
+	_content_x = (width - scaled_content_width)/2;
+	_content_y = (height - scaled_content_height)/2;
 
-	Glib::RefPtr<Gdk::Pixbuf> pixbuf = _pixbuf->scale_simple(_content_width * _scale, _content_height * _scale, Gdk::INTERP_NEAREST);
-	Gdk::Cairo::set_source_pixbuf(cr, pixbuf, _pixbuf_x, _pixbuf_y/* - 0.5*/);
+	// Align
+	_content_x = _scale * (_content_x / (int)_scale);
+	_content_y = _scale * (_content_y / (int)_scale);
+
+	Glib::RefPtr<Gdk::Pixbuf> pixbuf = _content->scale_simple(scaled_content_width,
+															scaled_content_height,
+															Gdk::INTERP_NEAREST);
+
+	cr->translate(_content_x, _content_y);
+	Gdk::Cairo::set_source_pixbuf(cr, pixbuf, 0, 0);
 	cr->paint();
-
 	cr->scale(_scale, _scale);
 
 	if (_layer_manager) {
 		vector<Layer* > layers = _layer_manager->get_all_layers();
 		vector<Layer* >::iterator it;
 		for (it = layers.begin(); it != layers.end(); ++it) {
-			(*it)->set_drawing_rectangle(_pixbuf_x / _scale, _pixbuf_y / _scale, width, height);
+			// TODO: remove unused from layer
+			(*it)->set_drawing_size(_content_width, _content_height);
 			(*it)->draw(cr);
 		}
 	}
@@ -165,15 +181,8 @@ bool SelectableImage::on_button_press_event(GdkEventButton *event)
 {
 	if (event->type == GDK_BUTTON_PRESS && event->button == 1) {
 		// Left mouse button: select point.
-		Gtk::Allocation allocation = get_allocation();
-		const int width = allocation.get_width();
-		const int height = allocation.get_height();
-
-		/*double pixbuf_x = (width - _content_width * _scale)/2;
-		double pixbuf_y = (height - _content_height * _scale)/2;*/
-
-		int x = (event->x - _pixbuf_x) / _scale;
-		int y = (event->y - _pixbuf_y) / _scale;
+		int x = (event->x - _content_x) / _scale;
+		int y = (event->y - _content_y) / _scale;
 
 		if (x > 0 && x < _content_width &&
 			y > 0 && y < _content_height) {
@@ -197,15 +206,8 @@ bool SelectableImage::on_button_release_event(GdkEventButton *event)
 {
 	if (event->type == GDK_BUTTON_RELEASE && event->button == 1) {
 		// Left mouse button.
-		Gtk::Allocation allocation = get_allocation();
-		const int width = allocation.get_width();
-		const int height = allocation.get_height();
-
-		/*double pixbuf_x = (width - _content_width * _scale)/2;
-		double pixbuf_y = (height - _content_height * _scale)/2;*/
-
-		int x = (event->x - _pixbuf_x) / _scale;
-		int y = (event->y - _pixbuf_y) / _scale;
+		int x = (event->x - _content_x) / _scale;
+		int y = (event->y - _content_y) / _scale;
 
 		if (x > 0 && x < _content_width &&
 			y > 0 && y < _content_height) {
@@ -222,15 +224,8 @@ bool SelectableImage::on_button_release_event(GdkEventButton *event)
 bool SelectableImage::on_motion_notify_event(GdkEventMotion *event)
 {
 	if (event->type == GDK_MOTION_NOTIFY) {
-		Gtk::Allocation allocation = get_allocation();
-		const int width = allocation.get_width();
-		const int height = allocation.get_height();
-
-		/*double pixbuf_x = (width - _content_width * _scale)/2;
-		double pixbuf_y = (height - _content_height * _scale)/2;*/
-
-		int x = (event->x - _pixbuf_x) / _scale;
-		int y = (event->y - _pixbuf_y) / _scale;
+		int x = (event->x - _content_x) / _scale;
+		int y = (event->y - _content_y) / _scale;
 
 		if (x > 0 && x < _content_width &&
 			y > 0 && y < _content_height) {
