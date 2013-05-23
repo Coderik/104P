@@ -74,6 +74,7 @@ private:
 	int _scaled_content_width, _scaled_content_height;
 	int _width, _height;
 	bool _is_panning_enabled;
+	bool _is_dragging;
 	type_mouse_signal _signal_left_button_pressed;
 	type_mouse_signal _signal_left_button_released;
 	type_mouse_signal _signal_left_button_drag;

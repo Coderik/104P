@@ -11,7 +11,8 @@ SelectableImage::SelectableImage()
 {
 	add_events(Gdk::BUTTON_PRESS_MASK);
 	add_events(Gdk::BUTTON_RELEASE_MASK);
-	add_events(Gdk::BUTTON1_MOTION_MASK);
+	//add_events(Gdk::BUTTON1_MOTION_MASK);
+	add_events(Gdk::POINTER_MOTION_MASK);
 	_layer_manager = (LayerManager*)0;
 
 	// Create context menu.
@@ -36,6 +37,7 @@ SelectableImage::SelectableImage()
 
 	_scale = 1;
 	_is_panning_enabled = false;
+	_is_dragging = false;
 }
 
 
@@ -186,6 +188,7 @@ bool SelectableImage::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 	if (!_content)
 		return false;
 
+	// NOTE: signal_configure_event might be used to capture size changings
 	Gtk::Allocation allocation = get_allocation();
 	int width = allocation.get_width();
 	int height = allocation.get_height();
@@ -239,6 +242,8 @@ bool SelectableImage::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 bool SelectableImage::on_button_press_event(GdkEventButton *event)
 {
 	if (event->type == GDK_BUTTON_PRESS && event->button == 1) {
+		_is_dragging = true;
+
 		if (_is_panning_enabled) {
 			// Left mouse button: start panning.
 			_pan_start_x = event->x;
@@ -272,6 +277,8 @@ bool SelectableImage::on_button_press_event(GdkEventButton *event)
 bool SelectableImage::on_button_release_event(GdkEventButton *event)
 {
 	if (event->type == GDK_BUTTON_RELEASE && event->button == 1) {
+		_is_dragging = false;
+
 		if (!_is_panning_enabled) {
 			// Left mouse button.
 			int x = (event->x - _content_x) / _scale;
@@ -291,7 +298,11 @@ bool SelectableImage::on_button_release_event(GdkEventButton *event)
 
 bool SelectableImage::on_motion_notify_event(GdkEventMotion *event)
 {
-	if (event->type == GDK_MOTION_NOTIFY) {
+	if (event->type != GDK_MOTION_NOTIFY) {
+		return false;
+	}
+
+	if (_is_dragging) {
 		if (_is_panning_enabled) {
 			// Left mouse button: pan.
 			int dx = event->x - _pan_start_x;
@@ -315,6 +326,17 @@ bool SelectableImage::on_motion_notify_event(GdkEventMotion *event)
 				y > 0 && y < _content_height) {
 				_signal_left_button_drag.emit(x, y);
 			}
+		}
+
+		return true;
+	} else {
+		if (event->x < 30 || event->x > _width - 30 || event->y < 30 || event->y > _height - 30) {
+			Glib::RefPtr<Gdk::Window> window = this->get_window();
+			Glib::RefPtr<Gdk::Cursor> cursor = Gdk::Cursor::create(Gdk::FLEUR);
+			window->set_cursor(cursor);
+		} else {
+			Glib::RefPtr<Gdk::Window> window = this->get_window();
+			window-> set_cursor();
 		}
 
 		return true;
