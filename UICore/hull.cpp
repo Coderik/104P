@@ -46,6 +46,11 @@ Hull::Hull(string application_id)
 	_ui.view_action_group->set_sensitive(false);
 	_ui.time_slider->set_sensitive(false);
 	_ui.layers_visibility_toggle_action->set_active(true);
+
+	// TODO: add preferences and controls for that api
+	// NOTE: code for ImageViewer api testing
+	_ui.image_control->set_handy_pan_enabled(true);
+	_ui.image_control->set_zoom_by_wheel_enabled(true);
 }
 
 Hull::~Hull()

@@ -22,7 +22,7 @@ public:
 
 	string get_display_name();
 	string get_id();
-	void set_drawing_rectangle(int x, int y, int width, int height);
+	void set_drawing_size(int width, int height);
 	bool set_visibitity(bool is_visible);
 
 	virtual void draw(const Cairo::RefPtr<Cairo::Context>& context);
@@ -37,11 +37,8 @@ protected:
 	string _display_name;
 	string _id;
 	bool _is_visible;
-	int _drawing_x, _drawing_y, _drawing_width, _drawing_height;
+	int _drawing_width, _drawing_height;
 	type_signal_changed _signal_changed;
-
-	inline int true_x(const int x) { return _drawing_x + x; }
-	inline int true_y(const int y) { return _drawing_y + y; }
 
 };
 

@@ -26,7 +26,7 @@
 #include <gtkmm/infobar.h>
 #include <sigc++/sigc++.h>
 
-#include "selectable_image.h"
+#include "image_viewer.h"
 #include "layer_manager.h"
 #include "fitting.h"
 
@@ -49,7 +49,7 @@ public:
 	Glib::RefPtr<Gtk::ToggleAction> layers_visibility_toggle_action;
 
 	Gtk::Box *right_side_layout;
-	SelectableImage *image_control;
+	ImageViewer *image_control;
 	Gtk::Scale *time_slider;
 	Gtk::Statusbar *status_bar;
 	Gtk::InfoBar *background_work_infobar;
@@ -227,7 +227,7 @@ public:
 			infobar_box->pack_start(*background_work_infobar_message, Gtk::PACK_EXPAND_PADDING);
 		}
 
-		image_control = new SelectableImage();
+		image_control = new ImageViewer();
 		image_view_frame->add(*image_control);
 
 		// show all

@@ -27,10 +27,8 @@ string Layer::get_id()
 }
 
 
-void Layer::set_drawing_rectangle(int x, int y, int width, int height)
+void Layer::set_drawing_size(int width, int height)
 {
-	_drawing_x = x;
-	_drawing_y = y;
 	_drawing_width = width;
 	_drawing_height = height;
 }
