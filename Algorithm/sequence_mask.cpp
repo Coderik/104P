@@ -62,13 +62,13 @@ SequenceMask::iterator SequenceMask::end()
 
 SequenceMask::iterator SequenceMask::rbegin()
 {
-	return iterator(this, last());
+	return iterator(this, last(), true);
 }
 
 
 SequenceMask::iterator SequenceMask::rend()
 {
-	return iterator(this, Point(-1, -1, -1));
+	return iterator(this, Point(-1, -1, -1), true);
 }
 
 

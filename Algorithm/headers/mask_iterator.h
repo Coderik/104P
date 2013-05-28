@@ -23,7 +23,7 @@ public:
     typedef std::bidirectional_iterator_tag			iterator_category;
 
 	MaskIterator();
-    MaskIterator(IIterableMask *mask, Point current);
+    MaskIterator(IIterableMask *mask, Point current, bool reverse = false);
     MaskIterator(const MaskIterator& source);
     ~MaskIterator();
 
@@ -53,6 +53,7 @@ public:
 private:
 	IIterableMask *_mask;
 	Point _current;
+	bool _is_reverse;
 };
 
 

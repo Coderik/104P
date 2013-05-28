@@ -55,13 +55,13 @@ ImageMask::iterator ImageMask::end()
 
 ImageMask::iterator ImageMask::rbegin()
 {
-	return iterator(this, last());
+	return iterator(this, last(), true);
 }
 
 
 ImageMask::iterator ImageMask::rend()
 {
-	return iterator(this, Point(-1, -1, -1));
+	return iterator(this, Point(-1, -1, -1), true);
 }
 
 
