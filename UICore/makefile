@@ -9,28 +9,28 @@ ARCH = -m32
 CPP_SRCS += \
 ./background_worker.cpp \
 ./hull.cpp \
+./image_viewer.cpp \
 ./layer.cpp \
 ./layer_manager.cpp \
 ./optical_flow.cpp \
-./selectable_image.cpp \
 ./signal_watchdog.cpp
 
 OBJS += \
 bin/background_worker.o \
 bin/hull.o \
+bin/image_viewer.o \
 bin/layer.o \
 bin/layer_manager.o \
 bin/optical_flow.o \
-bin/selectable_image.o \
 bin/signal_watchdog.o 
 
 CPP_DEPS += \
 bin/background_worker.d \
 bin/hull.d \
+bin/image_viewer.d \
 bin/layer.d \
 bin/layer_manager.d \
 bin/optical_flow.d \
-bin/selectable_image.d \
 bin/signal_watchdog.d 
 
 LIBS := -lAlgorithm

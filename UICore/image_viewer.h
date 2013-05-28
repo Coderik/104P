@@ -1,12 +1,13 @@
 /*
- * selectable_image.h
+ * image_viewer.h
+ * (Previous name 'selectable_image.h'. Renamed on May 28, 2013)
  *
  *  Created on: Jan 10, 2013
  *      Author: Vadim Fedorov
  */
 
-#ifndef SELECTABLE_IMAGE_H_
-#define SELECTABLE_IMAGE_H_
+#ifndef IMAGE_VIEWER_H_
+#define IMAGE_VIEWER_H_
 
 #include <vector>
 #include <gdkmm/general.h>
@@ -20,11 +21,11 @@
 #include <sigc++/sigc++.h>
 #include "layer_manager.h"
 
-class SelectableImage: public Gtk::DrawingArea
+class ImageViewer: public Gtk::DrawingArea
 {
 public:
-	SelectableImage();
-	virtual ~SelectableImage();
+	ImageViewer();
+	virtual ~ImageViewer();
 	void set_pixbuf(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf);
 	void set_layer_manager(LayerManager *layer_manager);
 	void drop_layer_manager();
@@ -67,7 +68,7 @@ protected:
 
 
 private:
-	static const short MAX_ZOOM_SCALE = 6;
+	static const short MAX_ZOOM_SCALE = 6;	// NOTE: this is dictated by memory limitations
 	static const short MIN_ZOOM_SCALE = 1;	// TODO: handle zoom out
 	static const short HANDY_PAN_MARGIN = 30;
 
@@ -99,4 +100,4 @@ private:
 };
 
 
-#endif /* SELECTABLE_IMAGE_H_ */
+#endif /* IMAGE_VIEWER_H_ */

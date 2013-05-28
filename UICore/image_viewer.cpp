@@ -1,13 +1,14 @@
 /*
- * selectable_image.cpp
+ * image_viewer.cpp
+ * (Previous name 'selectable_image.cpp'. Renamed on May 28, 2013)
  *
  *  Created on: Jan 10, 2013
  *      Author: Vadim Fedorov
  */
 
-#include "selectable_image.h"
+#include "image_viewer.h"
 
-SelectableImage::SelectableImage()
+ImageViewer::ImageViewer()
 {
 	add_events(Gdk::BUTTON_PRESS_MASK);
 	add_events(Gdk::BUTTON_RELEASE_MASK);
@@ -19,7 +20,7 @@ SelectableImage::SelectableImage()
 	Glib::RefPtr<Gtk::ActionGroup> action_group = Gtk::ActionGroup::create();
 	action_group->add(Gtk::Action::create("ContextMenu", "Context Menu"));
 	action_group->add(Gtk::Action::create("SaveAction", "Save To PNG"),
-						sigc::mem_fun(*this, &SelectableImage::save_content ));
+						sigc::mem_fun(*this, &ImageViewer::save_content ));
 
 	_menu_manager = Gtk::UIManager::create();
 	_menu_manager->insert_action_group(action_group);
@@ -44,13 +45,13 @@ SelectableImage::SelectableImage()
 }
 
 
-SelectableImage::~SelectableImage()
+ImageViewer::~ImageViewer()
 {
 
 }
 
 
-void SelectableImage::set_pixbuf(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf)
+void ImageViewer::set_pixbuf(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf)
 {
 	if (!pixbuf) {
 		return;
@@ -63,12 +64,13 @@ void SelectableImage::set_pixbuf(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf)
 		_content_width = pixbuf->get_width();
 		_content_height = pixbuf->get_height();
 		set_size_request(_content_width / 2, _content_height / 2);
+		_scale = 1;
 		center_content();
 	}
 }
 
 
-void SelectableImage::set_layer_manager(LayerManager *layer_manager)
+void ImageViewer::set_layer_manager(LayerManager *layer_manager)
 {
 	if (_connection_layer_manager_signal_layer_changed.connected()) {
 		_connection_layer_manager_signal_layer_changed.disconnect();
@@ -76,10 +78,10 @@ void SelectableImage::set_layer_manager(LayerManager *layer_manager)
 
 	_layer_manager = layer_manager;
 	_connection_layer_manager_signal_layer_changed =
-			_layer_manager->signal_layer_changed().connect( sigc::mem_fun(*this, &SelectableImage::queue_draw) );
+			_layer_manager->signal_layer_changed().connect( sigc::mem_fun(*this, &ImageViewer::queue_draw) );
 }
 
-void SelectableImage::drop_layer_manager()
+void ImageViewer::drop_layer_manager()
 {
 	if (_connection_layer_manager_signal_layer_changed.connected()) {
 		_connection_layer_manager_signal_layer_changed.disconnect();
@@ -89,7 +91,7 @@ void SelectableImage::drop_layer_manager()
 }
 
 
-void SelectableImage::center_content()
+void ImageViewer::center_content()
 {
 	if (_content) {
 		Gtk::Allocation allocation = get_allocation();
@@ -110,7 +112,7 @@ void SelectableImage::center_content()
 }
 
 
-bool SelectableImage::set_zoom_scale(short zoom_scale)
+bool ImageViewer::set_zoom_scale(short zoom_scale)
 {
 	if (zoom_scale < MIN_ZOOM_SCALE || zoom_scale > MAX_ZOOM_SCALE) {
 		return false;
@@ -153,42 +155,42 @@ bool SelectableImage::set_zoom_scale(short zoom_scale)
 }
 
 
-short SelectableImage::get_zoom_scale()
+short ImageViewer::get_zoom_scale()
 {
 	return (short)_scale;
 }
 
 
-short SelectableImage::get_min_zoom_scale()
+short ImageViewer::get_min_zoom_scale()
 {
 	return MIN_ZOOM_SCALE;
 }
 
 
-short SelectableImage::get_max_zoom_scale()
+short ImageViewer::get_max_zoom_scale()
 {
 	return MAX_ZOOM_SCALE;
 }
 
 
-void SelectableImage::set_pan_enabled(bool enabled)
+void ImageViewer::set_pan_enabled(bool enabled)
 {
 	_is_common_pan_enabled = enabled;
 }
 
 
-void SelectableImage::set_handy_pan_enabled(bool enabled)
+void ImageViewer::set_handy_pan_enabled(bool enabled)
 {
 	_is_handy_pan_enabled = enabled;
 }
 
-void SelectableImage::set_zoom_by_wheel_enabled(bool enabled)
+void ImageViewer::set_zoom_by_wheel_enabled(bool enabled)
 {
 	_is_zoom_by_wheel_enabled = enabled;
 }
 
 
-void SelectableImage::save_content()
+void ImageViewer::save_content()
 {
 	Gtk::FileChooserDialog dialog("Saving content as image...", Gtk::FILE_CHOOSER_ACTION_SAVE);
 	Gtk::Window *root_window = static_cast<Gtk::Window* >( this->get_toplevel() );
@@ -216,7 +218,7 @@ void SelectableImage::save_content()
 
 /* protected */
 
-bool SelectableImage::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
+bool ImageViewer::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 {
 	if (!_content)
 		return false;
@@ -272,7 +274,7 @@ bool SelectableImage::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 	return true;
 }
 
-bool SelectableImage::on_button_press_event(GdkEventButton *event)
+bool ImageViewer::on_button_press_event(GdkEventButton *event)
 {
 	if (event->type == GDK_BUTTON_PRESS && event->button == 1) {
 		_is_dragging = true;
@@ -312,7 +314,7 @@ bool SelectableImage::on_button_press_event(GdkEventButton *event)
 	return false;
 }
 
-bool SelectableImage::on_button_release_event(GdkEventButton *event)
+bool ImageViewer::on_button_release_event(GdkEventButton *event)
 {
 	if (event->type == GDK_BUTTON_RELEASE && event->button == 1) {
 		if (!_is_panning) {
@@ -338,7 +340,7 @@ bool SelectableImage::on_button_release_event(GdkEventButton *event)
 }
 
 
-bool SelectableImage::on_motion_notify_event(GdkEventMotion *event)
+bool ImageViewer::on_motion_notify_event(GdkEventMotion *event)
 {
 	if (event->type != GDK_MOTION_NOTIFY) {
 		return false;
@@ -389,7 +391,7 @@ bool SelectableImage::on_motion_notify_event(GdkEventMotion *event)
 }
 
 
-bool SelectableImage::on_scroll_event (GdkEventScroll* event)
+bool ImageViewer::on_scroll_event (GdkEventScroll* event)
 {
 	if (_is_zoom_by_wheel_enabled && _content) {
 		if (event->direction == GDK_SCROLL_UP) {
@@ -408,7 +410,7 @@ bool SelectableImage::on_scroll_event (GdkEventScroll* event)
 /* private */
 
 
-void SelectableImage::save_content_internal(const string& filename)
+void ImageViewer::save_content_internal(const string& filename)
 {
 	// TODO: add '.png' extension if absent
 	// TODO: crop to the actually used area
@@ -417,7 +419,7 @@ void SelectableImage::save_content_internal(const string& filename)
 }
 
 
-inline bool SelectableImage::is_pan_allowed(int x, int y, int margin)
+inline bool ImageViewer::is_pan_allowed(int x, int y, int margin)
 {
 	return _is_common_pan_enabled ||
 			(_is_handy_pan_enabled && (x < margin || x > _width - margin || y < margin || y > _height - margin));
