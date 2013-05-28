@@ -28,6 +28,7 @@ public:
 	void set_pixbuf(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf);
 	void set_layer_manager(LayerManager *layer_manager);
 	void drop_layer_manager();
+	void center_content();
 
 	bool set_zoom_scale(short zoom_scale);
 	short get_zoom_scale();
@@ -36,6 +37,7 @@ public:
 
 	void set_pan_enabled(bool enabled);
 	void set_handy_pan_enabled(bool enabled);
+	void set_zoom_by_wheel_enabled(bool enabled);
 
 	void save_content();
 
@@ -61,11 +63,13 @@ protected:
 	virtual bool on_button_press_event(GdkEventButton *event);
 	virtual bool on_button_release_event(GdkEventButton *event);
 	virtual bool on_motion_notify_event(GdkEventMotion *event);
+	virtual bool on_scroll_event (GdkEventScroll* event);
 
 
 private:
-	static const short MAX_ZOOM_SCALE = 16;
+	static const short MAX_ZOOM_SCALE = 6;
 	static const short MIN_ZOOM_SCALE = 1;	// TODO: handle zoom out
+	static const short HANDY_PAN_MARGIN = 30;
 
 	Glib::RefPtr<Gdk::Pixbuf> _content;
 	int _content_x, _content_y;
@@ -76,6 +80,7 @@ private:
 	int _width, _height;
 	bool _is_common_pan_enabled;
 	bool _is_handy_pan_enabled;
+	bool _is_zoom_by_wheel_enabled;
 
 	bool _is_dragging;
 	bool _is_panning;

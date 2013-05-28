@@ -47,9 +47,11 @@ Hull::Hull(string application_id)
 	_ui.time_slider->set_sensitive(false);
 	_ui.layers_visibility_toggle_action->set_active(true);
 
-	//tmp
+	// TODO: remove temporal code
+	// NOTE: temporal code for SelactableImage api testing
 	//_ui.image_control->set_zoom_scale(2);
 	_ui.image_control->set_handy_pan_enabled(true);
+	_ui.image_control->set_zoom_by_wheel_enabled(true);
 }
 
 Hull::~Hull()

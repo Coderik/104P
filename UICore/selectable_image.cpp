@@ -11,8 +11,8 @@ SelectableImage::SelectableImage()
 {
 	add_events(Gdk::BUTTON_PRESS_MASK);
 	add_events(Gdk::BUTTON_RELEASE_MASK);
-	//add_events(Gdk::BUTTON1_MOTION_MASK);
 	add_events(Gdk::POINTER_MOTION_MASK);
+	add_events(Gdk::SCROLL_MASK);
 	_layer_manager = (LayerManager*)0;
 
 	// Create context menu.
@@ -38,6 +38,7 @@ SelectableImage::SelectableImage()
 	_scale = 1;
 	_is_common_pan_enabled = false;
 	_is_handy_pan_enabled = false;
+	_is_zoom_by_wheel_enabled = false;
 	_is_dragging = false;
 	_is_panning = false;
 }
@@ -51,28 +52,18 @@ SelectableImage::~SelectableImage()
 
 void SelectableImage::set_pixbuf(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf)
 {
+	if (!pixbuf) {
+		return;
+	}
+
+	bool first_data = !_content;
 	_content = pixbuf;
 
-	// Show at least a quarter of the image.
-	if (_content) {
-		_content_width = _content->get_width();
-		_content_height = _content->get_height();
+	if ( first_data || _content_width != pixbuf->get_width() || _content_height != pixbuf->get_height() ) {
+		_content_width = pixbuf->get_width();
+		_content_height = pixbuf->get_height();
 		set_size_request(_content_width / 2, _content_height / 2);
-
-		Gtk::Allocation allocation = get_allocation();
-		_width = allocation.get_width();
-		_height = allocation.get_height();
-
-		// Draw the image in the middle of the drawing area, or (if the image is
-		// larger than the drawing area) draw the middle part of the image.
-		_scaled_content_width = _content_width * _scale;
-		_scaled_content_height = _content_height * _scale;
-		_content_x = (_width - _scaled_content_width)/2;
-		_content_y = (_height - _scaled_content_height)/2;
-
-		// Align
-		_content_x = _scale * (_content_x / (int)_scale);
-		_content_y = _scale * (_content_y / (int)_scale);
+		center_content();
 	}
 }
 
@@ -98,23 +89,48 @@ void SelectableImage::drop_layer_manager()
 }
 
 
+void SelectableImage::center_content()
+{
+	if (_content) {
+		Gtk::Allocation allocation = get_allocation();
+		_width = allocation.get_width();
+		_height = allocation.get_height();
+
+		// Draw the image in the middle of the drawing area, or (if the image is
+		// larger than the drawing area) draw the middle part of the image.
+		_scaled_content_width = _content_width * _scale;
+		_scaled_content_height = _content_height * _scale;
+		_content_x = (_width - _scaled_content_width)/2;
+		_content_y = (_height - _scaled_content_height)/2;
+
+		// Align
+		_content_x = _scale * (_content_x / (int)_scale);
+		_content_y = _scale * (_content_y / (int)_scale);
+	}
+}
+
+
 bool SelectableImage::set_zoom_scale(short zoom_scale)
 {
 	if (zoom_scale < MIN_ZOOM_SCALE || zoom_scale > MAX_ZOOM_SCALE) {
 		return false;
 	}
 
-	_scale = zoom_scale;
+	if (_scale == zoom_scale) {
+		return true;
+	}
 
-	int scaled_content_width = _content_width * _scale;
-	int scaled_content_height = _content_height * _scale;
+
+
+	int scaled_content_width = _content_width * zoom_scale;
+	int scaled_content_height = _content_height * zoom_scale;
 
 	if (_scaled_content_width != scaled_content_width) {
 		if (scaled_content_width < _width || _scaled_content_width < _width) {
 			_content_x = (_width - scaled_content_width)/2;
 		} else {
-			_content_x = _width / 2 - (_width / 2 - _content_x) * _scale;
-			_content_x = std::max(_width - _scaled_content_width , std::min(0, _content_x));
+			_content_x = _width / 2 - (_width / 2 - _content_x) / _scale * zoom_scale;
+			_content_x = std::max(_width - scaled_content_width , std::min(0, _content_x));
 		}
 		_scaled_content_width = scaled_content_width;
 	}
@@ -123,11 +139,15 @@ bool SelectableImage::set_zoom_scale(short zoom_scale)
 		if (scaled_content_height < _height || _scaled_content_height < _height) {
 			_content_y = (_height - scaled_content_height)/2;
 		} else {
-			_content_y = _height / 2 - (_height / 2 - _content_y) * _scale;
-			_content_y = std::max(_height - _scaled_content_height , std::min(0, _content_y));
+			_content_y = _height / 2 - (_height / 2 - _content_y) / _scale * zoom_scale;
+			_content_y = std::max(_height - scaled_content_height , std::min(0, _content_y));
 		}
 		_scaled_content_height = scaled_content_height;
 	}
+
+	_scale = zoom_scale;
+
+	this->get_window()->invalidate(false);
 
 	return true;
 }
@@ -160,6 +180,11 @@ void SelectableImage::set_pan_enabled(bool enabled)
 void SelectableImage::set_handy_pan_enabled(bool enabled)
 {
 	_is_handy_pan_enabled = enabled;
+}
+
+void SelectableImage::set_zoom_by_wheel_enabled(bool enabled)
+{
+	_is_zoom_by_wheel_enabled = enabled;
 }
 
 
@@ -252,7 +277,7 @@ bool SelectableImage::on_button_press_event(GdkEventButton *event)
 	if (event->type == GDK_BUTTON_PRESS && event->button == 1) {
 		_is_dragging = true;
 
-		if (is_pan_allowed(event->x, event->y, 30)) {
+		if (is_pan_allowed(event->x, event->y, HANDY_PAN_MARGIN)) {
 			// Left mouse button: start panning.
 			_is_panning = true;
 			_pan_start_x = event->x;
@@ -348,7 +373,7 @@ bool SelectableImage::on_motion_notify_event(GdkEventMotion *event)
 		return true;
 	} else {
 		// TODO: get rid of blinking on WIN
-		/*if (is_pan_allowed(event->x, event->y, 30)) {
+		/*if (is_pan_allowed(event->x, event->y, HANDY_PAN_MARGIN)) {
 			Glib::RefPtr<Gdk::Window> window = this->get_window();
 			Glib::RefPtr<Gdk::Cursor> cursor = Gdk::Cursor::create(Gdk::FLEUR);
 			window->set_cursor(cursor);
@@ -356,6 +381,22 @@ bool SelectableImage::on_motion_notify_event(GdkEventMotion *event)
 			Glib::RefPtr<Gdk::Window> window = this->get_window();
 			window-> set_cursor();
 		}*/
+
+		return true;
+	}
+
+	return false;
+}
+
+
+bool SelectableImage::on_scroll_event (GdkEventScroll* event)
+{
+	if (_is_zoom_by_wheel_enabled && _content) {
+		if (event->direction == GDK_SCROLL_UP) {
+			set_zoom_scale(_scale + 1);
+		} else if (event->direction == GDK_SCROLL_DOWN) {
+			set_zoom_scale(_scale - 1);
+		}
 
 		return true;
 	}
