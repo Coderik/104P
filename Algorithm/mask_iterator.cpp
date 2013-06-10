@@ -11,13 +11,15 @@ MaskIterator::MaskIterator()
 {
 	_mask = 0;
 	_current = Point(-1, -1, -1); // TODO: add 'empty' static property to Point
+	_is_reverse = false;
 }
 
 
-MaskIterator::MaskIterator(IIterableMask *mask, Point current)
+MaskIterator::MaskIterator(IIterableMask *mask, Point current, bool reverse)
 {
 	_mask = mask;
 	_current = current;
+	_is_reverse = reverse;
 }
 
 
@@ -25,6 +27,7 @@ MaskIterator::MaskIterator(const MaskIterator& source)
 {
 	this->_mask = source._mask;
 	this->_current = source._current;
+	this->_is_reverse = source._is_reverse;
 }
 
 
@@ -39,6 +42,7 @@ MaskIterator& MaskIterator::operator=(const MaskIterator& source)
 	if (this != &source) {
 		this->_mask = source._mask;
 		this->_current = source._current;
+		this->_is_reverse = source._is_reverse;
 	}
 
 	return *this;
@@ -47,20 +51,22 @@ MaskIterator& MaskIterator::operator=(const MaskIterator& source)
 
 bool MaskIterator::operator==(const MaskIterator& other) const
 {
-	return (this->_mask == other._mask) && (this->_current == other._current);
+	return (this->_mask == other._mask) && (this->_current == other._current) && (this->_is_reverse == other._is_reverse);
 }
 
 
 bool MaskIterator::operator!=(const MaskIterator& other) const
 {
-	return (this->_mask != other._mask) || (this->_current != other._current);
+	return (this->_mask != other._mask) || (this->_current != other._current) || (this->_is_reverse != other._is_reverse);
 }
 
 
 MaskIterator& MaskIterator::operator++()
 {
 	if (_mask) {
-		_current =  _mask->next(_current);
+		_current = (_is_reverse) ?
+					_mask->prev(_current) :
+					_mask->next(_current);
 	}
 
 	return *this;
@@ -72,7 +78,9 @@ MaskIterator MaskIterator::operator++(int)
 	MaskIterator aux(*this);
 
 	if (_mask) {
-		_current =  _mask->next(_current);
+		_current = (_is_reverse) ?
+					_mask->prev(_current) :
+					_mask->next(_current);
 	}
 
 	return aux;
@@ -82,7 +90,9 @@ MaskIterator MaskIterator::operator++(int)
 MaskIterator& MaskIterator::operator--()
 {
 	if (_mask) {
-		_current =  _mask->prev(_current);
+		_current = (_is_reverse) ?
+					_mask->next(_current) :
+					_mask->prev(_current);
 	}
 
 	return *this;
@@ -94,7 +104,9 @@ MaskIterator MaskIterator::operator--(int)
 	MaskIterator aux(*this);
 
 	if (_mask) {
-		_current =  _mask->prev(_current);
+		_current = (_is_reverse) ?
+					_mask->next(_current) :
+					_mask->prev(_current);
 	}
 
 	return aux;
