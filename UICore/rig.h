@@ -10,6 +10,7 @@
 
 #include <gdk/gdk.h>
 #include "i_hull.h"
+#include "mouse_event.h"
 
 /*
  * The base class for every specific Rig, which defines interface that the Hull uses
@@ -34,9 +35,9 @@ public:
 	/* TODO: in the case of multiple possible options of user interaction these methods
 	 * must be generalized e.g. by moving to separate User_Interaction class
 	 */
-	virtual void left_button_pressed(int x, int y) {};
-	virtual void left_button_drag(int x, int y) {};
-	virtual void left_button_released(int x, int y) {};
+	virtual void left_button_pressed(MouseEvent event) {};
+	virtual void left_button_drag(MouseEvent event) {};
+	virtual void left_button_released(MouseEvent event) {};
 	virtual void key_pressed(GdkEventKey* event) {};
 
 protected:

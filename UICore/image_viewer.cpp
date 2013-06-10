@@ -122,8 +122,6 @@ bool ImageViewer::set_zoom_scale(short zoom_scale)
 		return true;
 	}
 
-
-
 	int scaled_content_width = _content_width * zoom_scale;
 	int scaled_content_height = _content_height * zoom_scale;
 
@@ -296,7 +294,8 @@ bool ImageViewer::on_button_press_event(GdkEventButton *event)
 			int y = (event->y - _content_y) / _scale;
 			if (x > 0 && x < _content_width &&
 				y > 0 && y < _content_height) {
-				_signal_left_button_pressed.emit(x, y);
+				MouseEvent mouse_event(x, y, event->state);
+				_signal_left_button_pressed.emit(mouse_event);
 			}
 		}
 
@@ -323,7 +322,8 @@ bool ImageViewer::on_button_release_event(GdkEventButton *event)
 			int y = (event->y - _content_y) / _scale;
 			if (x > 0 && x < _content_width &&
 				y > 0 && y < _content_height) {
-				_signal_left_button_released.emit(x, y);
+				MouseEvent mouse_event(x, y, event->state);
+				_signal_left_button_released.emit(mouse_event);
 			}
 		}
 
@@ -368,7 +368,8 @@ bool ImageViewer::on_motion_notify_event(GdkEventMotion *event)
 			int y = (event->y - _content_y) / _scale;
 			if (x > 0 && x < _content_width &&
 				y > 0 && y < _content_height) {
-				_signal_left_button_drag.emit(x, y);
+				MouseEvent mouse_event(x, y, event->state);
+				_signal_left_button_drag.emit(mouse_event);
 			}
 		}
 

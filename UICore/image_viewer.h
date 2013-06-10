@@ -20,6 +20,7 @@
 #include <cairomm/context.h>
 #include <sigc++/sigc++.h>
 #include "layer_manager.h"
+#include "mouse_event.h"
 
 class ImageViewer: public Gtk::DrawingArea
 {
@@ -42,7 +43,7 @@ public:
 
 	void save_content();
 
-	typedef sigc::signal<void, int, int> type_mouse_signal;
+	typedef sigc::signal<void, MouseEvent> type_mouse_signal;
 	type_mouse_signal signal_left_button_pressed()
 	{
 		return _signal_left_button_pressed;

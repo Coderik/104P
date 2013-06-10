@@ -348,21 +348,21 @@ void Hull::set_layers_visibility()
 }
 
 
-void Hull::left_button_pressed(int mouse_x, int mouse_y)
+void Hull::left_button_pressed(MouseEvent mouse_event)
 {
-	_current_fitting->rig->left_button_pressed(mouse_x, mouse_y);
+	_current_fitting->rig->left_button_pressed(mouse_event);
 }
 
 
-void Hull::left_button_released(int mouse_x, int mouse_y)
+void Hull::left_button_released(MouseEvent mouse_event)
 {
-	_current_fitting->rig->left_button_released(mouse_x, mouse_y);
+	_current_fitting->rig->left_button_released(mouse_event);
 }
 
 
-void Hull::left_button_drag(int mouse_x, int mouse_y)
+void Hull::left_button_drag(MouseEvent mouse_event)
 {
-	_current_fitting->rig->left_button_drag(mouse_x, mouse_y);
+	_current_fitting->rig->left_button_drag(mouse_event);
 }
 
 

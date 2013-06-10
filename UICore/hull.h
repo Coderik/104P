@@ -46,6 +46,7 @@
 #include "layer_manager.h"
 #include "background_worker.h"
 #include "optical_flow_data.h"
+#include "mouse_event.h"
 
 using namespace std;
 
@@ -71,9 +72,9 @@ protected:
 	void open_image();
 	void open_sequence();
 	void open_recent();
-	void left_button_pressed(int mouse_x, int mouse_y);
-	void left_button_released(int mouse_x, int mouse_y);
-	void left_button_drag(int mouse_x, int mouse_y);
+	void left_button_pressed(MouseEvent mouse_event);
+	void left_button_released(MouseEvent mouse_event);
+	void left_button_drag(MouseEvent mouse_event);
 	void set_time();
 	void restore_optical_flow();
 	void update_view();
