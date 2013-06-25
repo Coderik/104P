@@ -370,6 +370,7 @@ void Hull::set_time()
 {
 	_current_time = _ui.time_slider->get_value();
 	update_image_control(_current_time);
+	_current_fitting->layer_manager->set_current_time(_current_time);
 	_current_fitting->rig->current_time_changed();
 }
 

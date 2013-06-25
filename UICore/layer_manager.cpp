@@ -79,6 +79,16 @@ void LayerManager::set_visibility(bool is_visible)
 }
 
 
+void LayerManager::set_current_time(int time)
+{
+	map<string, type_layer_and_connection >::iterator it;
+	for (it = _layers_map.begin(); it != _layers_map.end(); ++it) {
+		Layer *layer = it->second.first;
+		layer->set_current_time(time);
+	}
+}
+
+
 /* private */
 void LayerManager::notify_layer_changed()
 {
