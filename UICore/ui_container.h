@@ -82,7 +82,7 @@ public:
 		_current_view = VIEW_ORIGINAL_IMAGE;
 
 		// adjust main window
-		window->set_title("Geodesic Distance test app");
+		window->set_title("Image & video processing testing environment");
 		window->set_default_size(800, 700);
 
 		// set up menu

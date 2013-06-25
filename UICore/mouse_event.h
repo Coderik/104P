@@ -23,7 +23,7 @@ public:
 	unsigned int modifiers;
 
 	static const unsigned int SHIFT_MODIFIER = GDK_SHIFT_MASK;
-	static const unsigned int CONST_MODIFIER = GDK_CONTROL_MASK;
+	static const unsigned int CONTROL_MODIFIER = GDK_CONTROL_MASK;
 	static const unsigned int ALT_MODIFIER = GDK_MOD1_MASK;		//Note: it depends on the modifier mapping, but normally it is the Alt key
 };
 
