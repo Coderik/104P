@@ -136,7 +136,7 @@ T Sequence<T>::get_value(int x, int y, int t)
 template <class T>
 bool Sequence<T>::try_get_value(int x, int y, int t, T& value)
 {
-	if (t < 0 || t > _t_size || !_frames[t])
+	if (t < 0 || t >= _t_size || !_frames[t])
 		return false;
 
 	return _frames[t]->try_get_value(x, y, value);
@@ -146,7 +146,7 @@ bool Sequence<T>::try_get_value(int x, int y, int t, T& value)
 template <class T>
 void Sequence<T>::set_value(int x, int y, int t, T value)
 {
-	if (t < 0 || t > _t_size)
+	if (t < 0 || t >= _t_size)
 		return;
 
 	if (!_frames[t]) {
