@@ -11,6 +11,7 @@ LayerManager::LayerManager(){
 	_layers_map = map<string, type_layer_and_connection >();
 	_is_layers_cache_valid = false;
 	_is_notification_allowed = true;
+	_current_time = 0;
 }
 
 
@@ -28,6 +29,7 @@ string LayerManager::add_layer(Layer* layer)
 	sigc::connection connection =
 			layer->signal_changed().connect( sigc::mem_fun(*this, &LayerManager::notify_layer_changed) );
 	_layers_map[key] = std::make_pair(layer, connection);		// Note: [] operator inserts new or updates existing.
+	layer->set_current_time(_current_time);
 	_is_layers_cache_valid = false;
 
 	return key;
@@ -81,6 +83,12 @@ void LayerManager::set_visibility(bool is_visible)
 
 void LayerManager::set_current_time(int time)
 {
+	if (_current_time == time) {
+		return;
+	}
+
+	_current_time = time;
+
 	map<string, type_layer_and_connection >::iterator it;
 	for (it = _layers_map.begin(); it != _layers_map.end(); ++it) {
 		Layer *layer = it->second.first;

@@ -300,6 +300,7 @@ LayerManager* Hull::request_layer_manager()
 
 	if (!_current_fitting->layer_manager) {
 		_current_fitting->layer_manager = new LayerManager();
+		_current_fitting->layer_manager->set_current_time(_current_time);
 		_ui.image_control->set_layer_manager(_current_fitting->layer_manager);
 	}
 
@@ -370,7 +371,11 @@ void Hull::set_time()
 {
 	_current_time = _ui.time_slider->get_value();
 	update_image_control(_current_time);
-	_current_fitting->layer_manager->set_current_time(_current_time);
+
+	if (_current_fitting->layer_manager) {
+		_current_fitting->layer_manager->set_current_time(_current_time);
+	}
+
 	_current_fitting->rig->current_time_changed();
 }
 
@@ -503,6 +508,7 @@ void Hull::update_fitting()
 	_ui.refresh_placeholders();
 
 	if (_current_fitting->layer_manager) {
+		_current_fitting->layer_manager->set_current_time(_current_time);
 		_ui.image_control->set_layer_manager(_current_fitting->layer_manager);
 	}
 }

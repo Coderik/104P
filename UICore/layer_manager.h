@@ -44,6 +44,7 @@ private:
 	bool _is_layers_cache_valid;
 	type_signal_layer_changed _signal_layer_changed;
 	bool _is_notification_allowed;
+	int _current_time;
 
 	void notify_layer_changed();
 };
