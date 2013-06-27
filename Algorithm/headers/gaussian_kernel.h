@@ -23,7 +23,7 @@ public:
 	float get(int x, int y, int z);
 
 private:
-	static const float STEP = 0.1;
+	static const float STEP = 0.01;
 	unsigned int _size_x, _size_y, _size_z;
 	float *_values;
 
