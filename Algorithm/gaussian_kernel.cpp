@@ -52,7 +52,7 @@ float GaussianKernel::get(unsigned int x, unsigned int y, unsigned int z)
 void GaussianKernel::build_kernel()
 {
 	fill_n(_values, _size_x * _size_y * _size_z, 0.0);
-	const float sigma_scale = 9;
+	const float sigma_scale = 6;
 
 	float sigma_x = (float)_size_x / sigma_scale;
 	float sigma_y = (float)_size_y / sigma_scale;
