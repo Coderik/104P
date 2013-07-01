@@ -201,7 +201,7 @@ Image<T>* Image<T>::get_patch_around_point(int center_x, int center_y, int size)
 
 
 template <class T>
-int Image<T>::get_raw_data_length()
+int Image<T>::get_raw_data_length() const
 {
 	return _x_size * _y_size;
 }
@@ -211,9 +211,19 @@ int Image<T>::get_raw_data_length()
  * Returns pointer to internal raw data representation.
  */
  template <class T>
-T* Image<T>::get_raw_data()
+const T* Image<T>::get_raw_data() const
 {
 	return _points;
+}
+
+
+/**
+* Returns pointer to internal raw data representation.
+*/
+template <class T>
+T* Image<T>::get_raw_data()
+{
+return _points;
 }
 
 

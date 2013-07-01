@@ -2,7 +2,7 @@
  * interpolation.h
  *
  *  Created on: Jan 23, 2013
- *      Author: upf
+ *      Author: Vadim Fedorov
  */
 
 #ifndef INTERPOLATION_H_
@@ -10,13 +10,37 @@
 
 #include <math.h>
 
+#include "image.h"
+
+using namespace std;
+
+namespace BoundaryCondition {
+	enum Enum {
+		neumann,
+		periodic,
+		symmetric,
+		crop
+	};
+}
+typedef BoundaryCondition::Enum BoundaryConditionEnum;
+
 class Interpolation
 {
 public:
-	// NOTE: original name 'me_interpolate_bilinear'
-	static float bilinear(const float *in, int ncol, int nrow, float x, float y);
-	// NOTE: original name 'me_interpolate_bicubic'
-	static float bicubic(const float *in, int nx, int ny, float x, float y);
+	static float bilinear(const Image<float> &input, float x, float y);
+	static float bilinear(const float *input, int size_x, int size_y, float x, float y);
+	static float bicubic(const Image<float> &input, float x, float y,
+			BoundaryConditionEnum boundary_condition = BoundaryCondition::neumann);
+	static float bicubic(const float *input, int size_x, int size_y, float x, float y,
+			BoundaryConditionEnum boundary_condition = BoundaryCondition::neumann);
+
+private:
+	static double cubic_internal(double v[4], double x);
+	static double bicubic_internal(double p[4][4], double x, double y);
+	inline static int neumann_boundary_condition(int x, int size);
+	inline static int periodic_boundary_condition(int x, int size);
+	inline static int symmetric_boundary_condition(int x, int size);
+	inline static int crop_boundary_condition(int x, int size, bool &is_out);
 };
 
 

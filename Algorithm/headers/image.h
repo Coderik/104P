@@ -34,7 +34,8 @@ public:
 	Image<T>* get_patch_between_points(int a_x, int a_y, int b_x, int b_y);
 	Image<T>* get_patch_around_point(int center_x, int center_y, int x_size, int y_size);
 	Image<T>* get_patch_around_point(int center_x, int center_y, int size);
-	int get_raw_data_length();
+	int get_raw_data_length() const;
+	const T* get_raw_data() const;
 	T* get_raw_data();
 protected:
 	int _x_size, _y_size;
