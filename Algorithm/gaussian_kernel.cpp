@@ -7,15 +7,31 @@
 
 #include "headers/gaussian_kernel.h"
 
-GaussianKernel::GaussianKernel(unsigned int size_x, unsigned int size_y, unsigned int size_z)
+GaussianKernel::GaussianKernel(unsigned int size_x, unsigned int size_y, unsigned int size_z, float sigma_scale)
 {
+	// TODO: force size to be odd values
 	_size_x = size_x;
 	_size_y = size_y;
 	_size_z = size_z;
 
-	// TODO: force size to be odd values
+	_sigma_x = (float)_size_x / sigma_scale;
+	_sigma_y = (float)_size_y / sigma_scale;
+	_sigma_z = (float)_size_z / sigma_scale;
 
-	_values = (float*)malloc(sizeof(float) * size_x * size_y * size_z);
+	build_kernel();
+}
+
+
+GaussianKernel::GaussianKernel(unsigned int size_x, unsigned int size_y, unsigned int size_z, float sigma_x, float sigma_y, float sigma_z)
+{
+	// TODO: force size to be odd values
+	_size_x = size_x;
+	_size_y = size_y;
+	_size_z = size_z;
+
+	_sigma_x = sigma_x;
+	_sigma_y = sigma_y;
+	_sigma_z = sigma_z;
 
 	build_kernel();
 }
@@ -47,16 +63,18 @@ float GaussianKernel::get(unsigned int x, unsigned int y, unsigned int z)
 	return _values[get_index(x, y, z)];
 }
 
+
+const float* GaussianKernel::get_raw() const
+{
+	return _values;
+}
+
 /* Private */
 
 void GaussianKernel::build_kernel()
 {
+	_values = (float*)malloc(sizeof(float) * _size_x * _size_y * _size_z);
 	fill_n(_values, _size_x * _size_y * _size_z, 0.0);
-	const float sigma_scale = 6;
-
-	float sigma_x = (float)_size_x / sigma_scale;
-	float sigma_y = (float)_size_y / sigma_scale;
-	float sigma_z = (float)_size_z / sigma_scale;
 
 	float x_a = - (float)_size_x / 2 - STEP / 2;
 	float x_b = (float)1.0 / 2 - STEP / 2;
@@ -71,7 +89,7 @@ void GaussianKernel::build_kernel()
 		for (float x = x_a; x < x_b; x+= STEP) {
 			int i_x = (x - x_a);
 
-			float val = exp(-0.5 * (pow(x, 2) / pow(sigma_x, 2)));
+			float val = exp(-0.5 * (pow(x, 2) / pow(_sigma_x, 2)));
 
 			_values[get_index(i_x, 0, 0)] += val * STEP;
 		}
@@ -82,7 +100,7 @@ void GaussianKernel::build_kernel()
 				int i_x = (x - x_a);
 				int i_y = (y - y_a);
 
-				float val = exp(-0.5 * (pow(x, 2) / pow(sigma_x, 2) + pow(y, 2) / pow(sigma_y, 2)));
+				float val = exp(-0.5 * (pow(x, 2) / pow(_sigma_x, 2) + pow(y, 2) / pow(_sigma_y, 2)));
 
 				_values[get_index(i_x, i_y, 0)] += val * pow(STEP, 2);
 			}
@@ -96,8 +114,8 @@ void GaussianKernel::build_kernel()
 					int i_y = (y - y_a);
 					int i_z = (z - z_a);
 
-					float val = exp(-0.5 * (pow(x, 2) / pow(sigma_x, 2) + pow(y, 2) / pow(sigma_y, 2) +
-															pow(z, 2) / pow(sigma_z, 2)));
+					float val = exp(-0.5 * (pow(x, 2) / pow(_sigma_x, 2) + pow(y, 2) / pow(_sigma_y, 2) +
+															pow(z, 2) / pow(_sigma_z, 2)));
 
 					_values[get_index(i_x, i_y, i_z)] += val * pow(STEP, 3);
 				}

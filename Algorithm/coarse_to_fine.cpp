@@ -79,18 +79,17 @@ void CoarseToFine::zoom(float *in, float *out, int nx, int ny, float factor = 0.
 	smooth_sigma = sqrt(1./factor)/sqrt(2.0);
 	size = 2 * round(1.5 * smooth_sigma) + 1;
 
-	filter = me_sgauss(smooth_sigma, size);
+	GaussianKernel kernel(size, 1, 1, smooth_sigma, 0, 0);
 
 	/* Filter image */
 	tmp = new float[nx * ny];
-	me_sepconvol(in, tmp, nx, ny, filter, filter, size, size);
+	Filtering::separate_convolution(in, tmp, nx, ny, filter, filter, size, size);
 
 	/* Restrict image */
 	apply_restriction(tmp, out, nx, ny, nxx, nyy, factor);
 
 	/* Free memory */
 	delete [] tmp;
-	delete [] filter;
 }
 
 

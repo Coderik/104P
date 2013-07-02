@@ -19,7 +19,7 @@ namespace BoundaryCondition {
 		neumann,
 		periodic,
 		symmetric,
-		crop
+		cutting
 	};
 }
 typedef BoundaryCondition::Enum BoundaryConditionEnum;
@@ -27,8 +27,10 @@ typedef BoundaryCondition::Enum BoundaryConditionEnum;
 class Interpolation
 {
 public:
-	static float bilinear(const Image<float> &input, float x, float y);
-	static float bilinear(const float *input, int size_x, int size_y, float x, float y);
+	static float bilinear(const Image<float> &input, float x, float y,
+			BoundaryConditionEnum boundary_condition = BoundaryCondition::neumann);
+	static float bilinear(const float *input, int size_x, int size_y, float x, float y,
+			BoundaryConditionEnum boundary_condition = BoundaryCondition::neumann);
 	static float bicubic(const Image<float> &input, float x, float y,
 			BoundaryConditionEnum boundary_condition = BoundaryCondition::neumann);
 	static float bicubic(const float *input, int size_x, int size_y, float x, float y,
@@ -40,7 +42,7 @@ private:
 	inline static int neumann_boundary_condition(int x, int size);
 	inline static int periodic_boundary_condition(int x, int size);
 	inline static int symmetric_boundary_condition(int x, int size);
-	inline static int crop_boundary_condition(int x, int size, bool &is_out);
+	inline static int cutting_boundary_condition(int x, int size, bool &is_out);
 };
 
 

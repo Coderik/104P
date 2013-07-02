@@ -187,8 +187,8 @@ bool Zach_TVL1_OpticalFlow::calculate(float *I0, float *I1, float *u1, float *u2
 		}
 
 		if (_median > 1) {
-			me_median_filtering(u1, nx, ny, _median);
-			me_median_filtering(u2, nx, ny, _median);
+			Filtering::median(u1, nx, ny, _median);
+			Filtering::median(u2, nx, ny, _median);
 		}
 
 	}

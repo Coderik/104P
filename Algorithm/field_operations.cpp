@@ -95,8 +95,8 @@ void FieldOperations::centered_gradient(float *in, float *dx, float *dy, const i
 	float filter_der[5] = {-1.0/12.0,8.0/12.0,0.0,-8.0/12.0,1.0/12.0};
 	float filter_id[1]  = {1.0};
 
-	me_sepconvol(in, dx, nx, ny, filter_der, filter_id, 5, 1);
-	me_sepconvol(in, dy, nx, ny, filter_id, filter_der, 1, 5);
+	Filtering::separate_convolution(in, dx, nx, ny, filter_der, filter_id, 5, 1);
+	Filtering::separate_convolution(in, dy, nx, ny, filter_id, filter_der, 1, 5);
 }
 
 

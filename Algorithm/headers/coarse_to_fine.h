@@ -11,7 +11,8 @@
 #include <math.h>
 
 #include "interpolation.h"
-#include "util.h"
+#include "filtering.h"
+#include "gaussian_kernel.h"
 
 class CoarseToFine
 {

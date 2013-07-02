@@ -7,49 +7,90 @@
 
 #include "headers/interpolation.h"
 
-float Interpolation::bilinear(const Image<float> &input, float x, float y)
+float Interpolation::bilinear(const Image<float> &input, float x, float y, BoundaryConditionEnum boundary_conditionn)
 {
-	return bilinear((float*)input.get_raw_data(), input.get_size_x(), input.get_size_y(), x, y);
+	return bilinear((float*)input.get_raw_data(), input.get_size_x(), input.get_size_y(), x, y, boundary_conditionn);
 }
 
 
-float Interpolation::bilinear(const float *input, int size_x, int size_y, float x, float y)
+float Interpolation::bilinear(const float *input, int size_x, int size_y, float x, float y, BoundaryConditionEnum boundary_conditionn)
 {
-	int l, k, offset;
-	float *x0, *x1, *x2, *x3;
-	float a, b, b_1, a_1, phi;
+	int id_x = floor(x);
+	int id_y = floor(y);
 
-	l = floor(x);
-	k = floor(y);
+	int ids_x[2], ids_y[2];
+	bool out = false;
 
-	a = x-l;
-	b = y-k;
+	// apply the corresponding boundary conditions
+	switch(boundary_conditionn) {
+		case BoundaryCondition::neumann:
+			ids_x[0] = neumann_boundary_condition(id_x, size_x);
+			ids_y[0] = neumann_boundary_condition(id_y, size_y);
+			ids_x[1] = neumann_boundary_condition(id_x + 1, size_x);
+			ids_y[1] = neumann_boundary_condition(id_y + 1, size_y);
+			break;
 
-	offset = k*size_x+l;
+		case BoundaryCondition::periodic:
+			ids_x[0] = periodic_boundary_condition(id_x, size_x);
+			ids_y[0] = periodic_boundary_condition(id_y, size_y);
+			ids_x[1] = periodic_boundary_condition(id_x + 1, size_x);
+			ids_y[1] = periodic_boundary_condition(id_y + 1, size_y);
+			break;
 
-	a_1 = 1.0 - a;
-	b_1 = 1.0 - b;
+		case BoundaryCondition::symmetric:
+			ids_x[0] = symmetric_boundary_condition(id_x, size_x);
+			ids_y[0] = symmetric_boundary_condition(id_y, size_y);
+			ids_x[1] = symmetric_boundary_condition(id_x + 1, size_x);
+			ids_y[1] = symmetric_boundary_condition(id_y + 1, size_y);
+			break;
 
-	x0 = x1 = (float *) input + offset;
-	x1++;
-	x2 = x3 = x0 + size_x;
-	x3++;
+		case BoundaryCondition::cutting:
+			ids_x[0] = cutting_boundary_condition(id_x, size_x, out);
+			ids_y[0] = cutting_boundary_condition(id_y, size_y, out);
+			ids_x[1] = cutting_boundary_condition(id_x + 1, size_x, out);
+			ids_y[1] = cutting_boundary_condition(id_y + 1, size_y, out);
+			if (out) {
+				return 0.0;
+			}
+			break;
 
+		default:
+			ids_x[0] = neumann_boundary_condition(id_x, size_x);
+			ids_y[0] = neumann_boundary_condition(id_y, size_y);
+			ids_x[1] = neumann_boundary_condition(id_x + 1, size_x);
+			ids_y[1] = neumann_boundary_condition(id_y + 1, size_y);
+			break;
+	}
+
+	const float p11 = input[ ids_x[0] + size_x * ids_y[0] ];
+
+	float a = x - id_x;
+	float b = y - id_y;
+	float result = 0.0;
+
+	// interpolate
 	if ((!a) || (!b)) {
 		if ((!a) && (!b)) {
-			phi = *x0;
+			result = p11;
 		} else {
 			if (!a) {
-				phi = b_1 * (*x0) + b * (*x2);
+				const float p12 = input[ ids_x[0] + size_x * ids_y[1] ];
+				result = (1.0 - b) * p11 + b * p12;
 			} else {
-				phi = a_1 * (*x0) + a * (*x1);
+				const float p21 = input[ ids_x[1] + size_x * ids_y[0] ];
+				result = (1.0 - a) * p11 + a * p21;
 			}
 		}
 	} else {
-		phi = b_1 * (a_1 * (*x0) + a * (*x1)) + b * (a_1 * (*x2) + a * (*x3));
+		float a_1 = 1.0 - a;
+		float b_1 = 1.0 - b;
+		const float p21 = input[ ids_x[1] + size_x * ids_y[0] ];
+		const float p12 = input[ ids_x[0] + size_x * ids_y[1] ];
+		const float p22 = input[ ids_x[1] + size_x * ids_y[1] ];
+		result = b_1 * (a_1 * p11 + a * p21) + b * (a_1 * p12 + a * p22);
 	}
 
-	return(phi);
+	return result;
 }
 
 float Interpolation::bicubic(const Image<float> &input, float x, float y, BoundaryConditionEnum boundary_conditionn)
@@ -60,96 +101,98 @@ float Interpolation::bicubic(const Image<float> &input, float x, float y, Bounda
 
 float Interpolation::bicubic(const float *input, int size_x, int size_y, float x, float y, BoundaryConditionEnum boundary_conditionn)
 {
-	// TODO: change variables names
-	const int sx = (x < 0)? -1: 1;
-	const int sy = (y < 0)? -1: 1;
+	int id_x = floor(x);
+	int id_y = floor(y);
 
-	int xx, yy, mx, my, dx, dy, ddx, ddy;
+	const int step_x = (x < 0)? -1: 1;
+	const int step_y = (y < 0)? -1: 1;
+
+	int ids_x[4], ids_y[4];
 	bool out = false;
 
-	//apply the corresponding boundary conditions
+	// apply the corresponding boundary conditions
 	switch(boundary_conditionn) {
 		case BoundaryCondition::neumann:
-			xx   = neumann_boundary_condition((int) x, size_x);
-			yy   = neumann_boundary_condition((int) y, size_y);
-			mx  = neumann_boundary_condition((int) x - sx, size_x);
-			my  = neumann_boundary_condition((int) y - sx, size_y);
-			dx  = neumann_boundary_condition((int) x + sx, size_x);
-			dy  = neumann_boundary_condition((int) y + sy, size_y);
-			ddx = neumann_boundary_condition((int) x + 2*sx, size_x);
-			ddy = neumann_boundary_condition((int) y + 2*sy, size_y);
+			ids_x[0] = neumann_boundary_condition(id_x - step_x, size_x);
+			ids_y[0] = neumann_boundary_condition(id_y - step_y, size_y);
+			ids_x[1] = neumann_boundary_condition(id_x, size_x);
+			ids_y[1] = neumann_boundary_condition(id_y, size_y);
+			ids_x[2] = neumann_boundary_condition(id_x + step_x, size_x);
+			ids_y[2] = neumann_boundary_condition(id_y + step_y, size_y);
+			ids_x[3] = neumann_boundary_condition(id_x + 2 * step_x, size_x);
+			ids_y[3] = neumann_boundary_condition(id_y + 2 * step_y, size_y);
 			break;
 
 		case BoundaryCondition::periodic:
-			xx = periodic_boundary_condition((int) x, size_x);
-			yy   = periodic_boundary_condition((int) y, size_y);
-			mx  = periodic_boundary_condition((int) x - sx, size_x);
-			my  = periodic_boundary_condition((int) y - sx, size_y);
-			dx  = periodic_boundary_condition((int) x + sx, size_x);
-			dy  = periodic_boundary_condition((int) y + sy, size_y);
-			ddx = periodic_boundary_condition((int) x + 2*sx, size_x);
-			ddy = periodic_boundary_condition((int) y + 2*sy, size_y);
+			ids_x[0] = periodic_boundary_condition(id_x - step_x, size_x);
+			ids_y[0] = periodic_boundary_condition(id_y - step_y, size_y);
+			ids_x[1] = periodic_boundary_condition(id_x, size_x);
+			ids_y[1] = periodic_boundary_condition(id_y, size_y);
+			ids_x[2] = periodic_boundary_condition(id_x + step_x, size_x);
+			ids_y[2] = periodic_boundary_condition(id_y + step_y, size_y);
+			ids_x[3] = periodic_boundary_condition(id_x + 2 * step_x, size_x);
+			ids_y[3] = periodic_boundary_condition(id_y + 2 * step_y, size_y);
 			break;
 
 		case BoundaryCondition::symmetric:
-			xx   = symmetric_boundary_condition((int) x, size_x);
-			yy   = symmetric_boundary_condition((int) y, size_y);
-			mx  = symmetric_boundary_condition((int) x - sx, size_x);
-			my  = symmetric_boundary_condition((int) y - sx, size_y);
-			dx  = symmetric_boundary_condition((int) x + sx, size_x);
-			dy  = symmetric_boundary_condition((int) y + sy, size_y);
-			ddx = symmetric_boundary_condition((int) x + 2*sx, size_x);
-			ddy = symmetric_boundary_condition((int) y + 2*sy, size_y);
+			ids_x[0] = symmetric_boundary_condition(id_x - step_x, size_x);
+			ids_y[0] = symmetric_boundary_condition(id_y - step_y, size_y);
+			ids_x[1] = symmetric_boundary_condition(id_x, size_x);
+			ids_y[1] = symmetric_boundary_condition(id_y, size_y);
+			ids_x[2] = symmetric_boundary_condition(id_x + step_x, size_x);
+			ids_y[2] = symmetric_boundary_condition(id_y + step_y, size_y);
+			ids_x[3] = symmetric_boundary_condition(id_x + 2 * step_x, size_x);
+			ids_y[3] = symmetric_boundary_condition(id_y + 2 * step_y, size_y);
 			break;
 
-		case BoundaryCondition::crop:
-			xx   = crop_boundary_condition((int) x, size_x, out);
-			yy   = crop_boundary_condition((int) y, size_y, out);
-			mx  = crop_boundary_condition((int) x - sx, size_x, out);
-			my  = crop_boundary_condition((int) y - sx, size_y, out);
-			dx  = crop_boundary_condition((int) x + sx, size_x, out);
-			dy  = crop_boundary_condition((int) y + sy, size_y, out);
-			ddx = crop_boundary_condition((int) x + 2*sx, size_x, out);
-			ddy = crop_boundary_condition((int) y + 2*sy, size_y, out);
+		case BoundaryCondition::cutting:
+			ids_x[0] = cutting_boundary_condition(id_x - step_x, size_x, out);
+			ids_y[0] = cutting_boundary_condition(id_y - step_y, size_y, out);
+			ids_x[1] = cutting_boundary_condition(id_x, size_x, out);
+			ids_y[1] = cutting_boundary_condition(id_y, size_y, out);
+			ids_x[2] = cutting_boundary_condition(id_x + step_x, size_x, out);
+			ids_y[2] = cutting_boundary_condition(id_y + step_y, size_y, out);
+			ids_x[3] = cutting_boundary_condition(id_x + 2 * step_x, size_x, out);
+			ids_y[3] = cutting_boundary_condition(id_y + 2 * step_y, size_y, out);
 			if (out) {
 				return 0.0;
 			}
 			break;
 
 		default:
-			xx   = neumann_boundary_condition((int) x, size_x);
-			yy   = neumann_boundary_condition((int) y, size_y);
-			mx  = neumann_boundary_condition((int) x - sx, size_x);
-			my  = neumann_boundary_condition((int) y - sx, size_y);
-			dx  = neumann_boundary_condition((int) x + sx, size_x);
-			dy  = neumann_boundary_condition((int) y + sy, size_y);
-			ddx = neumann_boundary_condition((int) x + 2*sx, size_x);
-			ddy = neumann_boundary_condition((int) y + 2*sy, size_y);
+			ids_x[0] = neumann_boundary_condition(id_x - step_x, size_x);
+			ids_y[0] = neumann_boundary_condition(id_y - step_y, size_y);
+			ids_x[1] = neumann_boundary_condition(id_x, size_x);
+			ids_y[1] = neumann_boundary_condition(id_y, size_y);
+			ids_x[2] = neumann_boundary_condition(id_x + step_x, size_x);
+			ids_y[2] = neumann_boundary_condition(id_y + step_y, size_y);
+			ids_x[3] = neumann_boundary_condition(id_x + 2 * step_x, size_x);
+			ids_y[3] = neumann_boundary_condition(id_y + 2 * step_y, size_y);
 			break;
 	}
 
-	//obtain the interpolation points of the image
-	const float p11 = input[mx  + size_x * my];
-	const float p12 = input[xx   + size_x * my];
-	const float p13 = input[dx  + size_x * my];
-	const float p14 = input[ddx + size_x * my];
+	// obtain the interpolation points of the image
+	const float p11 = input[ ids_x[0] + size_x * ids_y[0] ];
+	const float p12 = input[ ids_x[1] + size_x * ids_y[0] ];
+	const float p13 = input[ ids_x[2] + size_x * ids_y[0] ];
+	const float p14 = input[ ids_x[3] + size_x * ids_y[0] ];
 
-	const float p21 = input[mx  + size_x * yy];
-	const float p22 = input[xx   + size_x * yy];
-	const float p23 = input[dx  + size_x * yy];
-	const float p24 = input[ddx + size_x * yy];
+	const float p21 = input[ ids_x[0] + size_x * ids_y[1] ];
+	const float p22 = input[ ids_x[1] + size_x * ids_y[1] ];
+	const float p23 = input[ ids_x[2] + size_x * ids_y[1] ];
+	const float p24 = input[ ids_x[3] + size_x * ids_y[1] ];
 
-	const float p31 = input[mx  + size_x * dy];
-	const float p32 = input[xx   + size_x * dy];
-	const float p33 = input[dx  + size_x * dy];
-	const float p34 = input[ddx + size_x * dy];
+	const float p31 = input[ ids_x[0] + size_x * ids_y[2] ];
+	const float p32 = input[ ids_x[1] + size_x * ids_y[2] ];
+	const float p33 = input[ ids_x[2] + size_x * ids_y[2] ];
+	const float p34 = input[ ids_x[3] + size_x * ids_y[2] ];
 
-	const float p41 = input[mx  + size_x * ddy];
-	const float p42 = input[xx   + size_x * ddy];
-	const float p43 = input[dx  + size_x * ddy];
-	const float p44 = input[ddx + size_x * ddy];
+	const float p41 = input[ ids_x[0] + size_x * ids_y[3] ];
+	const float p42 = input[ ids_x[1] + size_x * ids_y[3] ];
+	const float p43 = input[ ids_x[2] + size_x * ids_y[3] ];
+	const float p44 = input[ ids_x[3] + size_x * ids_y[3] ];
 
-	//create array
+	// create array
 	double pol[4][4] = {
 		{p11, p21, p31, p41},
 		{p12, p22, p32, p42},
@@ -157,208 +200,8 @@ float Interpolation::bicubic(const float *input, int size_x, int size_y, float x
 		{p14, p24, p34, p44}
 	};
 
-	//return interpolation
-	return bicubic_internal(pol, x-xx, y-yy);
-
-
-
-
-
-
-
-	/*int N, M, ncol, nrow, j, k, offset;
-	float *p_float, *p_float1;
-	float phi, sh, sv;
-	float mem_c[16], *mem_pc[4], **c;
-	float mem_u[8], *uh, *uv;
-	float mem_conv[4], *tmp_conv;
-	float sh2, sh3, sv2, sv3;*/
-
-	/*
-	x,y	  : the coordinates of the point to be interpolated
-	uh, uv: the horizontal and vertical components of the convolution kernel.
-			its values depend on sh, sv respectively.
-	mem_u : the space of memory where uv, uh are stored
-	sh    : the distance in the horizontal axis between the point to be interpolated
-			and the interpolation node.
-	sv    : the distance in the vertical axis between the point to be interpolated
-			and the interpolation node.
-	s     : auxiliar variable which contains the computed distances between the point
-			and the interpolation node.
-	phi   : the interpolated value of point (x,y).
-	c     : the image values of the interpolation nodes.
-	mem_c : the memory where the interpolation node values are stored.
-	mem_pc: it is interpreted as a vector of pointers to float. This memory is
-			used to create the matrix where the interpolation nodes are stored.
-	*/
-
-	/* uh, uv has range uv[-1..2] and uh[-1..2] */
-
-	/*uh = mem_u + 1;
-	uv = mem_u + 5;*/
-
-	/* c has range c[-1..2][-1..2] */
-
-	/*c = mem_pc + 1;
-
-	c[-1] = mem_c + 1;
-	c[0]  = mem_c + 5;
-	c[1]  = mem_c + 9;
-	c[2]  = mem_c + 13;*/
-
-	/* Memory for tmp_conv[-1..2] */
-
-	/*tmp_conv = mem_conv + 1;*/
-
-	/* Initialize variables */
-
-	/*j = x;
-	k = y;*/
-
-	/* Get nrow and ncol of the image */
-
-	/*nrow = size_y;
-	ncol = size_x;*/
-
-	/* Initialize M, N */
-
-	/*M = nrow - 1;
-	N = ncol - 1;
-
-	if ((j <= 0) || (j >= (N - 1)))
-	{
-		phi = bilinear(input, size_x, size_y, x, y);
-		return(phi);
-	}
-
-	if ((k <= 0) || (k >= (M - 1)))
-	{
-		phi = bilinear(input, size_x, size_y, x, y);
-		return(phi);
-	}*/
-
-	/* Compute distance of (x,y) to (j,k) */
-
-	/*sh = x - j;
-	sv = y - k;
-
-	sv2 = sv * sv;
-	sv3 = sv2 * sv;
-
-	sh2 = sh * sh;
-	sh3 = sh2 * sh;*/
-
-	/* Initialze weights associated to the interpolation nodes */
-
-	/*uh[-1] = (-sh3+2.0*sh2-sh)*0.5;
-	uv[-1] = (-sv3+2.0*sv2-sv)*0.5;
-
-	uh[0] = (3.0*sh3-5.0*sh2+2.0)*0.5;
-	uv[0] = (3.0*sv3-5.0*sv2+2.0)*0.5;
-
-	uh[1] = (-3.0*sh3+4.0*sh2+sh)*0.5;
-	uv[1] = (-3.0*sv3+4.0*sv2+sv)*0.5;
-
-	uh[2] = (sh3 - sh2)*0.5;
-	uv[2] = (sv3 - sv2)*0.5;*/
-
-	/* We are sure that these values cannot fall outside the image */
-
-	/*offset    = k * ncol + j;
-	p_float  = (float *) input + offset;
-	p_float1 = p_float + ncol;
-
-	c[0][0] = *p_float;
-	c[1][0] = *(p_float+1);
-	c[0][1] = *(p_float1);
-	c[1][1] = *(p_float1+1);*/
-
-	/* For the remaining values we have to check if they fall outside the image */
-
-	/*if(j == 0) {
-		c[-1][0] = 3*input[k*ncol] - 3*input[k*ncol+1] + input[k*ncol+2];
-		c[-1][1] = 3*input[(k+1)*ncol] - 3*input[(k+1)*ncol+1] + input[(k+1)*ncol+2];
-	} else {
-		c[-1][0] = input[k*ncol+(j-1)];
-		c[-1][1] = input[(k+1)*ncol+(j-1)];
-	}
-
-	if (j == (N - 1)) {
-		c[2][0] = 3*input[k*ncol+j] - 3*input[k*ncol+(j-1)] + input[k*ncol+(j-2)];
-		c[2][1] = 3*input[(k+1)*ncol+j] - 3*input[(k+1)*ncol+(j-1)] + input[(k+1)*ncol+(j-2)];
-	} else {
-		c[2][0] = input[k*ncol+(j+2)];
-		c[2][1] = input[(k+1)*ncol+(j+2)];
-	}
-
-	if (k == 0) {
-		c[0][-1] = 3*input[j] - 3*input[ncol+j] + input[2*ncol+j];
-		c[1][-1] = 3*input[j+1] - 3*input[ncol+j+1] + input[2*ncol+j+1];
-	} else {
-		c[0][-1] = input[(k-1)*ncol+j];
-		c[1][-1] = input[(k-1)*ncol+(j+1)];
-	}
-
-	if (k == (M - 1)) {
-		c[0][2] = 3*input[k*ncol+j] - 3*input[(k-1)*ncol+j] + input[(k-2)*ncol+j];
-		c[1][2] = 3*input[k*ncol+(j+1)] - 3*input[(k-1)*ncol+(j+1)] + input[(k-2)*ncol+(j+1)];
-	} else {
-		c[0][2] = input[(k+2)*ncol+j];
-		c[1][2] = input[(k+2)*ncol+(j+1)];
-	}
-
-	if ((j == 0) && (k == 0)) {
-		c[-1][-1] = 3*c[0][-1] - 3*c[1][-1] + c[2][-1];
-	} else {
-		c[-1][-1] = input[(k-1)*ncol+(j-1)];
-	}
-
-	if ((j == (N - 1)) && (k == 0)) {
-		c[2][-1] = 3 * c[1][-1] - 3 * c[0][-1] + c[-1][-1];
-	} else {
-		c[2][-1] = input[(k-1)*ncol+(j+2)];
-	}
-
-	if ((j == 0) && (k == (M - 1))) {
-		c[-1][2] = 3 * c[0][2] - 3 * c[1][2] + c[2][2];
-	} else {
-		c[-1][2] = input[(k-1)*ncol+(j+2)];
-	}
-
-	if ((j == (N - 1)) && (k == (M - 1))) {
-		c[2][2] = 3 * c[1][2] - 3 * c[0][2] + c[0][2];
-	} else {
-		c[2][2] = input[(k+2)*ncol+(j+2)];
-	}*/
-
-	/* Ok, now compute convolution */
-
-	/*phi = 0;
-
-	for(j = -1; j <= 2; j++) {
-		phi = 0;
-
-		for(k = -1; k <= 2; k++)
-			phi += c[j][k] * uv[k];
-
-		tmp_conv[j] = phi;
-	}
-
-	phi = 0;
-
-	for(j = -1; j <= 2; j++) {
-		phi += tmp_conv[j] * uh[j];
-	}*/
-
-	/*
-	phi = 0;
-
-	for(j = -1; j <= 2; j++)
-	for(k = -1; k <= 2; k++)
-	phi += c[j][k] * uh[j] * uv[k];
-	*/
-
-	/*return (phi);*/
+	// interpolate
+	return bicubic_internal(pol, x - id_x, y - id_y);
 }
 
 /* Private */
@@ -444,7 +287,7 @@ inline int Interpolation::symmetric_boundary_condition(int x, int size)
 /**
  * For size = 4 : | -4 -3 -2 -1 | 0 1 2 3 | 4 5 6 7 |
  */
-inline int Interpolation::crop_boundary_condition(int x, int size, bool &is_out)
+inline int Interpolation::cutting_boundary_condition(int x, int size, bool &is_out)
 {
 	if(x < 0 || x >= size) {
 		is_out = true;

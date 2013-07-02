@@ -8,7 +8,7 @@
 #ifndef FIELD_OPERATIONS_H_
 #define FIELD_OPERATIONS_H_
 
-#include "util.h"
+#include "filtering.h"
 
 
 /**
