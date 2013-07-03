@@ -2,127 +2,125 @@
  * coarse_to_fine.cpp
  *
  *  Created on: Jan 23, 2013
- *      Author: upf
+ *      Author: Vadim Fedorov
  */
 
 #include "headers/coarse_to_fine.h"
 
-void CoarseToFine::zoom_size(int nx, int ny, int &nxx, int &nyy, float factor = 0.5)
+void CoarseToFine::downsample(const float* in, float* out, uint size_x, uint size_y, uint sample_size_x, uint sample_size_y)
 {
-	nxx = (int)((float) nx * factor + 0.5);
-	nyy = (int)((float) ny * factor + 0.5);
+	float factor_x = (float)size_x / sample_size_x;
+	float factor_y = (float)size_y / sample_size_y;
+
+	// adjust smoothing filter
+	// TODO: handle different factors for x and y dimentions.
+	float sigma = sqrt(factor_x / 2);
+	int kernel_size = 2 * round(1.5 * sigma) + 1;
+	GaussianKernel kernel(kernel_size, 1, 1, sigma, 0, 0);
+	const float *filter = kernel.get_raw();
+
+	// smooth image
+	float *buffer = new float[size_x * size_y];
+	Filtering::separate_convolution(in, buffer, size_x, size_y, filter, filter, kernel_size, kernel_size);
+
+	// subsample
+	float min_x = factor_x / 2.0 - 0.5;
+	float min_y = factor_y / 2.0 - 0.5;
+
+	for(uint i = 0; i < sample_size_y; i++) {
+		float y = min_y + i * factor_y;
+		for(uint j = 0; j < sample_size_x; j++) {
+			float x = min_x + j * factor_x;
+
+			float value = Interpolation::bilinear(buffer, size_x, size_y, x, y);
+			out[i * sample_size_x + j] = value;
+		}
+	}
+
+	// free memory
+	delete [] buffer;
 }
 
 
-void CoarseToFine::zoom_out(float *in, float *out, int ncol, int nrow, int new_ncol, int new_nrow)
+Image<float>* CoarseToFine::downsample(const Image<float> &in, uint sample_size_x, uint sample_size_y)
 {
-	int i, j;
-	float ncol1, nrow1, coord_x, coord_y;
-	float value, gamma_x, gamma_y;
-	float min_x, min_y, max_x, max_y;
+	if (sample_size_x >= (uint)in.get_size_x() || sample_size_y >= (uint)in.get_size_y()) {
+		return 0;
+	}
 
-	/* sample the image */
+	Image<float> *out = new Image<float>(sample_size_x, sample_size_y);
+	downsample(in.get_raw_data(), out->get_raw_data(), in.get_size_x(), in.get_size_y(), sample_size_x, sample_size_y);
+	return out;
+}
 
-	ncol1 = ncol-1;
-	nrow1 = nrow-1;
+Image<float>* CoarseToFine::downsample(const Image<float> &in, float factor)
+{
+	if (factor <= 0 || factor >= 1.0) {
+		return 0;
+	}
 
-	/* compute gamma factors */
+	int sample_size_x = get_sample_size(in.get_size_x(), factor);
+	int sample_size_y = get_sample_size(in.get_size_y(), factor);
 
-	gamma_x = (float) new_ncol / (float) ncol;
-	gamma_y = (float) new_nrow / (float) nrow;
+	Image<float> *out = new Image<float>(sample_size_x, sample_size_y);
+	downsample(in.get_raw_data(), out->get_raw_data(), in.get_size_x(), in.get_size_y(), sample_size_x, sample_size_y);
+	return out;
+}
 
-	/* Bounding box */
 
-	min_x = gamma_x / 2.0 - 0.5;
-	min_y = gamma_y / 2.0 - 0.5;
+void CoarseToFine::upsample(const float* in, float* out, uint size_x, uint size_y, uint sample_size_x, uint sample_size_y)
+{
+	float factor_x = (float) sample_size_x / size_x;
+	float factor_y = (float) sample_size_y / size_y;
 
-	max_x = min_x + (ncol - 1) * gamma_x;
-	max_y = min_y + (nrow - 1) * gamma_y;
+	// bounding box
+	float min_x = factor_x / 2.0 - 0.5;
+	float min_y = factor_y / 2.0 - 0.5;
 
-	/* Set samples in output image. We use here bilinear interpolation. */
+	// set samples in output image
+	for(uint i = 0; i < sample_size_y; i++) {
+		float y = (i - min_y) / factor_y;
+		y = max<float>(0.0, min<float>(size_y - 1, y));
 
-	for(i = 0; i < new_nrow; i++) {
-		coord_y = (i - min_y) / gamma_y;
+		for(uint j = 0; j < sample_size_x; j++) {
+			float x = (j - min_x) / factor_x;
+			x = max<float>(0.0, min<float>(size_x - 1, x));
 
-		if (coord_y <= 0)
-			coord_y = 0;
-
-		if (coord_y >= nrow1)
-			coord_y = nrow1;
-
-		for(j = 0; j < new_ncol; j++) {
-			coord_x = (j - min_x) / gamma_x;
-
-			if (coord_x <= 0)
-				coord_x = 0;
-
-			if (coord_x >= ncol1)
-				coord_x = ncol1;
-
-			value = Interpolation::bilinear(in, ncol, nrow, coord_x, coord_y);
-			out[i * (int) new_ncol + j] = value;
+			float value = Interpolation::bilinear(in, size_x, size_y, x, y);
+			out[i * sample_size_x + j] = value;
 		}
 	}
 }
 
 
-void CoarseToFine::zoom(float *in, float *out, int nx, int ny, float factor = 0.5)
+Image<float>* CoarseToFine::upsample(const Image<float> &in, uint sample_size_x, uint sample_size_y)
 {
-	float *tmp;
-	float smooth_sigma, *filter;
-	int size, nxx, nyy;
-
-	// Get size
-	zoom_size(nx, ny, nxx, nyy, factor);
-
-	/* Subsampling filter */
-	smooth_sigma = sqrt(1./factor)/sqrt(2.0);
-	size = 2 * round(1.5 * smooth_sigma) + 1;
-
-	GaussianKernel kernel(size, 1, 1, smooth_sigma, 0, 0);
-
-	/* Filter image */
-	tmp = new float[nx * ny];
-	Filtering::separate_convolution(in, tmp, nx, ny, filter, filter, size, size);
-
-	/* Restrict image */
-	apply_restriction(tmp, out, nx, ny, nxx, nyy, factor);
-
-	/* Free memory */
-	delete [] tmp;
-}
-
-
-void CoarseToFine::apply_restriction(float *in, float *out, int ncol, int nrow, int new_ncol, int new_nrow, float factor = 0.5)
-{
-	int i, j;
-	float coord_x, coord_y;
-	float min_x, min_y;
-	float value, gamma_x, gamma_y;
-
-	/* compute gamma factors */
-
-	gamma_x = (float) ncol / (float) new_ncol;
-	gamma_y = (float) nrow / (float) new_nrow;
-
-	/* min_x and min_y */
-
-	min_x = gamma_x / 2.0 - 0.5;
-	min_y = gamma_y / 2.0 - 0.5;
-
-	/* Set samples in output image. We use here bilinear interpolation. */
-
-	for(i = 0; i < new_nrow; i++) {
-		coord_y = min_y + i * gamma_y;
-
-		for(j = 0; j < new_ncol; j++) {
-			coord_x = min_x + j * gamma_x;
-
-			value = Interpolation::bilinear(in, ncol, nrow, coord_x, coord_y);
-			out[i * (int) new_ncol + j] = value;
-		}
+	if (sample_size_x <= (uint)in.get_size_x() || sample_size_y <= (uint)in.get_size_y()) {
+		return 0;
 	}
+
+	Image<float> *out = new Image<float>(sample_size_x, sample_size_y);
+	upsample(in.get_raw_data(), out->get_raw_data(), in.get_size_x(), in.get_size_y(), sample_size_x, sample_size_y);
+	return out;
 }
 
 
+Image<float>* CoarseToFine::upsample(const Image<float> &in, float factor)
+{
+	if (factor <= 1.0) {
+		return 0;
+	}
 
+	int sample_size_x = get_sample_size(in.get_size_x(), factor);
+	int sample_size_y = get_sample_size(in.get_size_y(), factor);
+
+	Image<float> *out = new Image<float>(sample_size_x, sample_size_y);
+	upsample(in.get_raw_data(), out->get_raw_data(), in.get_size_x(), in.get_size_y(), sample_size_x, sample_size_y);
+	return out;
+}
+
+
+int CoarseToFine::get_sample_size(uint size, float factor)
+{
+	return (int)((float) size * factor + 0.5);
+}

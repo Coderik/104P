@@ -16,6 +16,8 @@
 
 using namespace std;
 
+// TODO: handle different boundary conditions
+
 class Filtering
 {
 public:

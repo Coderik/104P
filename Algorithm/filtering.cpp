@@ -25,7 +25,7 @@ void Filtering::separate_convolution(const float *in, float *out, int size_x, in
 
 			for (int i = 0; i < filter_x_size; i++) {
 				id = x - radius + i;
-				id = max(0, min(size_x - 1, id));
+				id = max(0, min(size_x - 1, id));	// neumann boundary conditions
 
 				sum += filter_x[i] * in[y * size_x + id];
 			}
@@ -43,7 +43,7 @@ void Filtering::separate_convolution(const float *in, float *out, int size_x, in
 
 			for (int i = 0; i < filter_y_size; i++) {
 				id = y - radius + i;
-				id = max(0, min(size_y - 1, id));
+				id = max(0, min(size_y - 1, id));	// neumann boundary conditions
 
 				sum += filter_y[i] * buffer[id * size_x + x];
 			}
@@ -98,7 +98,7 @@ void Filtering::median(const float *in, float *out, int size_x, int size_y, int 
 					int id_x = x - border + j;
 					int id_y = y - border + i;
 
-					/* apply symmetric boundary conditions */
+					// apply symmetric boundary conditions ( | 3 2 1 0 | 0 1 2 3 | 3 2 1 0 | )
 					if (id_x < 0)
 						id_x = -id_x - 1;
 

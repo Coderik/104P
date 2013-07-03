@@ -2,28 +2,36 @@
  * coarse_to_fine.h
  *
  *  Created on: Jan 23, 2013
- *      Author: upf
+ *      Author: Vadim Fedorov
  */
 
 #ifndef COARSE_TO_FINE_H_
 #define COARSE_TO_FINE_H_
 
+#include <algorithm>
 #include <math.h>
 
+#include "image.h"
 #include "interpolation.h"
 #include "filtering.h"
 #include "gaussian_kernel.h"
 
+using namespace std;
+
+// TODO: [?] rename the class to 'Sampling'
+// TODO: handle different kinds of interpolation (bicubic)
 class CoarseToFine
 {
 public:
-	static void zoom_size(int nx, int ny, int &nxx, int &nyy, float factor);
-	static void zoom_out(float *in, float *out, int ncol, int nrow, int new_ncol, int new_nrow);
-	static void zoom(float *in, float *out, int nx, int ny, float factor);
+	static void downsample(const float* in, float* out, uint size_x, uint size_y, uint sample_size_x, uint sample_size_y);
+	static Image<float>* downsample(const Image<float> &in, uint sample_size_x, uint sample_size_y);
+	static Image<float>* downsample(const Image<float> &in, float factor);
 
-private:
-	// NOTE: original name 'me_image_restriction'
-	static void apply_restriction(float *in, float *out, int ncol, int nrow, int new_ncol, int new_nrow, float factor);
+	static void upsample(const float* in, float* out, uint size_x, uint size_y, uint sample_size_x, uint sample_size_y);
+	static Image<float>* upsample(const Image<float> &in, uint sample_size_x, uint sample_size_y);
+	static Image<float>* upsample(const Image<float> &in, float factor);
+
+	static int get_sample_size(uint size, float factor);
 };
 
 
