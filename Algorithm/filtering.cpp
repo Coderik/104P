@@ -7,6 +7,9 @@
 
 #include "headers/filtering.h"
 
+/**
+ * Remember that the filters are ﬂipped in convolution
+ */
 void Filtering::separate_convolution(const float *in, float *out, int size_x, int size_y, const float *filter_x, const float *filter_y, int filter_x_size, int filter_y_size)
 {
 	/* initialize temporal buffer */
@@ -17,15 +20,25 @@ void Filtering::separate_convolution(const float *in, float *out, int size_x, in
 	int id;
 
 	/* convolution along x axis */
-	int radius = filter_x_size / 2;
+	int radius = (filter_x_size - 1) / 2;
 
 	for (int y = 0; y < size_y; y++) {
 		for (int x = 0;x < size_x; x++) {
 			sum = 0.0;
 
-			for (int i = 0; i < filter_x_size; i++) {
-				id = x - radius + i;
-				id = max(0, min(size_x - 1, id));	// neumann boundary conditions
+			for (int i = filter_x_size - 1; i >= 0; i--) {
+				id = x + radius - i;
+				//id = max(0, min(size_x - 1, id));	// neumann boundary conditions
+
+				// symmetric boundary conditions ( | 3 2 1 0 | 0 1 2 3 | 3 2 1 0 | )
+				while ((id < 0) || (id >= size_y)) {
+					if (id < 0) {
+						id = -id - 1;
+					}
+					if (id >= size_y) {
+						id = 2 * size_y - id -1;
+					}
+				}
 
 				sum += filter_x[i] * in[y * size_x + id];
 			}
@@ -35,15 +48,25 @@ void Filtering::separate_convolution(const float *in, float *out, int size_x, in
 	}
 
 	/* convolution along y axis */
-	radius = filter_y_size / 2;
+	radius = (filter_y_size - 1) / 2;
 
 	for (int y = 0;y < size_y; y++) {
 		for (int x = 0; x < size_x; x++) {
 			sum = 0.0;
 
-			for (int i = 0; i < filter_y_size; i++) {
-				id = y - radius + i;
-				id = max(0, min(size_y - 1, id));	// neumann boundary conditions
+			for (int i = filter_y_size - 1; i >= 0; i--) {
+				id = y + radius - i;
+				//id = max(0, min(size_y - 1, id));	// neumann boundary conditions
+
+				// symmetric boundary conditions ( | 3 2 1 0 | 0 1 2 3 | 3 2 1 0 | )
+				while ((id < 0) || (id >= size_y)) {
+					if (id < 0) {
+						id = -id - 1;
+					}
+					if (id >= size_y) {
+						id = 2 * size_y - id -1;
+					}
+				}
 
 				sum += filter_y[i] * buffer[id * size_x + x];
 			}
@@ -99,17 +122,23 @@ void Filtering::median(const float *in, float *out, int size_x, int size_y, int 
 					int id_y = y - border + i;
 
 					// apply symmetric boundary conditions ( | 3 2 1 0 | 0 1 2 3 | 3 2 1 0 | )
-					if (id_x < 0)
-						id_x = -id_x - 1;
+					while ((id_x < 0) || (id_x >= size_x)) {
+						if (id_x < 0) {
+							id_x = -id_x - 1;
+						}
+						if (id_x >= size_x) {
+							id_x = 2 * size_x - id_x -1;
+						}
+					}
 
-					if (id_x >= size_y)
-						id_x = 2 * size_y - id_x - 1;
-
-					if (id_y < 0)
-						id_y = -id_y - 1;
-
-					if (id_y >= size_x)
-						id_y = 2 * size_x - id_y - 1;
+					while ((id_y < 0) || (id_y >= size_y)) {
+						if (id_y < 0) {
+							id_y = -id_y - 1;
+						}
+						if (id_y >= size_y) {
+							id_y = 2 * size_y - id_y -1;
+						}
+					}
 
 					window[window_id++] = in[id_y * size_y + id_x];
 				}

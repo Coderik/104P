@@ -16,7 +16,7 @@
 
 using namespace std;
 
-// TODO: handle different boundary conditions
+// TODO: handle different boundary conditions (symmetric should be default)
 
 class Filtering
 {
