@@ -19,6 +19,8 @@
 
 using namespace std;
 
+typedef unsigned int uint;
+
 // TODO: [?] rename the class to 'Sampling'
 // TODO: handle different kinds of interpolation (bicubic)
 class CoarseToFine
