@@ -124,7 +124,7 @@ Point Sequence<T>::get_coordinates()
  * Note: if outside the range, returns default value.
  */
 template <class T>
-T Sequence<T>::get_value(int x, int y, int t)
+T Sequence<T>::get_value(int x, int y, int t) const
 {
 	if (t < 0 || t >= _t_size || !_frames[t])
 		return T();

@@ -72,7 +72,18 @@ T Image<T>::get_value(int x, int y) const
 		return T();
 	}
 
-	return _points[get_index(x,y)];
+	return _points[get_index(x, y)];
+}
+
+
+template <class T>
+T Image<T>::get_value(Point p) const
+{
+	if ( p.x < 0 || p.y < 0 || p.x >= _x_size || p.y >= _y_size || !_points) {
+		return T();
+	}
+
+	return _points[get_index(p.x, p.y)];
 }
 
 
@@ -95,7 +106,18 @@ void Image<T>::set_value(int x, int y, T value)
 		return;
 	}
 
-	_points[get_index(x,y)] = value;
+	_points[get_index(x, y)] = value;
+}
+
+
+template <class T>
+void Image<T>::set_value(Point p, T value)
+{
+	if ( p.x < 0 || p.y < 0 || p.x >= _x_size || p.y >= _y_size || !_points) {
+		return;
+	}
+
+	_points[get_index(p.x, p.y)] = value;
 }
 
 

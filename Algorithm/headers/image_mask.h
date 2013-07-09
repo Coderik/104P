@@ -21,23 +21,24 @@ public:
 	ImageMask();
 	ImageMask(int x_size,int y_size);
 	ImageMask(int x_size,int y_size, bool value);
+	ImageMask(Image<bool> &source);
 	ImageMask(ImageMask &source);
 	~ImageMask();
 
-	iterator begin();
-    iterator end();
-    iterator rbegin();
-    iterator rend();
+	iterator begin() const;
+	iterator end() const;
+	iterator rbegin() const;
+	iterator rend() const;
 
     void mask(int x, int y);
     void unmask(int x, int y);
     void invert();
 
 	/* I_Iterable_Mask methods */
-	virtual Point first();
-	virtual Point last();
-	virtual Point next(const Point current);
-	virtual Point prev(const Point current);
+	virtual Point first() const;
+	virtual Point last() const;
+	virtual Point next(const Point current) const;
+	virtual Point prev(const Point current) const;
 };
 
 #endif /* IMAGE_MASK_H_ */

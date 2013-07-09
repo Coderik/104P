@@ -28,8 +28,10 @@ public:
 	void set_coordinates(Point coordinates);
 	Point get_coordinates();
 	T get_value(int x, int y) const;
+	T get_value(Point p) const;
 	bool try_get_value(int x, int y, T& value) const;
 	void set_value(int x, int y, T value);
+	void set_value(Point p, T value);
 	void fill(T value);
 	Image<T>* get_patch_between_points(int a_x, int a_y, int b_x, int b_y);
 	Image<T>* get_patch_around_point(int center_x, int center_y, int x_size, int y_size);

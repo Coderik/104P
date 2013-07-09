@@ -32,7 +32,7 @@ public:
 	Shape get_size();
 	void set_coordinates(Point coordinates);
 	Point get_coordinates();
-	T get_value(int x, int y, int t);
+	T get_value(int x, int y, int t) const;
 	bool try_get_value(int x, int y, int t, T& value);
 	void set_value(int x, int y, int t, T value);
 	void fill(T value);

@@ -15,7 +15,7 @@ MaskIterator::MaskIterator()
 }
 
 
-MaskIterator::MaskIterator(IIterableMask *mask, Point current, bool reverse)
+MaskIterator::MaskIterator(const IIterableMask *mask, Point current, bool reverse)
 {
 	_mask = mask;
 	_current = current;

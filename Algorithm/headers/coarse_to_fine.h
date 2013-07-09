@@ -12,6 +12,7 @@
 #include <math.h>
 
 #include "image.h"
+#include "image_mask.h"
 #include "interpolation.h"
 #include "filtering.h"
 #include "gaussian_kernel.h"
@@ -26,6 +27,7 @@ public:
 	static void downsample(const float* in, float* out, uint size_x, uint size_y, uint sample_size_x, uint sample_size_y);
 	static Image<float>* downsample(const Image<float> &in, uint sample_size_x, uint sample_size_y);
 	static Image<float>* downsample(const Image<float> &in, float factor);
+	static ImageMask* downsample(const ImageMask &in, float factor);
 
 	static void upsample(const float* in, float* out, uint size_x, uint size_y, uint sample_size_x, uint sample_size_y);
 	static Image<float>* upsample(const Image<float> &in, uint sample_size_x, uint sample_size_y);

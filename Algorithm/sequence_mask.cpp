@@ -48,25 +48,25 @@ SequenceMask::~SequenceMask()
 }
 
 
-SequenceMask::iterator SequenceMask::begin()
+SequenceMask::iterator SequenceMask::begin() const
 {
 	return iterator(this, first());
 }
 
 
-SequenceMask::iterator SequenceMask::end()
+SequenceMask::iterator SequenceMask::end() const
 {
 	return iterator(this, Point(-1, -1, -1));
 }
 
 
-SequenceMask::iterator SequenceMask::rbegin()
+SequenceMask::iterator SequenceMask::rbegin() const
 {
 	return iterator(this, last(), true);
 }
 
 
-SequenceMask::iterator SequenceMask::rend()
+SequenceMask::iterator SequenceMask::rend() const
 {
 	return iterator(this, Point(-1, -1, -1), true);
 }
@@ -99,7 +99,7 @@ void SequenceMask::invert()
 
 /* I_Iterable_Mask methods */
 // TODO: optimize
-Point SequenceMask::first()
+Point SequenceMask::first() const
 {
 	for (int t = 0; t < _t_size; t++) {
 		for (int y = 0; y < _y_size; y++) {
@@ -115,7 +115,7 @@ Point SequenceMask::first()
 }
 
 
-Point SequenceMask::last()
+Point SequenceMask::last() const
 {
 	for (int t = _t_size - 1; t >= 0; t--) {
 		for (int y = _y_size - 1; y >= 0; y--) {
@@ -131,7 +131,7 @@ Point SequenceMask::last()
 }
 
 
-Point SequenceMask::next(const Point current)
+Point SequenceMask::next(const Point current) const
 {
 	int from_x = current.x + 1;
 	int from_y = current.y;
@@ -151,7 +151,7 @@ Point SequenceMask::next(const Point current)
 }
 
 
-Point SequenceMask::prev(const Point current)
+Point SequenceMask::prev(const Point current) const
 {
 	int from_x = current.x - 1;
 	int from_y = current.y;

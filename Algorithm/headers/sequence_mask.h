@@ -24,20 +24,20 @@ public:
 	SequenceMask(SequenceMask& source);
 	~SequenceMask();
 
-	iterator begin();
-    iterator end();
-    iterator rbegin();
-    iterator rend();
+	iterator begin() const;
+    iterator end() const;
+    iterator rbegin() const;
+    iterator rend() const;
 
     void mask(int x, int y, int t);
     void unmask(int x, int y, int t);
     void invert();
 
 	/* I_Iterable_Mask methods */
-	virtual Point first();
-	virtual Point last();
-	virtual Point next(const Point current);
-	virtual Point prev(const Point current);
+	virtual Point first() const;
+	virtual Point last() const;
+	virtual Point next(const Point current) const;
+	virtual Point prev(const Point current) const;
 
 };
 
