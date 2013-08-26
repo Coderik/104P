@@ -27,7 +27,7 @@ Sequence<T>::Sequence(int x_size,int y_size,int t_size)
 	_y_size = y_size;
 	_t_size = t_size;
 
-	_frames = vector<Image<T>* >(_t_size);
+	_frames = vector<Image<T>* >(_t_size, (Image<T>*)0);
 }
 
 
@@ -74,6 +74,13 @@ template <class T>
 Sequence<T>::~Sequence()
 {
 	// TODO: check destructors of frames
+	typename vector<Image<T>* >::iterator it;
+	for (it = _frames.begin(); it != _frames.end(); ++it) {
+		if (*it) {
+			delete *it;
+		}
+	}
+
 	_frames.clear();
 }
 
