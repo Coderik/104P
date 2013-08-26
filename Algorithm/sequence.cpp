@@ -79,28 +79,28 @@ Sequence<T>::~Sequence()
 
 
 template <class T>
-int Sequence<T>::get_size_x()
+int Sequence<T>::get_size_x() const
 {
 	return _x_size;
 }
 
 
 template <class T>
-int Sequence<T>::get_size_y()
+int Sequence<T>::get_size_y() const
 {
 	return _y_size;
 }
 
 
 template <class T>
-int Sequence<T>::get_size_t()
+int Sequence<T>::get_size_t() const
 {
 	return _t_size;
 }
 
 
 template <class T>
-Shape Sequence<T>::get_size()
+Shape Sequence<T>::get_size() const
 {
 	return Shape(_x_size, _y_size, _t_size);
 }
@@ -130,6 +130,19 @@ T Sequence<T>::get_value(int x, int y, int t) const
 		return T();
 
 	return _frames[t]->get_value(x, y);
+}
+
+
+/*
+ * Note: if outside the range, returns default value.
+ */
+template <class T>
+T Sequence<T>::get_value(Point p) const
+{
+	if (p.t < 0 || p.t >= _t_size || !_frames[p.t])
+		return T();
+
+	return _frames[p.t]->get_value(p.x, p.y);
 }
 
 
@@ -177,6 +190,16 @@ Image<T>* Sequence<T>::get_frame(int t)
 		return 0;
 
 	return _frames[t];
+}
+
+
+template <class T>
+Image<T> Sequence<T>::get_frame(int t) const
+{
+	if (t < 0 || t >= _t_size)
+		return Image<T>(_x_size, _y_size, T());
+
+	return Image<T>(*_frames[t]);
 }
 
 

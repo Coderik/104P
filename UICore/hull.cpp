@@ -167,7 +167,7 @@ void Hull::load_sequence(string path)
 	Glib::RefPtr<Gio::FileEnumerator> child_enumeration = dir->enumerate_children();
 	Glib::RefPtr<Gio::FileInfo> file_info;
 	std::vector<Glib::ustring> file_names;
-	while ((file_info = child_enumeration->next_file()) != NULL)
+	while ((file_info = child_enumeration->next_file()) != 0)
 	{
 		std::string file_mime_type = file_info->get_content_type();
 		// COMPATIBILITY: first for unix, second for win

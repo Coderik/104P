@@ -43,7 +43,7 @@ Image<T>::Image(int x_size,int y_size, T value)
 
 
 template <class T>
-Image<T>::Image(Image<T> &source)
+Image<T>::Image(const Image<T> &source)
 {
 	_x_size = source._x_size;
 	_y_size = source._y_size;

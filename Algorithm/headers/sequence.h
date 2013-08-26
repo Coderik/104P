@@ -26,17 +26,19 @@ public:
 	Sequence(Sequence& source);
 	~Sequence();
 
-	int get_size_x();
-	int get_size_y();
-	int get_size_t();
-	Shape get_size();
+	int get_size_x() const;
+	int get_size_y() const;
+	int get_size_t() const;
+	Shape get_size() const;
 	void set_coordinates(Point coordinates);
 	Point get_coordinates();
 	T get_value(int x, int y, int t) const;
+	T get_value(Point p) const;
 	bool try_get_value(int x, int y, int t, T& value);
 	void set_value(int x, int y, int t, T value);
 	void fill(T value);
 	Image<T>* get_frame(int t);
+	Image<T> get_frame(int t) const;
 	bool set_frame(int t, Image<T> *frame);
 	bool add_frame(Image<T> *frame);
 	int drop_empty_frames();

@@ -17,7 +17,7 @@ Shape::Shape()
 }
 
 
-Shape::Shape(int size_x, int size_y)
+Shape::Shape(unsigned int size_x, unsigned int size_y)
 {
 	this->size_x = size_x;
 	this->size_y = size_y;
@@ -25,7 +25,7 @@ Shape::Shape(int size_x, int size_y)
 }
 
 
-Shape::Shape(int size_x, int size_y, int size_t)
+Shape::Shape(unsigned int size_x, unsigned int size_y, unsigned int size_t)
 {
 	this->size_x = size_x;
 	this->size_y = size_y;
@@ -64,7 +64,7 @@ bool Shape::is_empty() const
  */
 bool Shape::contains(const Point &p) const
 {
-	return p.x >= 0 && p.y >= 0 && p.t >= 0 && p.x < size_x && p.y < size_y && p.t < size_t;
+	return p.x >= 0 && p.y >= 0 && p.t >= 0 && (unsigned)p.x < size_x && (unsigned)p.y < size_y && (unsigned)p.t < size_t;
 }
 
 

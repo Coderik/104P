@@ -13,11 +13,12 @@
 
 struct Shape
 {
-	int size_x, size_y, size_t;
+	// TODO: make it unsigned
+	unsigned int size_x, size_y, size_t;
 
 	Shape();
-	Shape(int size_x, int size_y);
-	Shape(int size_x, int size_y, int size_t);
+	Shape(unsigned int size_x, unsigned int size_y);
+	Shape(unsigned int size_x, unsigned int size_y, unsigned int size_t);
 	Shape(const Shape &source);
 
 	bool operator== (const Shape &other) const;

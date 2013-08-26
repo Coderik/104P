@@ -101,7 +101,7 @@ Image<float>* ReadPgmImage(string *name)
 void WritePgmImage(string *name, Image<float> *image)
 {
 	/* open file */
-	FILE *f = fopen((*name).data(),"w");
+	FILE *f = fopen((*name).data(),"wb");
 
 	/* write header */
 	putc('P', f);

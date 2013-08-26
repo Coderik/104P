@@ -19,7 +19,7 @@ public:
 	Image();
 	Image(int x_size,int y_size);
 	Image(int x_size,int y_size, T value);
-	Image(Image &source);
+	Image(const Image &source);
 	~Image();
 
 	int get_size_x() const;
