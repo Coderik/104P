@@ -13,7 +13,7 @@
 
 using namespace std;
 
-Image<float>* ReadPgmImage(string *name);
-void WritePgmImage(string *name, Image<float> *image);
+Image<float>* ReadPgmImage(const string &name);
+void WritePgmImage(const string &name, Image<float> *image);
 
 #endif /* PGM_H_ */

@@ -73,7 +73,6 @@ Sequence<T>::Sequence(Sequence<T>& source)
 template <class T>
 Sequence<T>::~Sequence()
 {
-	// TODO: check destructors of frames
 	typename vector<Image<T>* >::iterator it;
 	for (it = _frames.begin(); it != _frames.end(); ++it) {
 		if (*it) {
