@@ -29,7 +29,7 @@ public:
 	static void downsample(const float* in, float* out, uint size_x, uint size_y, uint sample_size_x, uint sample_size_y);
 	static Image<float>* downsample(const Image<float> &in, uint sample_size_x, uint sample_size_y);
 	static Image<float>* downsample(const Image<float> &in, float factor);
-	static ImageMask* downsample(const ImageMask &in, float factor);
+	static ImageMask* downsample(const ImageMask &in, float factor, float threshold = 0.0);
 
 	static void upsample(const float* in, float* out, uint size_x, uint size_y, uint sample_size_x, uint sample_size_y);
 	static Image<float>* upsample(const Image<float> &in, uint sample_size_x, uint sample_size_y);

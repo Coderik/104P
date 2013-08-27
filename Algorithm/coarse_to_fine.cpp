@@ -69,7 +69,7 @@ Image<float>* CoarseToFine::downsample(const Image<float> &in, float factor)
 
 
 // TODO: look for other options
-ImageMask* CoarseToFine::downsample(const ImageMask &in, float factor)
+ImageMask* CoarseToFine::downsample(const ImageMask &in, float factor, float threshold)
 {
 	// binary to float
 	Image<float> float_mask(in.get_size_x(), in.get_size_y(), 0.0);
@@ -81,7 +81,7 @@ ImageMask* CoarseToFine::downsample(const ImageMask &in, float factor)
 	Image<float> *sampled_float_mask = CoarseToFine::downsample(float_mask, factor);
 
 	// float to binary
-	const float threshold = 0.5;
+	threshold = fmax(0.0, fmin(1.0, threshold));
 	ImageMask *out = new ImageMask(sampled_float_mask->get_size_x(), sampled_float_mask->get_size_y());
 	for (int y = 0; y < sampled_float_mask->get_size_y(); y++) {
 		for (int x = 0; x < sampled_float_mask->get_size_x(); x++) {
