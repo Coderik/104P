@@ -187,8 +187,8 @@ bool Zach_TVL1_OpticalFlow::calculate(float *I0, float *I1, float *u1, float *u2
 		}
 
 		if (_median > 1) {
-			me_median_filtering(u1, nx, ny, _median);
-			me_median_filtering(u2, nx, ny, _median);
+			Filtering::median(u1, nx, ny, _median);
+			Filtering::median(u2, nx, ny, _median);
 		}
 
 	}
@@ -247,7 +247,9 @@ bool Zach_TVL1_OpticalFlow::calculate_with_multiscale(float *I0, float *I1, floa
 
 	//create the scales
 	for(int s = 1; s < _nscales; s++) {
-		CoarseToFine::zoom_size(nx[s-1], ny[s-1], nx[s], ny[s], _zoom_factor); //get x,y sizes for s-th scale
+		//get x,y sizes for s-th scale
+		nx[s] = CoarseToFine::get_sample_size(nx[s-1], _zoom_factor);
+		ny[s] = CoarseToFine::get_sample_size(ny[s-1], _zoom_factor);
 		const int sizes = nx[s] * ny[s];
 
 		I0s[s] = new float[sizes];
@@ -256,8 +258,8 @@ bool Zach_TVL1_OpticalFlow::calculate_with_multiscale(float *I0, float *I1, floa
 		u2s[s] = new float[sizes];
 
 		//zoom in the images to create the pyramidal structure
-		CoarseToFine::zoom(I0s[s-1], I0s[s], nx[s-1], ny[s-1], _zoom_factor);
-		CoarseToFine::zoom(I1s[s-1], I1s[s], nx[s-1], ny[s-1], _zoom_factor);
+		CoarseToFine::downsample(I0s[s-1], I0s[s], nx[s-1], ny[s-1], nx[s], ny[s]);
+		CoarseToFine::downsample(I1s[s-1], I1s[s], nx[s-1], ny[s-1], nx[s], ny[s]);
 	}
 
 	//initialize the flow at the coarsest scale
@@ -277,8 +279,8 @@ bool Zach_TVL1_OpticalFlow::calculate_with_multiscale(float *I0, float *I1, floa
 			return false;
 
 		if(s) {
-			CoarseToFine::zoom_out(u1s[s], u1s[s-1], nx[s], ny[s], nx[s-1], ny[s-1]);
-			CoarseToFine::zoom_out(u2s[s], u2s[s-1], nx[s], ny[s], nx[s-1], ny[s-1]);
+			CoarseToFine::upsample(u1s[s], u1s[s-1], nx[s], ny[s], nx[s-1], ny[s-1]);
+			CoarseToFine::upsample(u2s[s], u2s[s-1], nx[s], ny[s], nx[s-1], ny[s-1]);
 
 			int size = nx[s-1] * ny[s-1];
 

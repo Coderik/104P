@@ -111,7 +111,7 @@ void Hull::open_image()
 
 void Hull::load_image(string filename)
 {
-	Image<float> *image = ReadPgmImage(&filename);
+	Image<float> *image = ReadPgmImage(filename);
 
 	if (!image) {
 		return;
@@ -167,7 +167,7 @@ void Hull::load_sequence(string path)
 	Glib::RefPtr<Gio::FileEnumerator> child_enumeration = dir->enumerate_children();
 	Glib::RefPtr<Gio::FileInfo> file_info;
 	std::vector<Glib::ustring> file_names;
-	while ((file_info = child_enumeration->next_file()) != NULL)
+	while ((file_info = child_enumeration->next_file()) != 0)
 	{
 		std::string file_mime_type = file_info->get_content_type();
 		// COMPATIBILITY: first for unix, second for win
@@ -186,7 +186,7 @@ void Hull::load_sequence(string path)
 	// Load first frame, that will define width and height for the sequence.
 	std::string first_frame_path = path;
 	first_frame_path.append(file_names[0]);
-	Image<float> *first_frame = ReadPgmImage(&first_frame_path);
+	Image<float> *first_frame = ReadPgmImage(first_frame_path);
 
 	// [Re]create sequence instance
 	if (_sequence)
@@ -197,7 +197,7 @@ void Hull::load_sequence(string path)
 	for (unsigned int i = 1; i < file_names.size(); i++) {
 		string frame_path = path;
 		frame_path.append(file_names[i]);
-		Image<float> *frame = ReadPgmImage(&frame_path);
+		Image<float> *frame = ReadPgmImage(frame_path);
 		_sequence->add_frame(frame);
 	}
 
@@ -300,6 +300,7 @@ LayerManager* Hull::request_layer_manager()
 
 	if (!_current_fitting->layer_manager) {
 		_current_fitting->layer_manager = new LayerManager();
+		_current_fitting->layer_manager->set_current_time(_current_time);
 		_ui.image_control->set_layer_manager(_current_fitting->layer_manager);
 	}
 
@@ -370,6 +371,11 @@ void Hull::set_time()
 {
 	_current_time = _ui.time_slider->get_value();
 	update_image_control(_current_time);
+
+	if (_current_fitting->layer_manager) {
+		_current_fitting->layer_manager->set_current_time(_current_time);
+	}
+
 	_current_fitting->rig->current_time_changed();
 }
 
@@ -502,6 +508,7 @@ void Hull::update_fitting()
 	_ui.refresh_placeholders();
 
 	if (_current_fitting->layer_manager) {
+		_current_fitting->layer_manager->set_current_time(_current_time);
 		_ui.image_control->set_layer_manager(_current_fitting->layer_manager);
 	}
 }

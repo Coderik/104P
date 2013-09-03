@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "field_operations.h"
+#include "filtering.h"
 #include "coarse_to_fine.h"
 #include "warping.h"
 #include "i_watchdog.h"

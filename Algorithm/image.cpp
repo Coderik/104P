@@ -43,7 +43,7 @@ Image<T>::Image(int x_size,int y_size, T value)
 
 
 template <class T>
-Image<T>::Image(Image<T> &source)
+Image<T>::Image(const Image<T> &source)
 {
 	_x_size = source._x_size;
 	_y_size = source._y_size;
@@ -72,7 +72,18 @@ T Image<T>::get_value(int x, int y) const
 		return T();
 	}
 
-	return _points[get_index(x,y)];
+	return _points[get_index(x, y)];
+}
+
+
+template <class T>
+T Image<T>::get_value(Point p) const
+{
+	if ( p.x < 0 || p.y < 0 || p.x >= _x_size || p.y >= _y_size || !_points) {
+		return T();
+	}
+
+	return _points[get_index(p.x, p.y)];
 }
 
 
@@ -95,7 +106,18 @@ void Image<T>::set_value(int x, int y, T value)
 		return;
 	}
 
-	_points[get_index(x,y)] = value;
+	_points[get_index(x, y)] = value;
+}
+
+
+template <class T>
+void Image<T>::set_value(Point p, T value)
+{
+	if ( p.x < 0 || p.y < 0 || p.x >= _x_size || p.y >= _y_size || !_points) {
+		return;
+	}
+
+	_points[get_index(p.x, p.y)] = value;
 }
 
 
@@ -201,7 +223,7 @@ Image<T>* Image<T>::get_patch_around_point(int center_x, int center_y, int size)
 
 
 template <class T>
-int Image<T>::get_raw_data_length()
+int Image<T>::get_raw_data_length() const
 {
 	return _x_size * _y_size;
 }
@@ -211,9 +233,19 @@ int Image<T>::get_raw_data_length()
  * Returns pointer to internal raw data representation.
  */
  template <class T>
-T* Image<T>::get_raw_data()
+const T* Image<T>::get_raw_data() const
 {
 	return _points;
+}
+
+
+/**
+* Returns pointer to internal raw data representation.
+*/
+template <class T>
+T* Image<T>::get_raw_data()
+{
+return _points;
 }
 
 

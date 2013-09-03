@@ -15,10 +15,10 @@ class IIterableMask
 public:
 	virtual ~IIterableMask() {}
 
-	virtual Point first() = 0;
-	virtual Point last() = 0;
-	virtual Point next(const Point current) = 0;
-	virtual Point prev(const Point current) = 0;
+	virtual Point first() const = 0;
+	virtual Point last() const = 0;
+	virtual Point next(const Point current) const = 0;
+	virtual Point prev(const Point current) const = 0;
 };
 
 

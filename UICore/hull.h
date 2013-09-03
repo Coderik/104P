@@ -35,7 +35,6 @@
 #include "sequence.h"
 #include "pgm_util.h"
 #include "zach_TVL1_optical_flow.h"
-#include "util.h"
 #include "optical_flow_io.h"
 #include "optical_flow_io_legacy.h"
 #include "optical_flow.h"

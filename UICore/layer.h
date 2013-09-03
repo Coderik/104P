@@ -24,6 +24,7 @@ public:
 	string get_id();
 	void set_drawing_size(int width, int height);
 	bool set_visibitity(bool is_visible);
+	void set_current_time(int time);
 
 	virtual void draw(const Cairo::RefPtr<Cairo::Context>& context);
 
@@ -37,6 +38,7 @@ protected:
 	string _display_name;
 	string _id;
 	bool _is_visible;
+	int _current_time;
 	int _drawing_width, _drawing_height;
 	type_signal_changed _signal_changed;
 

@@ -27,7 +27,7 @@ Sequence<T>::Sequence(int x_size,int y_size,int t_size)
 	_y_size = y_size;
 	_t_size = t_size;
 
-	_frames = vector<Image<T>* >(_t_size);
+	_frames = vector<Image<T>* >(_t_size, (Image<T>*)0);
 }
 
 
@@ -73,34 +73,40 @@ Sequence<T>::Sequence(Sequence<T>& source)
 template <class T>
 Sequence<T>::~Sequence()
 {
-	// TODO: check destructors of frames
+	typename vector<Image<T>* >::iterator it;
+	for (it = _frames.begin(); it != _frames.end(); ++it) {
+		if (*it) {
+			delete *it;
+		}
+	}
+
 	_frames.clear();
 }
 
 
 template <class T>
-int Sequence<T>::get_size_x()
+int Sequence<T>::get_size_x() const
 {
 	return _x_size;
 }
 
 
 template <class T>
-int Sequence<T>::get_size_y()
+int Sequence<T>::get_size_y() const
 {
 	return _y_size;
 }
 
 
 template <class T>
-int Sequence<T>::get_size_t()
+int Sequence<T>::get_size_t() const
 {
 	return _t_size;
 }
 
 
 template <class T>
-Shape Sequence<T>::get_size()
+Shape Sequence<T>::get_size() const
 {
 	return Shape(_x_size, _y_size, _t_size);
 }
@@ -124,7 +130,7 @@ Point Sequence<T>::get_coordinates()
  * Note: if outside the range, returns default value.
  */
 template <class T>
-T Sequence<T>::get_value(int x, int y, int t)
+T Sequence<T>::get_value(int x, int y, int t) const
 {
 	if (t < 0 || t >= _t_size || !_frames[t])
 		return T();
@@ -133,10 +139,23 @@ T Sequence<T>::get_value(int x, int y, int t)
 }
 
 
+/*
+ * Note: if outside the range, returns default value.
+ */
+template <class T>
+T Sequence<T>::get_value(Point p) const
+{
+	if (p.t < 0 || p.t >= _t_size || !_frames[p.t])
+		return T();
+
+	return _frames[p.t]->get_value(p.x, p.y);
+}
+
+
 template <class T>
 bool Sequence<T>::try_get_value(int x, int y, int t, T& value)
 {
-	if (t < 0 || t > _t_size || !_frames[t])
+	if (t < 0 || t >= _t_size || !_frames[t])
 		return false;
 
 	return _frames[t]->try_get_value(x, y, value);
@@ -146,7 +165,7 @@ bool Sequence<T>::try_get_value(int x, int y, int t, T& value)
 template <class T>
 void Sequence<T>::set_value(int x, int y, int t, T value)
 {
-	if (t < 0 || t > _t_size)
+	if (t < 0 || t >= _t_size)
 		return;
 
 	if (!_frames[t]) {
@@ -177,6 +196,16 @@ Image<T>* Sequence<T>::get_frame(int t)
 		return 0;
 
 	return _frames[t];
+}
+
+
+template <class T>
+Image<T> Sequence<T>::get_frame(int t) const
+{
+	if (t < 0 || t >= _t_size)
+		return Image<T>(_x_size, _y_size, T());
+
+	return Image<T>(*_frames[t]);
 }
 
 

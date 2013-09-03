@@ -43,11 +43,11 @@ int GetNumber(FILE * f)
  * Reads image in PGM format from file with provided path\name
  * to the object of 'Image' class
  */
-Image<float>* ReadPgmImage(string *name)
+Image<float>* ReadPgmImage(const string &name)
 {
 	/* open file */
 	// COMPATIBILITY: for win 'rb' file mode instead of just 'r'
-	FILE *f = fopen((*name).data(),"rb");
+	FILE *f = fopen(name.data(),"rb");
 	if( f == NULL ) {
 		return 0;
 	}
@@ -98,10 +98,10 @@ Image<float>* ReadPgmImage(string *name)
  * Writes image in PGM format to file with provided path\name
  * from the object of 'Image' class
  */
-void WritePgmImage(string *name, Image<float> *image)
+void WritePgmImage(const string &name, Image<float> *image)
 {
 	/* open file */
-	FILE *f = fopen((*name).data(),"w");
+	FILE *f = fopen(name.data(),"wb");
 
 	/* write header */
 	putc('P', f);

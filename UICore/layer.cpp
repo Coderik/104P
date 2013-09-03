@@ -12,6 +12,7 @@ Layer::Layer(string id, string display_name)
 	_id = id;
 	_display_name = display_name;
 	_is_visible = true;
+	_current_time = 0;
 }
 
 
@@ -43,6 +44,12 @@ bool Layer::set_visibitity(bool is_visible)
 	_is_visible = is_visible;
 	_signal_changed.emit();
 	return true;
+}
+
+
+void Layer::set_current_time(int time)
+{
+	_current_time = time;
 }
 
 

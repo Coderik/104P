@@ -28,6 +28,13 @@ ImageMask::ImageMask(int x_size,int y_size, bool value)
 }
 
 
+ImageMask::ImageMask(Image<bool> &source)
+	: Image<bool>(source)
+{
+
+}
+
+
 ImageMask::ImageMask(ImageMask &source)
 	: Image<bool>(source)
 {
@@ -41,25 +48,25 @@ ImageMask::~ImageMask()
 }
 
 
-ImageMask::iterator ImageMask::begin()
+ImageMask::iterator ImageMask::begin() const
 {
 	return iterator(this, first());
 }
 
 
-ImageMask::iterator ImageMask::end()
+ImageMask::iterator ImageMask::end() const
 {
 	return iterator(this, Point(-1, -1, -1));
 }
 
 
-ImageMask::iterator ImageMask::rbegin()
+ImageMask::iterator ImageMask::rbegin() const
 {
 	return iterator(this, last(), true);
 }
 
 
-ImageMask::iterator ImageMask::rend()
+ImageMask::iterator ImageMask::rend() const
 {
 	return iterator(this, Point(-1, -1, -1), true);
 }
@@ -90,7 +97,7 @@ void ImageMask::invert()
 
 /* I_Iterable_Mask methods */
 // TODO: optimize
-Point ImageMask::first()
+Point ImageMask::first() const
 {
 	for (int y = 0; y < _y_size; y++) {
 		for (int x = 0; x < _x_size; x++) {
@@ -104,7 +111,7 @@ Point ImageMask::first()
 }
 
 
-Point ImageMask::last()
+Point ImageMask::last() const
 {
 	for (int y = _y_size - 1; y >= 0; y--) {
 		for (int x = _x_size - 1; x >= 0; x--) {
@@ -118,7 +125,7 @@ Point ImageMask::last()
 }
 
 
-Point ImageMask::next(const Point current)
+Point ImageMask::next(const Point current) const
 {
 	int from_x = current.x + 1;
 	for (int y = current.y; y < _y_size; y++) {
@@ -134,7 +141,7 @@ Point ImageMask::next(const Point current)
 }
 
 
-Point ImageMask::prev(const Point current)
+Point ImageMask::prev(const Point current) const
 {
 	int from_x = current.x - 1;
 	for (int y = current.y; y >= 0; y--) {
