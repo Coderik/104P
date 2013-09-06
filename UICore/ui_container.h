@@ -83,7 +83,7 @@ public:
 
 		// adjust main window
 		window->set_title("Image & video processing testing environment");
-		window->set_default_size(900, 700);
+		window->set_default_size(900, 800);
 
 		// set up menu
 		_menu_manager = Gtk::UIManager::create();
