@@ -1,0 +1,37 @@
+@startuml
+
+package Eigen #DDDDDD {
+}
+
+package sigc #DDDDDD {
+}
+
+package gtkmm #DDDDDD {
+}
+
+package Core {
+}
+sigc <-- Core
+
+package Algorithm {
+}
+Core <-- Algorithm
+Eigen <-- Algorithm
+sigc <-- Algorithm
+
+package UICore {
+}
+gtkmm <-- UICore
+sigc <-- UICore
+Core <-- UICore
+Algorithm <-- UICore
+
+package SampleApp {
+}
+gtkmm <-- SampleApp
+sigc <-- SampleApp
+Core <-- SampleApp
+Algorithm <-- SampleApp
+UICore <-- SampleApp
+
+@enduml

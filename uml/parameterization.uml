@@ -1,0 +1,66 @@
+@startuml
+
+/'===================================== Core ======================================'/
+package Core
+
+interface IParameter {
+	+string get_display_name()
+}
+
+
+interface IListParameter {
+	+vector<string> get_items()
+	+bool set(unsigned int item_id)
+	+int get() 
+}
+IParameter <|-- IListParameter
+
+
+interface IRangeParameter {
+	+float get_lower_boundary()
+	+float get_upper_boundary()
+	+int get_digits()
+	+bool set(float value)
+	+float get()
+}
+IParameter <|-- IRangeParameter
+
+class ListParameter {
+	+void set_display_name(string display_name)
+	+void add_item(string name, T value)
+	+void attach_setter(sigc::slot1<void, T> setter)
+	+void attach_getter(sigc::slot0<T> getter)
+}
+IListParameter <|-- ListParameter
+
+class RangeParameter {
+	+void set_display_name(string display_name)
+	+void set_lower_boundary(float lower_boundary)
+	+void set_upper_boundary(float upper_boundary)
+	+void set_digits(int digits)
+	+void attach_setter(sigc::slot1<void, float> setter)
+	+void attach_getter(sigc::slot0<float> getter)
+}
+IRangeParameter <|-- RangeParameter
+
+interface IParameterizable {
+	+vector<IParameter *> get_parameters()
+}
+IParameter "0..*" <-- "1" IParameterizable
+
+end package
+
+/'=================================== UICore ======================================'/
+package UICore
+
+class ParametersUIBuilder {
+	+Gtk::VBox* get_ui()
+	+signal_changed()
+}
+IParameterizable "1" --o "1" ParametersUIBuilder
+IRangeParameter <... ParametersUIBuilder
+IListParameter <... ParametersUIBuilder
+
+end package
+
+@enduml
