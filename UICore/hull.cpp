@@ -351,18 +351,21 @@ void Hull::set_layers_visibility()
 
 void Hull::left_button_pressed(MouseEvent mouse_event)
 {
+	mouse_event.t = _current_time;
 	_current_fitting->rig->left_button_pressed(mouse_event);
 }
 
 
 void Hull::left_button_released(MouseEvent mouse_event)
 {
+	mouse_event.t = _current_time;
 	_current_fitting->rig->left_button_released(mouse_event);
 }
 
 
 void Hull::left_button_drag(MouseEvent mouse_event)
 {
+	mouse_event.t = _current_time;
 	_current_fitting->rig->left_button_drag(mouse_event);
 }
 
