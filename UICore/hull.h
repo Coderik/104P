@@ -65,6 +65,7 @@ public:
 	virtual LayerManager* request_layer_manager();
 	virtual Gtk::Box* request_ui_placeholder();
 	virtual int request_current_time();
+	virtual void pass_interaction(Interaction *interaction);
 
 protected:
 	/* slots */

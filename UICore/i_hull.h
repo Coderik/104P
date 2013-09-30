@@ -12,6 +12,7 @@
 #include "sequence.h"
 #include "optical_flow_container.h"
 #include "layer_manager.h"
+#include "interaction.h"
 
 class IHull
 {
@@ -28,6 +29,8 @@ public:
 	virtual Gtk::Box* request_ui_placeholder() = 0;
 	virtual int request_current_time() = 0;
 	// TODO: add requests for b.g. worker, ...
+
+	virtual void pass_interaction(Interaction *interaction) = 0;
 };
 
 

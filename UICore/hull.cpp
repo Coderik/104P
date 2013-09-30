@@ -320,6 +320,12 @@ int Hull::request_current_time()
 }
 
 
+void Hull::pass_interaction(Interaction *interaction)
+{
+	_current_fitting->interaction = interaction;	// TODO: potential problem here: wrong pointer passed from some Rig may crash the whole Hull.
+}
+
+
 template <typename T>
 void Hull::reset_vector_of_pointers(std::vector<T*> &v, int size)
 {
@@ -352,21 +358,36 @@ void Hull::set_layers_visibility()
 void Hull::left_button_pressed(MouseEvent mouse_event)
 {
 	mouse_event.t = _current_time;
-	_current_fitting->rig->left_button_pressed(mouse_event);
+
+	if (_current_fitting->interaction) {
+		_current_fitting->interaction->left_button_pressed(mouse_event);
+	}
+
+	_current_fitting->rig->left_button_pressed(mouse_event);	// TODO: remove this. Allow receive mouse events from ImageViewer only via Interaction
 }
 
 
 void Hull::left_button_released(MouseEvent mouse_event)
 {
 	mouse_event.t = _current_time;
-	_current_fitting->rig->left_button_released(mouse_event);
+
+	if (_current_fitting->interaction) {
+		_current_fitting->interaction->left_button_released(mouse_event);
+	}
+
+	_current_fitting->rig->left_button_released(mouse_event);	// TODO: remove this. Allow receive mouse events from ImageViewer only via Interaction
 }
 
 
 void Hull::left_button_drag(MouseEvent mouse_event)
 {
 	mouse_event.t = _current_time;
-	_current_fitting->rig->left_button_drag(mouse_event);
+
+	if (_current_fitting->interaction) {
+		_current_fitting->interaction->left_button_drag(mouse_event);
+	}
+
+	_current_fitting->rig->left_button_drag(mouse_event);	// TODO: remove this. Allow receive mouse events from ImageViewer only via Interaction
 }
 
 
@@ -385,6 +406,10 @@ void Hull::set_time()
 
 bool Hull::key_pressed(GdkEventKey* event)
 {
+	if (_current_fitting->interaction) {
+		_current_fitting->interaction->key_pressed(event);
+	}
+
 	_current_fitting->rig->key_pressed(event);
 
 	return false;
