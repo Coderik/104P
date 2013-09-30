@@ -23,6 +23,9 @@ class Rig
 public:
 	virtual ~Rig() {};
 
+	/**
+	 * NOTE: No requests to the Hull should be done during the initialization.
+	 */
 	virtual void initialize(IHull *hull) = 0;
 
 	virtual void activate() {};
