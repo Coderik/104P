@@ -63,9 +63,9 @@ public:
 	virtual vector<OpticalFlowContainer*> request_backward_optical_flow();
 	virtual bool request_has_optical_flow_data();
 	virtual LayerManager* request_layer_manager();
+	virtual InteractionManager* request_interaction_manager();
 	virtual Gtk::Box* request_ui_placeholder();
 	virtual int request_current_time();
-	virtual void pass_interaction(Interaction *interaction);
 
 protected:
 	/* slots */
@@ -79,6 +79,7 @@ protected:
 	void restore_optical_flow();
 	void update_view();
 	void update_fitting();
+	void update_toolbar();
 	void set_layers_visibility();
 	void perceive_background_worker(int responce_id);	//TODO: rename it!
 
@@ -102,6 +103,7 @@ private:
 	bool _optical_flow_legacy_format;
 	bool _layers_visibility;
 	IBackgroundWorker *_background_worker;
+	sigc::connection _connection_interaction_manager_signal_ui_updated;
 
 	UI_Container _ui;
 

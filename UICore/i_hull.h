@@ -12,7 +12,7 @@
 #include "sequence.h"
 #include "optical_flow_container.h"
 #include "layer_manager.h"
-#include "interaction.h"
+#include "interaction_manager.h"
 
 class IHull
 {
@@ -26,11 +26,10 @@ public:
 	/* NOTE: NULL pointer is the correct return value,
 	 * which means that requested service is currently unavailable. */
 	virtual LayerManager* request_layer_manager() = 0;
+	virtual InteractionManager* request_interaction_manager() = 0;
 	virtual Gtk::Box* request_ui_placeholder() = 0;
 	virtual int request_current_time() = 0;
 	// TODO: add requests for b.g. worker, ...
-
-	virtual void pass_interaction(Interaction *interaction) = 0;
 };
 
 

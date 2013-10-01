@@ -295,7 +295,7 @@ bool Hull::request_has_optical_flow_data()
 LayerManager* Hull::request_layer_manager()
 {
 	if (!_current_fitting) {
-		return NULL;
+		return 0;
 	}
 
 	if (!_current_fitting->layer_manager) {
@@ -308,6 +308,23 @@ LayerManager* Hull::request_layer_manager()
 }
 
 
+InteractionManager* Hull::request_interaction_manager()
+{
+	if (!_current_fitting) {
+		return 0;
+	}
+
+	if (!_current_fitting->interaction_manager) {
+		_current_fitting->interaction_manager = new InteractionManager();
+		_connection_interaction_manager_signal_ui_updated =
+					_current_fitting->interaction_manager->signal_ui_updated().connect(
+							sigc::mem_fun(*this, &Hull::update_toolbar) );
+	}
+
+	return _current_fitting->interaction_manager;
+}
+
+
 Gtk::Box* Hull::request_ui_placeholder()
 {
 	return _ui.right_side_layout;
@@ -317,12 +334,6 @@ Gtk::Box* Hull::request_ui_placeholder()
 int Hull::request_current_time()
 {
 	return _current_time;
-}
-
-
-void Hull::pass_interaction(Interaction *interaction)
-{
-	_current_fitting->interaction = interaction;	// TODO: potential problem here: wrong pointer passed from some Rig may crash the whole Hull.
 }
 
 
@@ -359,8 +370,11 @@ void Hull::left_button_pressed(MouseEvent mouse_event)
 {
 	mouse_event.t = _current_time;
 
-	if (_current_fitting->interaction) {
-		_current_fitting->interaction->left_button_pressed(mouse_event);
+	if (_current_fitting->interaction_manager) {
+		Interaction *interaction = _current_fitting->interaction_manager->get_active();
+		if (interaction) {
+			interaction->left_button_pressed(mouse_event);
+		}
 	}
 
 	_current_fitting->rig->left_button_pressed(mouse_event);	// TODO: remove this. Allow receive mouse events from ImageViewer only via Interaction
@@ -371,8 +385,11 @@ void Hull::left_button_released(MouseEvent mouse_event)
 {
 	mouse_event.t = _current_time;
 
-	if (_current_fitting->interaction) {
-		_current_fitting->interaction->left_button_released(mouse_event);
+	if (_current_fitting->interaction_manager) {
+		Interaction *interaction = _current_fitting->interaction_manager->get_active();
+		if (interaction) {
+			interaction->left_button_released(mouse_event);
+		}
 	}
 
 	_current_fitting->rig->left_button_released(mouse_event);	// TODO: remove this. Allow receive mouse events from ImageViewer only via Interaction
@@ -383,8 +400,11 @@ void Hull::left_button_drag(MouseEvent mouse_event)
 {
 	mouse_event.t = _current_time;
 
-	if (_current_fitting->interaction) {
-		_current_fitting->interaction->left_button_drag(mouse_event);
+	if (_current_fitting->interaction_manager) {
+		Interaction *interaction = _current_fitting->interaction_manager->get_active();
+		if (interaction) {
+			interaction->left_button_drag(mouse_event);
+		}
 	}
 
 	_current_fitting->rig->left_button_drag(mouse_event);	// TODO: remove this. Allow receive mouse events from ImageViewer only via Interaction
@@ -406,8 +426,11 @@ void Hull::set_time()
 
 bool Hull::key_pressed(GdkEventKey* event)
 {
-	if (_current_fitting->interaction) {
-		_current_fitting->interaction->key_pressed(event);
+	if (_current_fitting->interaction_manager) {
+		Interaction *interaction = _current_fitting->interaction_manager->get_active();
+		if (interaction) {
+			interaction->key_pressed(event);
+		}
 	}
 
 	_current_fitting->rig->key_pressed(event);
@@ -526,6 +549,9 @@ void Hull::update_fitting()
 {
 	if (_current_fitting) {
 		_current_fitting->rig->deactivate();
+		if (_connection_interaction_manager_signal_ui_updated.connected()) {
+			_connection_interaction_manager_signal_ui_updated.disconnect();
+		}
 		_ui.clear_placeholders();
 		_ui.image_control->drop_layer_manager();
 	}
@@ -539,6 +565,18 @@ void Hull::update_fitting()
 		_current_fitting->layer_manager->set_current_time(_current_time);
 		_ui.image_control->set_layer_manager(_current_fitting->layer_manager);
 	}
+
+	if (_current_fitting->interaction_manager) {
+		_connection_interaction_manager_signal_ui_updated =
+						_current_fitting->interaction_manager->signal_ui_updated().connect(
+								sigc::mem_fun(*this, &Hull::update_toolbar) );
+	}
+}
+
+
+void Hull::update_toolbar()
+{
+	// TODO: implement
 }
 
 /* private */
