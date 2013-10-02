@@ -376,8 +376,6 @@ void Hull::left_button_pressed(MouseEvent mouse_event)
 			interaction->left_button_pressed(mouse_event);
 		}
 	}
-
-	_current_fitting->rig->left_button_pressed(mouse_event);	// TODO: remove this. Allow receive mouse events from ImageViewer only via Interaction
 }
 
 
@@ -391,8 +389,6 @@ void Hull::left_button_released(MouseEvent mouse_event)
 			interaction->left_button_released(mouse_event);
 		}
 	}
-
-	_current_fitting->rig->left_button_released(mouse_event);	// TODO: remove this. Allow receive mouse events from ImageViewer only via Interaction
 }
 
 
@@ -406,8 +402,6 @@ void Hull::left_button_drag(MouseEvent mouse_event)
 			interaction->left_button_drag(mouse_event);
 		}
 	}
-
-	_current_fitting->rig->left_button_drag(mouse_event);	// TODO: remove this. Allow receive mouse events from ImageViewer only via Interaction
 }
 
 
@@ -433,6 +427,8 @@ bool Hull::key_pressed(GdkEventKey* event)
 		}
 	}
 
+	// TODO: It might be useful to add some is_handled flag to the event,
+	//       because it is normal to have more than one receiver.
 	_current_fitting->rig->key_pressed(event);
 
 	return false;
@@ -559,6 +555,7 @@ void Hull::update_fitting()
 	_current_fitting = _ui.get_fitting();
 	_current_fitting->rig->activate();
 
+	update_toolbar();
 	_ui.refresh_placeholders();
 
 	if (_current_fitting->layer_manager) {
@@ -576,7 +573,19 @@ void Hull::update_fitting()
 
 void Hull::update_toolbar()
 {
-	// TODO: implement
+	if (_current_fitting->interaction_manager) {
+		// clear placeholder
+		vector<Gtk::Widget* > children = _ui.left_side_layout->get_children();
+		vector<Gtk::Widget* >::iterator it;
+		for(it = children.begin(); it != children.end(); ++it) {
+			_ui.left_side_layout->remove(**it);
+		}
+
+		Gtk::Box* toolbar = _current_fitting->interaction_manager->get_ui();
+		if (toolbar) {
+			_ui.left_side_layout->pack_start(*toolbar, Gtk::PACK_EXPAND_WIDGET);
+		}
+	}
 }
 
 /* private */

@@ -8,9 +8,17 @@
 #ifndef INTERACTION_MANAGER_H_
 #define INTERACTION_MANAGER_H_
 
+#include <vector>
 #include <gtkmm/box.h>
+#include <gtkmm/toolbar.h>
+#include <gtkmm/radiotoolbutton.h>
+#include <gtkmm/radiobuttongroup.h>
+#include <gtkmm/frame.h>
+#include <gtkmm/stock.h>
 #include <sigc++/sigc++.h>
 #include "interaction.h"
+
+using namespace std;
 
 class InteractionManager
 {
@@ -20,6 +28,7 @@ public:
 	Gtk::Box* get_ui();
 	Interaction* get_active();
 	void add_interation(Interaction *interaction);
+	int get_interactions_amount();
 
 	typedef sigc::signal<void> type_signal_ui_updated;
 	type_signal_ui_updated signal_ui_updated() {
@@ -29,7 +38,12 @@ public:
 private:
 	Gtk::Box *_ui;
 	Interaction *_active;
+	vector<Interaction* > _interactions;
 	type_signal_ui_updated _signal_ui_updated;
+
+	Gtk::Box* build_ui();
+	void destroy_ui(Gtk::Box* ui);
+	void set_active(Interaction *interaction);
 };
 
 
