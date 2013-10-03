@@ -7,6 +7,8 @@
 
 #include "interaction_manager.h"
 
+const string InteractionManager::DEFAULT_ICON_NAME = "help-about";
+
 InteractionManager::InteractionManager()
 {
 	_ui = 0;
@@ -70,10 +72,16 @@ Gtk::Box* InteractionManager::build_ui()
 
 	vector<Interaction* >::iterator it;
 	for (it = _interactions.begin(); it != _interactions.end(); ++it) {
-		// TODO: use user-provided icons
-		Gtk::RadioToolButton *button = new Gtk::RadioToolButton(group, Gtk::Stock::ABOUT);
+		Gtk::RadioToolButton *button = new Gtk::RadioToolButton(group, (*it)->get_display_name());
+		button->set_tooltip_text((*it)->get_tooltip_text());
+
+		string icon_name = (*it)->get_icon_name();
+		if (icon_name.empty()) {
+			icon_name = DEFAULT_ICON_NAME;
+		}
+		button->set_icon_name(icon_name);
+
 		group = button->get_group();	// NOTE: this magic is required. Without it all buttons will be in separate groups.
-		button->set_tooltip_text((*it)->get_display_name());
 
 		if ((*it) == _active) {
 			button->activate();

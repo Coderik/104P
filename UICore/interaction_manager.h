@@ -9,6 +9,7 @@
 #define INTERACTION_MANAGER_H_
 
 #include <vector>
+#include <string>
 #include <gtkmm/box.h>
 #include <gtkmm/toolbar.h>
 #include <gtkmm/radiotoolbutton.h>
@@ -36,6 +37,7 @@ public:
 	}
 
 private:
+	static const string DEFAULT_ICON_NAME;
 	Gtk::Box *_ui;
 	Interaction *_active;
 	vector<Interaction* > _interactions;

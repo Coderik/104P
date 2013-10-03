@@ -29,8 +29,20 @@ public:
 		return _display_name;
 	}
 
+	string get_tooltip_text()
+	{
+		return _tooltip_text;
+	}
+
+	string get_icon_name()
+	{
+		return _icon_name;
+	}
+
 protected:
 	string _display_name;
+	string _tooltip_text;
+	string _icon_name;
 
 };
 
