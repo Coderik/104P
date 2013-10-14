@@ -1,0 +1,39 @@
+@startuml
+
+participant Main
+
+Main -> Hull: << create >>
+activate Hull
+
+Hull -> UI: << create >>
+activate UI
+
+Main -> Rig: << create >>
+activate Rig
+
+Main -> Hull: add_rig(rig, name)
+
+Hull -> Fitting: << create >>
+activate Fitting
+Hull -> Fitting: << set rig & name >>
+
+Main -> Hull: initialize_rigs
+Hull -> Rig: initialize(this)
+
+Hull -> UI: set_fittings(...)
+UI -> UI: _current_fitting = fittings[0]
+UI --> Hull: Signal fitting_changed
+
+Hull -> UI: get_fitting()
+activate UI
+UI --> Hull: Fitting
+deactivate UI
+
+Hull -> Rig: activate()
+Rig -> Hull: request_ui_placeholder()
+activate Hull
+Hull --> Rig: Gtk::Box
+deactivate Hull
+Hull -> UI: refresh_placeholders()
+
+@enduml

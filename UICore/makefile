@@ -10,6 +10,7 @@ SOURCES += \
 background_worker.cpp \
 hull.cpp \
 image_viewer.cpp \
+interaction_manager.cpp \
 layer.cpp \
 layer_manager.cpp \
 optical_flow.cpp \

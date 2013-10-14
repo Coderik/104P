@@ -295,7 +295,7 @@ bool Hull::request_has_optical_flow_data()
 LayerManager* Hull::request_layer_manager()
 {
 	if (!_current_fitting) {
-		return NULL;
+		return 0;
 	}
 
 	if (!_current_fitting->layer_manager) {
@@ -305,6 +305,23 @@ LayerManager* Hull::request_layer_manager()
 	}
 
 	return _current_fitting->layer_manager;
+}
+
+
+InteractionManager* Hull::request_interaction_manager()
+{
+	if (!_current_fitting) {
+		return 0;
+	}
+
+	if (!_current_fitting->interaction_manager) {
+		_current_fitting->interaction_manager = new InteractionManager();
+		_connection_interaction_manager_signal_ui_updated =
+					_current_fitting->interaction_manager->signal_ui_updated().connect(
+							sigc::mem_fun(*this, &Hull::update_toolbar) );
+	}
+
+	return _current_fitting->interaction_manager;
 }
 
 
@@ -351,19 +368,40 @@ void Hull::set_layers_visibility()
 
 void Hull::left_button_pressed(MouseEvent mouse_event)
 {
-	_current_fitting->rig->left_button_pressed(mouse_event);
+	mouse_event.t = _current_time;
+
+	if (_current_fitting->interaction_manager) {
+		Interaction *interaction = _current_fitting->interaction_manager->get_active();
+		if (interaction) {
+			interaction->left_button_pressed(mouse_event);
+		}
+	}
 }
 
 
 void Hull::left_button_released(MouseEvent mouse_event)
 {
-	_current_fitting->rig->left_button_released(mouse_event);
+	mouse_event.t = _current_time;
+
+	if (_current_fitting->interaction_manager) {
+		Interaction *interaction = _current_fitting->interaction_manager->get_active();
+		if (interaction) {
+			interaction->left_button_released(mouse_event);
+		}
+	}
 }
 
 
 void Hull::left_button_drag(MouseEvent mouse_event)
 {
-	_current_fitting->rig->left_button_drag(mouse_event);
+	mouse_event.t = _current_time;
+
+	if (_current_fitting->interaction_manager) {
+		Interaction *interaction = _current_fitting->interaction_manager->get_active();
+		if (interaction) {
+			interaction->left_button_drag(mouse_event);
+		}
+	}
 }
 
 
@@ -382,6 +420,15 @@ void Hull::set_time()
 
 bool Hull::key_pressed(GdkEventKey* event)
 {
+	if (_current_fitting->interaction_manager) {
+		Interaction *interaction = _current_fitting->interaction_manager->get_active();
+		if (interaction) {
+			interaction->key_pressed(event);
+		}
+	}
+
+	// TODO: It might be useful to add some is_handled flag to the event,
+	//       because it is normal to have more than one receiver.
 	_current_fitting->rig->key_pressed(event);
 
 	return false;
@@ -498,6 +545,9 @@ void Hull::update_fitting()
 {
 	if (_current_fitting) {
 		_current_fitting->rig->deactivate();
+		if (_connection_interaction_manager_signal_ui_updated.connected()) {
+			_connection_interaction_manager_signal_ui_updated.disconnect();
+		}
 		_ui.clear_placeholders();
 		_ui.image_control->drop_layer_manager();
 	}
@@ -505,11 +555,36 @@ void Hull::update_fitting()
 	_current_fitting = _ui.get_fitting();
 	_current_fitting->rig->activate();
 
+	update_toolbar();
 	_ui.refresh_placeholders();
 
 	if (_current_fitting->layer_manager) {
 		_current_fitting->layer_manager->set_current_time(_current_time);
 		_ui.image_control->set_layer_manager(_current_fitting->layer_manager);
+	}
+
+	if (_current_fitting->interaction_manager) {
+		_connection_interaction_manager_signal_ui_updated =
+						_current_fitting->interaction_manager->signal_ui_updated().connect(
+								sigc::mem_fun(*this, &Hull::update_toolbar) );
+	}
+}
+
+
+void Hull::update_toolbar()
+{
+	if (_current_fitting->interaction_manager) {
+		// clear placeholder
+		vector<Gtk::Widget* > children = _ui.left_side_layout->get_children();
+		vector<Gtk::Widget* >::iterator it;
+		for(it = children.begin(); it != children.end(); ++it) {
+			_ui.left_side_layout->remove(**it);
+		}
+
+		Gtk::Box* toolbar = _current_fitting->interaction_manager->get_ui();
+		if (toolbar) {
+			_ui.left_side_layout->pack_start(*toolbar, Gtk::PACK_EXPAND_WIDGET);
+		}
 	}
 }
 

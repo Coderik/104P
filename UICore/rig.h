@@ -23,6 +23,9 @@ class Rig
 public:
 	virtual ~Rig() {};
 
+	/**
+	 * NOTE: No requests to the Hull should be done during the initialization.
+	 */
 	virtual void initialize(IHull *hull) = 0;
 
 	virtual void activate() {};
@@ -32,12 +35,6 @@ public:
 	virtual void optical_flow_changed() {};
 	virtual void current_time_changed() {};
 
-	/* TODO: in the case of multiple possible options of user interaction these methods
-	 * must be generalized e.g. by moving to separate User_Interaction class
-	 */
-	virtual void left_button_pressed(MouseEvent event) {};
-	virtual void left_button_drag(MouseEvent event) {};
-	virtual void left_button_released(MouseEvent event) {};
 	virtual void key_pressed(GdkEventKey* event) {};
 
 protected:
