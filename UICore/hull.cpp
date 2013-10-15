@@ -136,6 +136,11 @@ void Hull::load_image(string filename)
 
 	// Notify rig that sequence have been changed.
 	_current_fitting->rig->sequence_changed();
+
+	// Set current time for all already existing layers
+	if (_current_fitting->layer_manager) {
+		_current_fitting->layer_manager->set_current_time(_current_time);
+	}
 }
 
 
@@ -245,6 +250,11 @@ void Hull::load_sequence(string path)
 
 	// Notify rig that sequence have been changed.
 	_current_fitting->rig->sequence_changed();
+
+	// Set current time for all already existing layers
+	if (_current_fitting->layer_manager) {
+		_current_fitting->layer_manager->set_current_time(_current_time);
+	}
 }
 	
 	
