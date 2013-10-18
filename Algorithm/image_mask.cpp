@@ -31,7 +31,7 @@ ImageMask::ImageMask(int x_size,int y_size, bool value)
 /**
  * Deep copy
  */
-ImageMask::ImageMask(Image<bool> &source)
+ImageMask::ImageMask(const Image<bool> &source)
 	: Image<bool>(source)
 {
 
@@ -41,7 +41,7 @@ ImageMask::ImageMask(Image<bool> &source)
 /**
  * Deep copy
  */
-ImageMask::ImageMask(ImageMask &source)
+ImageMask::ImageMask(const ImageMask &source)
 	: Image<bool>(source)
 {
 

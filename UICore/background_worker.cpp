@@ -17,6 +17,14 @@ BackgroundWorker::BackgroundWorker()
 }
 
 
+BackgroundWorker::~BackgroundWorker()
+{
+	if (_watchdog) {
+		delete _watchdog;
+	}
+}
+
+
 /**
  * Starts background processing.
  * NOTE: This method is called from the UI thread.
