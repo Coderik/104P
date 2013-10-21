@@ -11,6 +11,7 @@
 #include "sequence.h"
 #include "i_iterable_mask.h"
 #include "mask_iterator.h"
+#include "image_mask.h"
 
 class SequenceMask : public Sequence<bool>, public IIterableMask
 {
@@ -23,6 +24,8 @@ public:
 	SequenceMask(Image<bool> *first_frame);
 	SequenceMask(SequenceMask& source);
 	~SequenceMask();
+
+	ImageMask* get_mask_frame(int t) const;
 
 	iterator begin() const;
     iterator end() const;

@@ -1,0 +1,55 @@
+@startuml
+
+class Pack {
+	+Eigen::Matrix2f tensor
+	+Eigen::Matrix2f transform
+	+float angle
+}
+
+class Sequence<float> {
+
+}
+
+class SequenceMask {
+
+}
+
+interface IStructureTensor {
+
+}
+
+class StructureTensorPack {
+	+Shape get_size()
+
+	+float get_color(Point p)
+	+Eigen::Matrix2f get_tensor(Point p)
+	+ImageMask* get_ellipse(Point p)
+	+Eigen::Matrix2f get_transform(Point p)
+	+float get_angle(Point p)
+	+bool is_belong(Point p)
+
+	+void populate_gradient_cache(\n\
+	const Sequence<float> &gradient_x,\n\
+	const Sequence<float> &gradient_y)
+}
+StructureTensorPack "1" *--> "0..*" Pack
+StructureTensorPack "1" *--> "0..2" Sequence : gradient
+StructureTensorPack "1" o--> "1" Sequence : sequence
+StructureTensorPack "1" o--> "1" SequenceMask : mask
+IStructureTensor "1" <--o "1" StructureTensorPack
+
+interface IAffineInvariantPatchDistance {
+	+float calculate(\n\
+		const StructureTensorPack &source_pack,\n\
+		Point source_point,\n\
+		const StructureTensorPack &target_pack,\n\
+		Point target_point)
+}
+StructureTensorPack <.. IAffineInvariantPatchDistance
+
+class AffineInvariantPatchDistance {
+
+}
+IAffineInvariantPatchDistance <|-- AffineInvariantPatchDistance
+
+@enduml
