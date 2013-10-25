@@ -28,13 +28,13 @@ public:
 	ImageMask* get_mask_frame(int t) const;
 
 	iterator begin() const;
-    iterator end() const;
-    iterator rbegin() const;
-    iterator rend() const;
+	iterator end() const;
+	iterator rbegin() const;
+	iterator rend() const;
 
-    void mask(int x, int y, int t);
-    void unmask(int x, int y, int t);
-    void invert();
+	void mask(int x, int y, int t);
+	void unmask(int x, int y, int t);
+	void invert();
 
 	/* I_Iterable_Mask methods */
 	virtual Point first() const;
@@ -42,6 +42,7 @@ public:
 	virtual Point next(const Point current) const;
 	virtual Point prev(const Point current) const;
 
+	static iterator empty_iterator();
 };
 
 

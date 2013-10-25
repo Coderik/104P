@@ -179,3 +179,9 @@ Point SequenceMask::prev(const Point current) const
 
 	return Point(-1, -1, -1);
 }
+
+
+SequenceMask::iterator SequenceMask::empty_iterator()
+{
+	return iterator(0, Point(-1, -1, -1));
+}
