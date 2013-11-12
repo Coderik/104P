@@ -31,12 +31,12 @@ void Filtering::separate_convolution(const float *in, float *out, int size_x, in
 				//id = max(0, min(size_x - 1, id));	// neumann boundary conditions
 
 				// symmetric boundary conditions ( | 3 2 1 0 | 0 1 2 3 | 3 2 1 0 | )
-				while ((id < 0) || (id >= size_y)) {
+				while ((id < 0) || (id >= size_x)) {
 					if (id < 0) {
 						id = -id - 1;
 					}
-					if (id >= size_y) {
-						id = 2 * size_y - id -1;
+					if (id >= size_x) {
+						id = 2 * size_x - id -1;
 					}
 				}
 
