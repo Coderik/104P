@@ -5,7 +5,7 @@
  *      Author: Vadim Fedorov
  */
 
-#include "headers/optical_flow_io.h"
+#include "optical_flow_io.h"
 
 int MIN_VALUE = -32768;
 

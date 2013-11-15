@@ -5,8 +5,8 @@
  *      Author: Vadim Fedorov
  */
 
-#include "headers/list_parameter.h"
-#include "headers/steering_patch_weighting.h"
+#include "list_parameter.h"
+//#include "steering_patch_weighting.h"
 
 template <class T>
 ListParameter<T>::ListParameter()
@@ -109,6 +109,6 @@ void ListParameter<T>::attach_getter(sigc::slot0<T> getter)
 
 
 // Explicit instantiations
-template class ListParameter<SteeringPatchWeighting::SteeringModeEnum>;
+//template class ListParameter<SteeringPatchWeighting::SteeringModeEnum>;
 
 

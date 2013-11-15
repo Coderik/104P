@@ -7,7 +7,7 @@
 
 #include <omp.h>
 
-#include "headers/field_operations.h"
+#include "field_operations.h"
 
 void FieldOperations::divergence(const float *v1, const float *v2, float *div, const int nx, const int ny)
 {

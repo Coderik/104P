@@ -5,7 +5,7 @@
  *      Author: Vadim Fedorov
  */
 
-#include "headers/range_parameter.h"
+#include "range_parameter.h"
 
 RangeParameter::RangeParameter()
 {

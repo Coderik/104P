@@ -5,7 +5,7 @@
  *      Author: Vadim Fedorov
  */
 
-#include "headers/interpolation.h"
+#include "interpolation.h"
 
 float Interpolation::bilinear(const Image<float> &input, float x, float y, BoundaryConditionEnum boundary_conditionn)
 {

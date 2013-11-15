@@ -5,7 +5,7 @@
  *      Author: Vadim Fedorov
  */
 
-#include "headers/image_mask.h"
+#include "image_mask.h"
 
 ImageMask::ImageMask()
 	: Image<bool>()

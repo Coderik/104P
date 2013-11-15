@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <string>
 
-#include "headers/pgm_util.h"
+#include "pgm_util.h"
 
 
 void SkipSpacesAndComments(FILE * f)

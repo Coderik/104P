@@ -5,7 +5,7 @@
  *      Author: Vadim Fedorov
  */
 
-#include "headers/sequence.h"
+#include "sequence.h"
 
 template <class T>
 Sequence<T>::Sequence(int x_size, int y_size, int t_size, T value)
