@@ -21,8 +21,8 @@ public:
 	ImageMask();
 	ImageMask(int x_size,int y_size);
 	ImageMask(int x_size,int y_size, bool value);
-	ImageMask(Image<bool> &source);
-	ImageMask(ImageMask &source);
+	ImageMask(const Image<bool> &source);
+	ImageMask(const ImageMask &source);
 	~ImageMask();
 
 	iterator begin() const;

@@ -20,15 +20,15 @@ public:
 	Image(int x_size,int y_size);
 	Image(int x_size,int y_size, T value);
 	Image(const Image &source);
-	~Image();
+	virtual ~Image();
 
 	int get_size_x() const;
 	int get_size_y() const;
 	Shape get_size() const;
 	void set_coordinates(Point coordinates);
 	Point get_coordinates();
-	T get_value(int x, int y) const;
-	T get_value(Point p) const;
+	virtual T get_value(int x, int y) const;
+	virtual T get_value(Point p) const;
 	bool try_get_value(int x, int y, T& value) const;
 	void set_value(int x, int y, T value);
 	void set_value(Point p, T value);

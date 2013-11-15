@@ -44,6 +44,30 @@ Sequence<T>::Sequence(int x_size,int y_size)
 
 
 template <class T>
+Sequence<T>::Sequence(Shape size, T value)
+{
+	_x_size = size.size_x;
+	_y_size = size.size_y;
+	_t_size = size.size_t;
+
+	_frames = vector<Image<T>* >(_t_size);
+
+	fill(value);
+}
+
+
+template <class T>
+Sequence<T>::Sequence(Shape size)
+{
+	_x_size = size.size_x;
+	_y_size = size.size_y;
+	_t_size = size.size_t;
+
+	_frames = vector<Image<T>* >(_t_size, (Image<T>*)0);
+}
+
+
+template <class T>
 Sequence<T>::Sequence(Image<T> *first_frame)
 {
 	_x_size = first_frame->get_size_x();
@@ -54,18 +78,15 @@ Sequence<T>::Sequence(Image<T> *first_frame)
 }
 
 template <class T>
-Sequence<T>::Sequence(Sequence<T>& source)
+Sequence<T>::Sequence(const Sequence<T>& source)
 {
 	_x_size = source.get_size_x();
 	_y_size = source.get_size_y();
 	_t_size = source.get_size_t();
 
-	_frames = vector<Image<T>* >(_t_size);
+	_frames = vector<Image<T>* >(_t_size, (Image<T>*)0);
 	for (int i = 0; i < _t_size; i++) {
-		Image<T> *frame = source.get_frame(i);
-		if (frame) {
-			_frames[i] = new Image<T>(*frame);
-		}
+		_frames[i] = source.get_frame_as_is(i);
 	}
 }
 
@@ -206,6 +227,16 @@ Image<T> Sequence<T>::get_frame(int t) const
 		return Image<T>(_x_size, _y_size, T());
 
 	return Image<T>(*_frames[t]);
+}
+
+
+template <class T>
+Image<T>* Sequence<T>::get_frame_as_is(int t) const
+{
+	if (t < 0 || t >= _t_size || !_frames[t])
+		return 0;
+
+	return new Image<T>(*_frames[t]);
 }
 
 

@@ -1,0 +1,38 @@
+@startuml
+
+package sigc #DDDDDD {
+}
+
+package gtkmm #DDDDDD {
+}
+sigc <- gtkmm
+
+package Core #00DD00 {
+}
+sigc <-- Core
+
+package Common #00DD00 {
+}
+Core <- Common
+sigc <-- Common
+
+package UICore #00DD00 {
+}
+gtkmm <-- UICore
+Core <- UICore
+Common <- UICore
+
+package YourAlgorithm {
+}
+Core <-- YourAlgorithm
+Common <-- YourAlgorithm
+
+package YourGUI {
+}
+gtkmm <-- YourGUI
+Core <-- YourGUI
+Common <-- YourGUI
+UICore <-- YourGUI
+YourAlgorithm <- YourGUI
+
+@enduml

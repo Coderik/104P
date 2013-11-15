@@ -28,14 +28,20 @@ ImageMask::ImageMask(int x_size,int y_size, bool value)
 }
 
 
-ImageMask::ImageMask(Image<bool> &source)
+/**
+ * Deep copy
+ */
+ImageMask::ImageMask(const Image<bool> &source)
 	: Image<bool>(source)
 {
 
 }
 
 
-ImageMask::ImageMask(ImageMask &source)
+/**
+ * Deep copy
+ */
+ImageMask::ImageMask(const ImageMask &source)
 	: Image<bool>(source)
 {
 

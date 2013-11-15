@@ -1,0 +1,87 @@
+@startuml
+
+interface IData {
+
+}
+
+interface IBackgroundWorker {
+	+void start(sigc::slot1<void,IBackgroundInsider* > working_function)
+	+void cancel()
+	+void wait()
+
+	+type_signal signal_work_finished()
+	+type_signal signal_data_prepared()
+}
+IData <.. IBackgroundWorker
+
+note right of IBackgroundWorker
+	This interface is used
+	at the <b>UI thread side</b>
+	to run and control
+	the background processing.
+end note
+
+interface IBackgroundInsider {
+	+IWatchdog* get_watchdog()
+	+void submit_data_portion(IData* data)
+	+void announce_completion()
+}
+IBackgroundInsider ...> IWatchdog
+IData <.. IBackgroundInsider
+
+note top of IBackgroundInsider
+	This interface is used
+	at the <b>background thread side</b>
+	to communicate with the UI thread 
+	from the inside of the working function. 
+end note
+
+interface IWatchdog {
+	+bool can_continue()
+}
+
+class SignalWatchdog {
+	+type_signal signal_ask_permission()
+}
+IWatchdog <|- SignalWatchdog
+
+class BackgroundWorker {
+
+}
+IBackgroundWorker <|--- BackgroundWorker
+IBackgroundInsider <|--- BackgroundWorker
+SignalWatchdog "0..1" -* "1" BackgroundWorker
+
+note left of BackgroundWorker
+	start(working_function) {{
+		entry_point = sigc::bind<IBackgroundInsider* >( working_function, this );
+		thread = Glib::Threads::Thread::create( entry_point );
+	}}
+	
+end note
+
+/'---------------------'/
+package Glib
+namespace Threads
+class Thread {
+}
+class Mutex {
+}
+end namespace
+class Dispatcher {
+}
+end package
+/'---------------------'/
+BackgroundWorker "1" *-- "1" Threads.Thread
+BackgroundWorker "1" *-- "1" Threads.Mutex 
+BackgroundWorker "1" *-- "2" Dispatcher
+
+/'---------------------'/
+package sigc++
+class slot {
+}
+end package
+/'---------------------'/
+slot <.. IBackgroundWorker
+
+@enduml

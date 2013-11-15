@@ -22,8 +22,10 @@ public:
 	Sequence(int x_size, int y_size, int t_size, T value);
 	Sequence(int x_size, int y_size, int t_size);
 	Sequence(int x_size, int y_size);
+	Sequence(Shape size, T value);
+	Sequence(Shape size);
 	Sequence(Image<T> *first_frame);
-	Sequence(Sequence& source);
+	Sequence(const Sequence& source);
 	~Sequence();
 
 	int get_size_x() const;
@@ -39,6 +41,7 @@ public:
 	void fill(T value);
 	Image<T>* get_frame(int t);
 	Image<T> get_frame(int t) const;
+	Image<T>* get_frame_as_is(int t) const;
 	bool set_frame(int t, Image<T> *frame);
 	bool add_frame(Image<T> *frame);
 	int drop_empty_frames();

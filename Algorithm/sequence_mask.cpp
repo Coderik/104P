@@ -48,6 +48,16 @@ SequenceMask::~SequenceMask()
 }
 
 
+ImageMask* SequenceMask::get_mask_frame(int t) const
+{
+	if (t < 0 || t >= _t_size || !_frames[t]) {
+		return 0;
+	}
+
+	return new ImageMask(*_frames[t]);
+}
+
+
 SequenceMask::iterator SequenceMask::begin() const
 {
 	return iterator(this, first());
@@ -168,4 +178,10 @@ Point SequenceMask::prev(const Point current) const
 	}
 
 	return Point(-1, -1, -1);
+}
+
+
+SequenceMask::iterator SequenceMask::empty_iterator()
+{
+	return iterator(0, Point(-1, -1, -1));
 }

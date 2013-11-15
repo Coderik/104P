@@ -18,7 +18,7 @@ class BackgroundWorker : public IBackgroundWorker, public IBackgroundInsider
 {
 public:
 	BackgroundWorker();
-	virtual ~BackgroundWorker() {}
+	virtual ~BackgroundWorker();
 
 	/* IBackgroundWorker members (UI thread side) */
 	virtual void start(sigc::slot1<void,IBackgroundInsider* > working_function);

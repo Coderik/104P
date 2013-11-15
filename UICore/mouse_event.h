@@ -16,10 +16,20 @@ public:
 	MouseEvent(int x, int y, unsigned int modifiers) {
 		this->x = x;
 		this->y = y;
+		this->t = 0;
 		this->modifiers = modifiers;
 	}
 
-	int x, y;
+
+	MouseEvent(int x, int y, int t, unsigned int modifiers) {
+		this->x = x;
+		this->y = y;
+		this->t = t;
+		this->modifiers = modifiers;
+	}
+
+
+	int x, y, t;
 	unsigned int modifiers;
 
 	static const unsigned int SHIFT_MODIFIER = GDK_SHIFT_MASK;

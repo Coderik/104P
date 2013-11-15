@@ -48,6 +48,7 @@ public:
 	Glib::RefPtr<Gtk::ActionGroup> layer_action_group;
 	Glib::RefPtr<Gtk::ToggleAction> layers_visibility_toggle_action;
 
+	Gtk::Box *left_side_layout;
 	Gtk::Box *right_side_layout;
 	ImageViewer *image_control;
 	Gtk::Scale *time_slider;
@@ -83,7 +84,7 @@ public:
 
 		// adjust main window
 		window->set_title("Image & video processing testing environment");
-		window->set_default_size(900, 800);
+		window->set_default_size(920, 800);
 
 		// set up menu
 		_menu_manager = Gtk::UIManager::create();
@@ -193,23 +194,27 @@ public:
 		status_bar = new Gtk::Statusbar();
 		window_layout->pack_end(*status_bar,  Gtk::PACK_SHRINK);
 
-		Gtk::Box *working_area_layout = new Gtk::HBox();	// containes right and left 'sides'
+		Gtk::Box *working_area_layout = new Gtk::HBox();	// containes central, right and left 'sides'
 		working_area_layout->set_margin_top(10);
 		working_area_layout->set_margin_left(10);
 		working_area_layout->set_margin_right(10);
 		window_layout->pack_start(*working_area_layout, Gtk::PACK_EXPAND_WIDGET);
 
-		Gtk::Box *left_side_layout = new Gtk::VBox();		// containes image/sequence view and time scale
-		left_side_layout->set_margin_right(10);
-		working_area_layout->pack_start(*left_side_layout, Gtk::PACK_EXPAND_WIDGET);
+		left_side_layout = new Gtk::VBox();		// toolbox placeholder
+		working_area_layout->pack_start(*left_side_layout, Gtk::PACK_SHRINK);
+
+		Gtk::Box *central_layout = new Gtk::VBox();		// containes image/sequence view and time scale
+		central_layout->set_margin_left(10);
+		central_layout->set_margin_right(10);
+		working_area_layout->pack_start(*central_layout, Gtk::PACK_EXPAND_WIDGET);
 
 		Gtk::Frame *image_view_frame = new Gtk::Frame("Image/sequence view");
 		image_view_frame->set_label_align(Gtk::ALIGN_CENTER, Gtk::ALIGN_START);
 		image_view_frame->set_shadow_type(Gtk::SHADOW_ETCHED_OUT);
-		left_side_layout->pack_start(*image_view_frame, Gtk::PACK_EXPAND_WIDGET);
+		central_layout->pack_start(*image_view_frame, Gtk::PACK_EXPAND_WIDGET);
 
 		time_slider = new Gtk::Scale(Gtk::ORIENTATION_HORIZONTAL);
-		left_side_layout->pack_start(*time_slider, Gtk::PACK_SHRINK);
+		central_layout->pack_start(*time_slider, Gtk::PACK_SHRINK);
 
 		right_side_layout = new Gtk::VBox();		// rig placeholder
 		working_area_layout->pack_start(*right_side_layout, Gtk::PACK_SHRINK);
@@ -250,6 +255,7 @@ public:
 	void refresh_placeholders()
 	{
 		right_side_layout->show_all_children(true);
+		left_side_layout->show_all_children(true);
 	}
 
 
@@ -259,6 +265,11 @@ public:
 		vector<Gtk::Widget* >::iterator it;
 		for(it = children.begin(); it != children.end(); ++it) {
 			right_side_layout->remove(**it);
+		}
+
+		children = left_side_layout->get_children();
+		for(it = children.begin(); it != children.end(); ++it) {
+			left_side_layout->remove(**it);
 		}
 	}
 

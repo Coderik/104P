@@ -11,6 +11,7 @@
 #include "sequence.h"
 #include "i_iterable_mask.h"
 #include "mask_iterator.h"
+#include "image_mask.h"
 
 class SequenceMask : public Sequence<bool>, public IIterableMask
 {
@@ -24,14 +25,16 @@ public:
 	SequenceMask(SequenceMask& source);
 	~SequenceMask();
 
-	iterator begin() const;
-    iterator end() const;
-    iterator rbegin() const;
-    iterator rend() const;
+	ImageMask* get_mask_frame(int t) const;
 
-    void mask(int x, int y, int t);
-    void unmask(int x, int y, int t);
-    void invert();
+	iterator begin() const;
+	iterator end() const;
+	iterator rbegin() const;
+	iterator rend() const;
+
+	void mask(int x, int y, int t);
+	void unmask(int x, int y, int t);
+	void invert();
 
 	/* I_Iterable_Mask methods */
 	virtual Point first() const;
@@ -39,6 +42,7 @@ public:
 	virtual Point next(const Point current) const;
 	virtual Point prev(const Point current) const;
 
+	static iterator empty_iterator();
 };
 
 
