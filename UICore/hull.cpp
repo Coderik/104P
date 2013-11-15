@@ -134,6 +134,10 @@ void Hull::load_image(string filename)
 	// Show image
 	update_image_control(_current_time);
 
+	if (!_current_fitting) {
+		return;
+	}
+
 	// Notify rig that sequence have been changed.
 	_current_fitting->rig->sequence_changed();
 
@@ -247,6 +251,10 @@ void Hull::load_sequence(string path)
 
 	// Show first frame
 	update_image_control(_current_time);
+
+	if (!_current_fitting) {
+		return;
+	}
 
 	// Notify rig that sequence have been changed.
 	_current_fitting->rig->sequence_changed();
@@ -420,16 +428,22 @@ void Hull::set_time()
 	_current_time = _ui.time_slider->get_value();
 	update_image_control(_current_time);
 
-	if (_current_fitting->layer_manager) {
-		_current_fitting->layer_manager->set_current_time(_current_time);
-	}
+	if (_current_fitting) {
+		if (_current_fitting->layer_manager) {
+			_current_fitting->layer_manager->set_current_time(_current_time);
+		}
 
-	_current_fitting->rig->current_time_changed();
+		_current_fitting->rig->current_time_changed();
+	}
 }
 
 
 bool Hull::key_pressed(GdkEventKey* event)
 {
+	if (!_current_fitting) {
+		return false;
+	}
+
 	if (_current_fitting->interaction_manager) {
 		Interaction *interaction = _current_fitting->interaction_manager->get_active();
 		if (interaction) {
