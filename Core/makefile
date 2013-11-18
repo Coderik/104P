@@ -18,7 +18,6 @@ image.cpp \
 image_mask.cpp \
 intensity_code.cpp \
 interpolation.cpp \
-list_parameter.cpp \
 mask_iterator.cpp \
 optical_flow_container.cpp \
 optical_flow_io.cpp \
