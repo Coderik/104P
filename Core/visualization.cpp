@@ -5,7 +5,7 @@
  *      Author: Vadim Fedorov
  */
 
-#include "headers/visualization.h"
+#include "visualization.h"
 
 Sequence<float>* Visualization::mask_to_greyscale(const SequenceMask &mask)
 {

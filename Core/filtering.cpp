@@ -5,7 +5,7 @@
  *      Author: Vadim Fedorov
  */
 
-#include "headers/filtering.h"
+#include "filtering.h"
 
 /**
  * Remember that the filters are ﬂipped in convolution

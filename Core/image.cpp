@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "headers/image.h"
+#include "image.h"
 
 template <class T>
 Image<T>::Image()

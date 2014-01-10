@@ -5,7 +5,7 @@
  *      Author: Vadim Fedorov
  */
 
-#include "headers/mask_iterator.h"
+#include "mask_iterator.h"
 
 MaskIterator::MaskIterator()
 {

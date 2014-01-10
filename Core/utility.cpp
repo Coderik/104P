@@ -5,7 +5,7 @@
  *      Author: Vadim Fedorov
  */
 
-#include "headers/utility.h"
+#include "utility.h"
 
 string Utility::compose_file_name(const string &name, int index, const string &extension)
 {

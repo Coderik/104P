@@ -5,7 +5,7 @@
  *      Author: Vadim Fedorov
  */
 
-#include "headers/intensity_code.h"
+#include "intensity_code.h"
 
 IntensityCode::IntensityCode()
 {

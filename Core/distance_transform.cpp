@@ -5,7 +5,7 @@
  *      Author: Vadim Fedorov
  */
 
-#include "headers/distance_transform.h"
+#include "distance_transform.h"
 
 Image<float>* DistanceTransform::calculate(ImageMask &mask, DistanceEnum distance_type)
 {

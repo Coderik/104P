@@ -5,7 +5,7 @@
  *      Author: Vadim Fedorov
  */
 
-#include "headers/gaussian_kernel.h"
+#include "gaussian_kernel.h"
 
 GaussianKernel::GaussianKernel(unsigned int size_x, unsigned int size_y, unsigned int size_z, float sigma_scale)
 {

@@ -5,7 +5,7 @@
  *      Author: Vadim Fedorov
  */
 
-#include "headers/optical_flow_io_legacy.h"
+#include "optical_flow_io_legacy.h"
 
 OFStatus check_optical_flow_legacy(const std::string &file_name, int size_x, int size_y, int frames_count)
 {

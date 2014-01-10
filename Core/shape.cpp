@@ -5,7 +5,7 @@
  *      Author: Vadim Fedorov
  */
 
-#include "headers/shape.h"
+#include "shape.h"
 
 Shape Shape::empty = Shape();
 

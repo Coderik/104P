@@ -5,7 +5,7 @@
  *      Author: Vadim Fedorov
  */
 
-#include "headers/patch.h"
+#include "patch.h"
 
 Patch::Patch(Point center)
 {

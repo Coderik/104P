@@ -5,7 +5,7 @@
  *      Author: upf
  */
 
-#include "headers/warping.h"
+#include "warping.h"
 
 void Warping::warp(const float *input, const float *u, const float *v,
 					 float *output, const int nx, const int ny)

@@ -5,7 +5,7 @@
  *      Author: Vadim Fedorov
  */
 
-#include "headers/composite_image_mask.h"
+#include "composite_image_mask.h"
 
 CompositeImageMask::CompositeImageMask()
 {

@@ -5,7 +5,7 @@
  *      Author: Vadim Fedorov
  */
 
-#include "headers/color_code.h"
+#include "color_code.h"
 
 ColorCode::ColorCode()
 {

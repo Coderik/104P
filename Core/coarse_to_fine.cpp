@@ -5,7 +5,7 @@
  *      Author: Vadim Fedorov
  */
 
-#include "headers/coarse_to_fine.h"
+#include "coarse_to_fine.h"
 
 void CoarseToFine::downsample(const float* in, float* out, uint size_x, uint size_y, uint sample_size_x, uint sample_size_y)
 {
