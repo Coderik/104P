@@ -111,7 +111,7 @@ void Hull::open_image()
 
 void Hull::load_image(string filename)
 {
-	Image<float> *image = ReadPgmImage(filename);
+	Image<float> *image = IOUtility::read_pgm_image(filename);
 
 	if (!image) {
 		return;
@@ -195,7 +195,7 @@ void Hull::load_sequence(string path)
 	// Load first frame, that will define width and height for the sequence.
 	std::string first_frame_path = path;
 	first_frame_path.append(file_names[0]);
-	Image<float> *first_frame = ReadPgmImage(first_frame_path);
+	Image<float> *first_frame = IOUtility::read_pgm_image(first_frame_path);
 
 	// [Re]create sequence instance
 	if (_sequence)
@@ -206,7 +206,7 @@ void Hull::load_sequence(string path)
 	for (unsigned int i = 1; i < file_names.size(); i++) {
 		string frame_path = path;
 		frame_path.append(file_names[i]);
-		Image<float> *frame = ReadPgmImage(frame_path);
+		Image<float> *frame = IOUtility::read_pgm_image(frame_path);
 		_sequence->add_frame(frame);
 	}
 

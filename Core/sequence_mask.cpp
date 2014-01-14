@@ -7,22 +7,22 @@
 
 #include "sequence_mask.h"
 
-SequenceMask::SequenceMask(int x_size, int y_size, int t_size, bool value)
-	: Sequence<bool>(x_size, y_size, t_size, value)
+SequenceMask::SequenceMask(int size_x, int size_y, int size_t, bool value)
+	: Sequence<bool>(size_x, size_y, size_t, value)
 {
 
 }
 
 
-SequenceMask::SequenceMask(int x_size, int y_size, int t_size)
-	: Sequence<bool>(x_size, y_size, t_size, false)
+SequenceMask::SequenceMask(int size_x, int size_y, int size_t)
+	: Sequence<bool>(size_x, size_y, size_t, false)
 {
 
 }
 
 
-SequenceMask::SequenceMask(int x_size, int y_size)
-	: Sequence<bool>(x_size, y_size)
+SequenceMask::SequenceMask(int size_x, int size_y)
+	: Sequence<bool>(size_x, size_y)
 {
 
 }
@@ -50,7 +50,7 @@ SequenceMask::~SequenceMask()
 
 ImageMask* SequenceMask::get_mask_frame(int t) const
 {
-	if (t < 0 || t >= _t_size || !_frames[t]) {
+	if (t < 0 || t >= _size_t || !_frames[t]) {
 		return 0;
 	}
 
@@ -97,9 +97,9 @@ void SequenceMask::unmask(int x, int y, int t)
 void SequenceMask::invert()
 {
 	// TODO: may be move to specialization Image<bool>
-	for (int t = 0; t < _t_size; t++) {
-		for (int y = 0; y < _y_size; y++) {
-			for (int x = 0; x < _x_size; x++) {
+	for (int t = 0; t < _size_t; t++) {
+		for (int y = 0; y < _size_y; y++) {
+			for (int x = 0; x < _size_x; x++) {
 				set_value(x, y, t, !get_value(x, y, t));
 			}
 		}
@@ -111,9 +111,9 @@ void SequenceMask::invert()
 // TODO: optimize
 Point SequenceMask::first() const
 {
-	for (int t = 0; t < _t_size; t++) {
-		for (int y = 0; y < _y_size; y++) {
-			for (int x = 0; x < _x_size; x++) {
+	for (int t = 0; t < _size_t; t++) {
+		for (int y = 0; y < _size_y; y++) {
+			for (int x = 0; x < _size_x; x++) {
 				if (get_value(x, y, t)) {
 					return Point(x, y, t);
 				}
@@ -127,9 +127,9 @@ Point SequenceMask::first() const
 
 Point SequenceMask::last() const
 {
-	for (int t = _t_size - 1; t >= 0; t--) {
-		for (int y = _y_size - 1; y >= 0; y--) {
-			for (int x = _x_size - 1; x >= 0; x--) {
+	for (int t = _size_t - 1; t >= 0; t--) {
+		for (int y = _size_y - 1; y >= 0; y--) {
+			for (int x = _size_x - 1; x >= 0; x--) {
 				if (get_value(x, y, t)) {
 					return Point(x, y, t);
 				}
@@ -145,9 +145,9 @@ Point SequenceMask::next(const Point current) const
 {
 	int from_x = current.x + 1;
 	int from_y = current.y;
-	for (int t = current.t; t < _t_size; t++) {
-		for (int y = from_y; y < _y_size; y++) {
-			for (int x = from_x; x < _x_size; x++) {
+	for (int t = current.t; t < _size_t; t++) {
+		for (int y = from_y; y < _size_y; y++) {
+			for (int x = from_x; x < _size_x; x++) {
 				if (get_value(x, y, t)) {
 					return Point(x, y, t);
 				}
@@ -172,9 +172,9 @@ Point SequenceMask::prev(const Point current) const
 					return Point(x, y, t);
 				}
 			}
-			from_x = _x_size - 1;
+			from_x = _size_x - 1;
 		}
-		from_y = _y_size - 1;
+		from_y = _size_y - 1;
 	}
 
 	return Point(-1, -1, -1);

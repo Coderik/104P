@@ -12,7 +12,7 @@
 #include <cstring>
 
 #include "image.h"
-#include "gaussian_kernel.h"
+#include "gaussian_weights.h"
 
 using namespace std;
 

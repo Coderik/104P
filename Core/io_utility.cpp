@@ -1,49 +1,17 @@
 /*
- * pgm.cpp
+ * io_utility.cpp
  *
- *  Created on: Nov 5, 2012
+ *  Created on: Aug 27, 2013
  *      Author: Vadim Fedorov
  */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string>
-
-#include "pgm_util.h"
-
-
-void SkipSpacesAndComments(FILE * f)
-{
-  int c;
-  do
-    {
-      while(isspace(c=fgetc(f))); /* skip spaces */
-      if(c=='#') while((c=fgetc(f))!='\n'); /* skip comments */
-    }
-  while(c == '#');
-  ungetc(c,f);
-}
-
-/**
- *  Reads a number digit by digit.
- */
-int GetNumber(FILE * f)
-{
-  int num, c;
-
-  while(isspace(c=fgetc(f)));
-  if(!isdigit(c)) exit(1);
-  num = c - '0';
-  while( isdigit(c=fgetc(f)) ) num = 10 * num + c - '0';
-
-  return num;
-}
+#include "io_utility.h"
 
 /**
  * Reads image in PGM format from file with provided path\name
  * to the object of 'Image' class
  */
-Image<float>* ReadPgmImage(const string &name)
+Image<float>* IOUtility::read_pgm_image(const string &name)
 {
 	/* open file */
 	// COMPATIBILITY: for win 'rb' file mode instead of just 'r'
@@ -68,22 +36,22 @@ Image<float>* ReadPgmImage(const string &name)
 		return 0;
 	}
 
-	SkipSpacesAndComments(f);
+	skip_spaces_and_comments(f);
 	fscanf(f,"%d",&x_size);
-	SkipSpacesAndComments(f);
+	skip_spaces_and_comments(f);
 	fscanf(f,"%d",&y_size);
-	SkipSpacesAndComments(f);
+	skip_spaces_and_comments(f);
 	fscanf(f,"%d",&depth);
 
 	/* get memory */
 	Image<float> *image = new Image<float>(x_size, y_size);
 
 	/* read data */
-	SkipSpacesAndComments(f);
+	skip_spaces_and_comments(f);
 	int value;
 	for(int y=0;y<y_size;y++) {
 		for(int x=0;x<x_size;x++) {
-			value = isBinary ? fgetc(f) : GetNumber(f);
+			value = isBinary ? fgetc(f) : get_number(f);
 			image->set_value(x,y,value);
 		}
 	}
@@ -94,11 +62,12 @@ Image<float>* ReadPgmImage(const string &name)
 	return image;
 }
 
+
 /**
  * Writes image in PGM format to file with provided path\name
  * from the object of 'Image' class
  */
-void WritePgmImage(const string &name, Image<float> *image)
+void IOUtility::write_pgm_image(const string &name, Image<float> *image)
 {
 	/* open file */
 	FILE *f = fopen(name.data(),"wb");
@@ -124,6 +93,55 @@ void WritePgmImage(const string &name, Image<float> *image)
 	/* close file */
 	fclose(f);
 }
+
+
+string IOUtility::compose_file_name(const string &name, int index, const string &extension)
+{
+	stringstream stream;
+	stream << name << "_" << index << "." << extension;
+	string file_name = stream.str();
+	return file_name;
+}
+
+
+string IOUtility::compose_file_name(const string &name, int index, int index2, const string &extension)
+{
+	stringstream stream;
+	stream << name << "_" << index << "_" << setw(3) << setfill('0') << index2 << "." << extension;
+	string file_name = stream.str();
+	return file_name;
+}
+
+/* Private */
+
+void IOUtility::skip_spaces_and_comments(FILE * f)
+{
+	int c;
+	do
+	{
+		while(isspace(c=fgetc(f))); /* skip spaces */
+		if(c=='#') while((c=fgetc(f))!='\n'); /* skip comments */
+	}
+	while(c == '#');
+	ungetc(c,f);
+}
+
+
+/**
+ *  Reads a number digit by digit.
+ */
+int IOUtility::get_number(FILE * f)
+	{
+	int num, c;
+
+	while(isspace(c=fgetc(f)));
+	if(!isdigit(c)) exit(1);
+	num = c - '0';
+	while( isdigit(c=fgetc(f)) ) num = 10 * num + c - '0';
+
+	return num;
+}
+
 
 
 

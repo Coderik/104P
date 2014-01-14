@@ -21,7 +21,7 @@ Point::Point(int x, int y)
 {
 	this->x = x;
 	this->y = y;
-	t = 1;
+	t = 0;
 }
 
 

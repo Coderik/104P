@@ -180,8 +180,10 @@ void Filtering::median(Image<float> &in_out, int window_size)
 
 void Filtering::gaussian_smoothing(const float *in, float *out, int size_x, int size_y, int kernel_size)
 {
-	GaussianKernel kernel(kernel_size, 1, 1);
-	separate_convolution(in, out, size_x, size_y, kernel.get_raw(), kernel.get_raw(), kernel_size, kernel_size);
+	float sigma = kernel_size / 6;	// TODO: get rid of magic number
+	Image<float> kernel = GaussianWeights::calculate_1d(kernel_size, sigma);
+	float* kernel_raw = kernel.get_raw_data();
+	separate_convolution(in, out, size_x, size_y, kernel_raw, kernel_raw, kernel_size, kernel_size);
 }
 
 

@@ -18,9 +18,9 @@ class SequenceMask : public Sequence<bool>, public IIterableMask
 public:
 	typedef MaskIterator iterator;
 
-	SequenceMask(int x_size, int y_size, int t_size, bool value);
-	SequenceMask(int x_size, int y_size, int t_size);
-	SequenceMask(int x_size, int y_size);
+	SequenceMask(int size_x, int size_y, int size_t, bool value);
+	SequenceMask(int size_x, int size_y, int size_t);
+	SequenceMask(int size_x, int size_y);
 	SequenceMask(Image<bool> *first_frame);
 	SequenceMask(SequenceMask& source);
 	~SequenceMask();

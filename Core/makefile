@@ -1,9 +1,9 @@
 RM := rm -rf
 
-TARGET = elf32-i386
-#TARGET = elf64-x86-64 
-ARCH = -m32
-#ARCH = -m64
+#TARGET = elf32-i386
+TARGET = elf64-x86-64 
+#ARCH = -m32
+ARCH = -m64
 
 # Add inputs to the build variables 
 SOURCES += \

@@ -13,30 +13,30 @@
 template <class T>
 Image<T>::Image()
 {
-	_x_size = 0;
-	_y_size = 0;
+	_size_x = 0;
+	_size_y = 0;
 	_points = 0;
 }
 
 
 // TODO: Possible issue. _points contains rubbish after memory allocation
 template <class T>
-Image<T>::Image(int x_size, int y_size)
+Image<T>::Image(int size_x, int size_y)
 {
-	_x_size = x_size;
-	_y_size = y_size;
+	_size_x = size_x;
+	_size_y = size_y;
 
-	_points = (T *)malloc(sizeof(T) * x_size * y_size);
+	_points = new T[size_x * size_y];
 }
 
 
 template <class T>
-Image<T>::Image(int x_size,int y_size, T value)
+Image<T>::Image(int size_x,int size_y, T value)
 {
-	_x_size = x_size;
-	_y_size = y_size;
+	_size_x = size_x;
+	_size_y = size_y;
 
-	_points = (T *)malloc(sizeof(T) * x_size * y_size);
+	_points = new T[size_x * size_y];
 
 	fill(value);
 }
@@ -45,12 +45,12 @@ Image<T>::Image(int x_size,int y_size, T value)
 template <class T>
 Image<T>::Image(const Image<T> &source)
 {
-	_x_size = source._x_size;
-	_y_size = source._y_size;
-	_points = (T *)malloc(sizeof(T) * _x_size * _y_size);
+	_size_x = source._size_x;
+	_size_y = source._size_y;
+	_points = new T[_size_x * _size_y];
 
 	// TODO: rewrite copying
-	for (int i = 0; i < _x_size * _y_size; i++) {
+	for (int i = 0; i < _size_x * _size_y; i++) {
 		_points[i] = source._points[i];
 	}
 }
@@ -60,7 +60,7 @@ template <class T>
 Image<T>::~Image()
 {
 	if (_points) {
-		free(_points);
+		delete[] _points;
 	}
 }
 
@@ -68,7 +68,7 @@ Image<T>::~Image()
 template <class T>
 T Image<T>::get_value(int x, int y) const
 {
-	if ( x < 0 || y < 0 || x >= _x_size || y >= _y_size || !_points) {
+	if ( x < 0 || y < 0 || x >= _size_x || y >= _size_y || !_points) {
 		return T();
 	}
 
@@ -79,7 +79,7 @@ T Image<T>::get_value(int x, int y) const
 template <class T>
 T Image<T>::get_value(Point p) const
 {
-	if ( p.x < 0 || p.y < 0 || p.x >= _x_size || p.y >= _y_size || !_points) {
+	if ( p.x < 0 || p.y < 0 || p.x >= _size_x || p.y >= _size_y || !_points) {
 		return T();
 	}
 
@@ -90,7 +90,7 @@ T Image<T>::get_value(Point p) const
 template <class T>
 bool Image<T>::try_get_value(int x, int y, T& value) const
 {
-	if ( x < 0 || y < 0 || x >= _x_size || y >= _y_size || !_points) {
+	if ( x < 0 || y < 0 || x >= _size_x || y >= _size_y || !_points) {
 		return false;
 	}
 
@@ -102,7 +102,7 @@ bool Image<T>::try_get_value(int x, int y, T& value) const
 template <class T>
 void Image<T>::set_value(int x, int y, T value)
 {
-	if ( x < 0 || y < 0 || x >= _x_size || y >= _y_size || !_points) {
+	if ( x < 0 || y < 0 || x >= _size_x || y >= _size_y || !_points) {
 		return;
 	}
 
@@ -113,7 +113,7 @@ void Image<T>::set_value(int x, int y, T value)
 template <class T>
 void Image<T>::set_value(Point p, T value)
 {
-	if ( p.x < 0 || p.y < 0 || p.x >= _x_size || p.y >= _y_size || !_points) {
+	if ( p.x < 0 || p.y < 0 || p.x >= _size_x || p.y >= _size_y || !_points) {
 		return;
 	}
 
@@ -124,28 +124,28 @@ void Image<T>::set_value(Point p, T value)
 template <class T>
 void Image<T>::fill(T value)
 {
-	std::fill_n(_points, _x_size*_y_size, value);
+	std::fill_n(_points, _size_x*_size_y, value);
 }
 
 
 template <class T>
 int Image<T>::get_size_x() const
 {
-	return _x_size;
+	return _size_x;
 }
 
 
 template <class T>
 int Image<T>::get_size_y() const
 {
-	return _y_size;
+	return _size_y;
 }
 
 
 template <class T>
 Shape Image<T>::get_size() const
 {
-	return Shape(_x_size, _y_size, 1);
+	return Shape(_size_x, _size_y, 1);
 }
 
 
@@ -177,8 +177,8 @@ Image<T>* Image<T>::get_patch_between_points(int a_x, int a_y, int b_x, int b_y)
 	}
 
 	// check if whole patch is inside the image
-	if (a_x < 0 || b_x >= _x_size ||
-		a_y < 0 || b_y >= _y_size) {
+	if (a_x < 0 || b_x >= _size_x ||
+		a_y < 0 || b_y >= _size_y) {
 		return 0;
 	}
 
@@ -187,27 +187,27 @@ Image<T>* Image<T>::get_patch_between_points(int a_x, int a_y, int b_x, int b_y)
 
 
 template <class T>
-Image<T>* Image<T>::get_patch_around_point(int center_x, int center_y, int x_size, int y_size)
+Image<T>* Image<T>::get_patch_around_point(int center_x, int center_y, int size_x, int size_y)
 {
-	if (x_size <= 0 || y_size <= 0) {
+	if (size_x <= 0 || size_y <= 0) {
 		return 0;
 	}
 
 	// force 'x_size' and 'y_size' to be odd
-	if (!is_odd_number(x_size)) x_size--;
-	if (!is_odd_number(y_size)) y_size--;
+	if (!is_odd_number(size_x)) size_x--;
+	if (!is_odd_number(size_y)) size_y--;
 
 	// calculate left-top and bottom-right points of the patch
-	int x_offset = x_size / 2;
-	int y_offset = y_size / 2;
+	int x_offset = size_x / 2;
+	int y_offset = size_y / 2;
 	int a_x = center_x - x_offset;
 	int a_y = center_y - y_offset;
 	int b_x = center_x + x_offset;
 	int b_y = center_y + y_offset;
 
 	// check if whole patch is inside the image
-	if (a_x < 0 || b_x >= _x_size ||
-		a_y < 0 || b_y >= _y_size) {
+	if (a_x < 0 || b_x >= _size_x ||
+		a_y < 0 || b_y >= _size_y) {
 		return 0;
 	}
 
@@ -225,7 +225,7 @@ Image<T>* Image<T>::get_patch_around_point(int center_x, int center_y, int size)
 template <class T>
 int Image<T>::get_raw_data_length() const
 {
-	return _x_size * _y_size;
+	return _size_x * _size_y;
 }
 
 
@@ -253,7 +253,7 @@ return _points;
 template <class T>
 inline int Image<T>::get_index(int x, int y) const
 {
-	return _x_size * y + x;
+	return _size_x * y + x;
 }
 
 

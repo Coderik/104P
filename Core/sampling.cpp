@@ -5,9 +5,9 @@
  *      Author: Vadim Fedorov
  */
 
-#include "coarse_to_fine.h"
+#include "sampling.h"
 
-void CoarseToFine::downsample(const float* in, float* out, uint size_x, uint size_y, uint sample_size_x, uint sample_size_y)
+void Sampling::downsample(const float* in, float* out, uint size_x, uint size_y, uint sample_size_x, uint sample_size_y)
 {
 	float factor_x = (float)size_x / sample_size_x;
 	float factor_y = (float)size_y / sample_size_y;
@@ -16,8 +16,8 @@ void CoarseToFine::downsample(const float* in, float* out, uint size_x, uint siz
 	// TODO: handle different factors for x and y dimentions.
 	float sigma = sqrt(factor_x / 2);
 	int kernel_size = 2 * round(1.5 * sigma) + 1;
-	GaussianKernel kernel(kernel_size, 1, 1, sigma, 0, 0);
-	const float *filter = kernel.get_raw();
+	Image<float> kernel = GaussianWeights::calculate_1d(kernel_size, sigma);
+	const float *filter = kernel.get_raw_data();
 
 	// smooth image
 	float *buffer = new float[size_x * size_y];
@@ -42,7 +42,7 @@ void CoarseToFine::downsample(const float* in, float* out, uint size_x, uint siz
 }
 
 
-Image<float>* CoarseToFine::downsample(const Image<float> &in, uint sample_size_x, uint sample_size_y)
+Image<float>* Sampling::downsample(const Image<float> &in, uint sample_size_x, uint sample_size_y)
 {
 	if (sample_size_x >= (uint)in.get_size_x() || sample_size_y >= (uint)in.get_size_y()) {
 		return 0;
@@ -53,7 +53,7 @@ Image<float>* CoarseToFine::downsample(const Image<float> &in, uint sample_size_
 	return out;
 }
 
-Image<float>* CoarseToFine::downsample(const Image<float> &in, float factor)
+Image<float>* Sampling::downsample(const Image<float> &in, float factor)
 {
 	if (factor <= 0 || factor >= 1.0) {
 		return 0;
@@ -69,7 +69,7 @@ Image<float>* CoarseToFine::downsample(const Image<float> &in, float factor)
 
 
 // TODO: look for other options
-ImageMask* CoarseToFine::downsample(const ImageMask &in, float factor, float threshold)
+ImageMask* Sampling::downsample(const ImageMask &in, float factor, float threshold)
 {
 	// binary to float
 	Image<float> float_mask(in.get_size_x(), in.get_size_y(), 0.0);
@@ -78,7 +78,7 @@ ImageMask* CoarseToFine::downsample(const ImageMask &in, float factor, float thr
 		float_mask.set_value(*it, 1.0);
 	}
 
-	Image<float> *sampled_float_mask = CoarseToFine::downsample(float_mask, factor);
+	Image<float> *sampled_float_mask = Sampling::downsample(float_mask, factor);
 
 	// float to binary
 	threshold = fmax(0.0, fmin(1.0, threshold));
@@ -97,7 +97,7 @@ ImageMask* CoarseToFine::downsample(const ImageMask &in, float factor, float thr
 }
 
 
-void CoarseToFine::upsample(const float* in, float* out, uint size_x, uint size_y, uint sample_size_x, uint sample_size_y)
+void Sampling::upsample(const float* in, float* out, uint size_x, uint size_y, uint sample_size_x, uint sample_size_y)
 {
 	float factor_x = (float) sample_size_x / size_x;
 	float factor_y = (float) sample_size_y / size_y;
@@ -122,7 +122,7 @@ void CoarseToFine::upsample(const float* in, float* out, uint size_x, uint size_
 }
 
 
-Image<float>* CoarseToFine::upsample(const Image<float> &in, uint sample_size_x, uint sample_size_y)
+Image<float>* Sampling::upsample(const Image<float> &in, uint sample_size_x, uint sample_size_y)
 {
 	if (sample_size_x <= (uint)in.get_size_x() || sample_size_y <= (uint)in.get_size_y()) {
 		return 0;
@@ -134,7 +134,7 @@ Image<float>* CoarseToFine::upsample(const Image<float> &in, uint sample_size_x,
 }
 
 
-Image<float>* CoarseToFine::upsample(const Image<float> &in, float factor)
+Image<float>* Sampling::upsample(const Image<float> &in, float factor)
 {
 	if (factor <= 1.0) {
 		return 0;
@@ -149,7 +149,7 @@ Image<float>* CoarseToFine::upsample(const Image<float> &in, float factor)
 }
 
 
-int CoarseToFine::get_sample_size(uint size, float factor)
+int Sampling::get_sample_size(uint size, float factor)
 {
 	return (int)((float) size * factor + 0.5);
 }
