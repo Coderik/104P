@@ -1,12 +1,12 @@
 /*
- * coarse_to_fine.h
+ * sampling.h
  *
  *  Created on: Jan 23, 2013
  *      Author: Vadim Fedorov
  */
 
-#ifndef COARSE_TO_FINE_H_
-#define COARSE_TO_FINE_H_
+#ifndef SAMPLING_H_
+#define SAMPLING_H_
 
 #include <algorithm>
 #include <math.h>
@@ -21,9 +21,8 @@ using namespace std;
 
 typedef unsigned int uint;
 
-// TODO: [?] rename the class to 'Sampling'
 // TODO: handle different kinds of interpolation (bicubic)
-class CoarseToFine
+class Sampling
 {
 public:
 	static void downsample(const float* in, float* out, uint size_x, uint size_y, uint sample_size_x, uint sample_size_y);
@@ -39,4 +38,4 @@ public:
 };
 
 
-#endif /* COARSE_TO_FINE_H_ */
+#endif /* SAMPLING_H_ */

@@ -13,7 +13,7 @@
 
 #include "field_operations.h"
 #include "filtering.h"
-#include "coarse_to_fine.h"
+#include "sampling.h"
 #include "warping.h"
 #include "i_watchdog.h"
 
