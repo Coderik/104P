@@ -30,8 +30,8 @@ public:
 	virtual T get_value(int x, int y) const;
 	virtual T get_value(Point p) const;
 	bool try_get_value(int x, int y, T& value) const;
-	void set_value(int x, int y, T value);
-	void set_value(Point p, T value);
+	virtual void set_value(int x, int y, T value);
+	virtual void set_value(Point p, T value);
 	void fill(T value);
 	Image<T>* get_patch_between_points(int a_x, int a_y, int b_x, int b_y);
 	Image<T>* get_patch_around_point(int center_x, int center_y, int size_x, int size_y);
