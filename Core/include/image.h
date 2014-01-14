@@ -17,8 +17,8 @@ class Image
 {
 public:
 	Image();
-	Image(int x_size,int y_size);
-	Image(int x_size,int y_size, T value);
+	Image(int size_x,int size_y);
+	Image(int size_x,int size_y, T value);
 	Image(const Image &source);
 	virtual ~Image();
 
@@ -34,13 +34,13 @@ public:
 	void set_value(Point p, T value);
 	void fill(T value);
 	Image<T>* get_patch_between_points(int a_x, int a_y, int b_x, int b_y);
-	Image<T>* get_patch_around_point(int center_x, int center_y, int x_size, int y_size);
+	Image<T>* get_patch_around_point(int center_x, int center_y, int size_x, int size_y);
 	Image<T>* get_patch_around_point(int center_x, int center_y, int size);
 	int get_raw_data_length() const;
 	const T* get_raw_data() const;
 	T* get_raw_data();
 protected:
-	int _x_size, _y_size;
+	int _size_x, _size_y;
 	T *_points;
 	Point _coordinates;
 	inline int get_index(int x, int y) const;

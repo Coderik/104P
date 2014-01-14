@@ -8,36 +8,36 @@
 #include "sequence.h"
 
 template <class T>
-Sequence<T>::Sequence(int x_size, int y_size, int t_size, T value)
+Sequence<T>::Sequence(int size_x, int size_y, int size_t, T value)
 {
-	_x_size = x_size;
-	_y_size = y_size;
-	_t_size = t_size;
+	_size_x = size_x;
+	_size_y = size_y;
+	_size_t = size_t;
 
-	_frames = vector<Image<T>* >(_t_size);
+	_frames = vector<Image<T>* >(_size_t);
 
 	fill(value);
 }
 
 
 template <class T>
-Sequence<T>::Sequence(int x_size,int y_size,int t_size)
+Sequence<T>::Sequence(int size_x,int size_y,int size_t)
 {
-	_x_size = x_size;
-	_y_size = y_size;
-	_t_size = t_size;
+	_size_x = size_x;
+	_size_y = size_y;
+	_size_t = size_t;
 
-	_frames = vector<Image<T>* >(_t_size, (Image<T>*)0);
+	_frames = vector<Image<T>* >(_size_t, (Image<T>*)0);
 }
 
 
 // TODO: test it
 template <class T>
-Sequence<T>::Sequence(int x_size,int y_size)
+Sequence<T>::Sequence(int size_x,int size_y)
 {
-	_x_size = x_size;
-	_y_size = y_size;
-	_t_size = 0;
+	_size_x = size_x;
+	_size_y = size_y;
+	_size_t = 0;
 
 	_frames = vector<Image<T>* >();
 }
@@ -46,11 +46,11 @@ Sequence<T>::Sequence(int x_size,int y_size)
 template <class T>
 Sequence<T>::Sequence(Shape size, T value)
 {
-	_x_size = size.size_x;
-	_y_size = size.size_y;
-	_t_size = size.size_t;
+	_size_x = size.size_x;
+	_size_y = size.size_y;
+	_size_t = size.size_t;
 
-	_frames = vector<Image<T>* >(_t_size);
+	_frames = vector<Image<T>* >(_size_t);
 
 	fill(value);
 }
@@ -59,20 +59,20 @@ Sequence<T>::Sequence(Shape size, T value)
 template <class T>
 Sequence<T>::Sequence(Shape size)
 {
-	_x_size = size.size_x;
-	_y_size = size.size_y;
-	_t_size = size.size_t;
+	_size_x = size.size_x;
+	_size_y = size.size_y;
+	_size_t = size.size_t;
 
-	_frames = vector<Image<T>* >(_t_size, (Image<T>*)0);
+	_frames = vector<Image<T>* >(_size_t, (Image<T>*)0);
 }
 
 
 template <class T>
 Sequence<T>::Sequence(Image<T> *first_frame)
 {
-	_x_size = first_frame->get_size_x();
-	_y_size = first_frame->get_size_y();
-	_t_size = 1;
+	_size_x = first_frame->get_size_x();
+	_size_y = first_frame->get_size_y();
+	_size_t = 1;
 
 	_frames = vector<Image<T>* >(1, first_frame);
 }
@@ -80,12 +80,12 @@ Sequence<T>::Sequence(Image<T> *first_frame)
 template <class T>
 Sequence<T>::Sequence(const Sequence<T>& source)
 {
-	_x_size = source.get_size_x();
-	_y_size = source.get_size_y();
-	_t_size = source.get_size_t();
+	_size_x = source.get_size_x();
+	_size_y = source.get_size_y();
+	_size_t = source.get_size_t();
 
-	_frames = vector<Image<T>* >(_t_size, (Image<T>*)0);
-	for (int i = 0; i < _t_size; i++) {
+	_frames = vector<Image<T>* >(_size_t, (Image<T>*)0);
+	for (int i = 0; i < _size_t; i++) {
 		_frames[i] = source.get_frame_as_is(i);
 	}
 }
@@ -108,28 +108,28 @@ Sequence<T>::~Sequence()
 template <class T>
 int Sequence<T>::get_size_x() const
 {
-	return _x_size;
+	return _size_x;
 }
 
 
 template <class T>
 int Sequence<T>::get_size_y() const
 {
-	return _y_size;
+	return _size_y;
 }
 
 
 template <class T>
 int Sequence<T>::get_size_t() const
 {
-	return _t_size;
+	return _size_t;
 }
 
 
 template <class T>
 Shape Sequence<T>::get_size() const
 {
-	return Shape(_x_size, _y_size, _t_size);
+	return Shape(_size_x, _size_y, _size_t);
 }
 
 
@@ -153,7 +153,7 @@ Point Sequence<T>::get_coordinates()
 template <class T>
 T Sequence<T>::get_value(int x, int y, int t) const
 {
-	if (t < 0 || t >= _t_size || !_frames[t])
+	if (t < 0 || t >= _size_t || !_frames[t])
 		return T();
 
 	return _frames[t]->get_value(x, y);
@@ -166,7 +166,7 @@ T Sequence<T>::get_value(int x, int y, int t) const
 template <class T>
 T Sequence<T>::get_value(Point p) const
 {
-	if (p.t < 0 || p.t >= _t_size || !_frames[p.t])
+	if (p.t < 0 || p.t >= _size_t || !_frames[p.t])
 		return T();
 
 	return _frames[p.t]->get_value(p.x, p.y);
@@ -176,7 +176,7 @@ T Sequence<T>::get_value(Point p) const
 template <class T>
 bool Sequence<T>::try_get_value(int x, int y, int t, T& value)
 {
-	if (t < 0 || t >= _t_size || !_frames[t])
+	if (t < 0 || t >= _size_t || !_frames[t])
 		return false;
 
 	return _frames[t]->try_get_value(x, y, value);
@@ -186,11 +186,11 @@ bool Sequence<T>::try_get_value(int x, int y, int t, T& value)
 template <class T>
 void Sequence<T>::set_value(int x, int y, int t, T value)
 {
-	if (t < 0 || t >= _t_size)
+	if (t < 0 || t >= _size_t)
 		return;
 
 	if (!_frames[t]) {
-		_frames[t] = new Image<T>(_x_size, _y_size);
+		_frames[t] = new Image<T>(_size_x, _size_y);
 	}
 
 	_frames[t]->set_value(x, y, value);
@@ -200,9 +200,9 @@ void Sequence<T>::set_value(int x, int y, int t, T value)
 template <class T>
 void Sequence<T>::fill(T value)
 {
-	for (int t = 0; t < _t_size; t++ ) {
+	for (int t = 0; t < _size_t; t++ ) {
 		if (!_frames[t]) {
-			_frames[t] = new Image<T>(_x_size, _y_size);
+			_frames[t] = new Image<T>(_size_x, _size_y);
 		}
 
 		_frames[t]->fill(value);
@@ -213,7 +213,7 @@ void Sequence<T>::fill(T value)
 template <class T>
 Image<T>* Sequence<T>::get_frame(int t)
 {
-	if (t < 0 || t >= _t_size)
+	if (t < 0 || t >= _size_t)
 		return 0;
 
 	return _frames[t];
@@ -223,8 +223,8 @@ Image<T>* Sequence<T>::get_frame(int t)
 template <class T>
 Image<T> Sequence<T>::get_frame(int t) const
 {
-	if (t < 0 || t >= _t_size)
-		return Image<T>(_x_size, _y_size, T());
+	if (t < 0 || t >= _size_t)
+		return Image<T>(_size_x, _size_y, T());
 
 	return Image<T>(*_frames[t]);
 }
@@ -233,7 +233,7 @@ Image<T> Sequence<T>::get_frame(int t) const
 template <class T>
 Image<T>* Sequence<T>::get_frame_as_is(int t) const
 {
-	if (t < 0 || t >= _t_size || !_frames[t])
+	if (t < 0 || t >= _size_t || !_frames[t])
 		return 0;
 
 	return new Image<T>(*_frames[t]);
@@ -243,12 +243,12 @@ Image<T>* Sequence<T>::get_frame_as_is(int t) const
 template <class T>
 bool Sequence<T>::set_frame(int t, Image<T> *frame)
 {
-	if (t < 0 || t >= _t_size)
+	if (t < 0 || t >= _size_t)
 		return false;
 
 	if (frame && (
-			_x_size != frame->get_size_x() ||
-			_y_size != frame->get_size_y() ))
+			_size_x != frame->get_size_x() ||
+			_size_y != frame->get_size_y() ))
 		return false;
 
 	_frames[t] = frame;
@@ -260,12 +260,12 @@ template <class T>
 bool Sequence<T>::add_frame(Image<T> *frame)
 {
 	if (frame && (
-			_x_size != frame->get_size_x() ||
-			_y_size != frame->get_size_y() ))
+			_size_x != frame->get_size_x() ||
+			_size_y != frame->get_size_y() ))
 		return false;
 
 	_frames.push_back(frame);
-	_t_size++;
+	_size_t++;
 	return true;
 }
 
@@ -283,9 +283,9 @@ int Sequence<T>::drop_empty_frames()
 		}
 	}
 
-	_t_size = _frames.size();
+	_size_t = _frames.size();
 
-	return _t_size;
+	return _size_t;
 }
 
 
@@ -297,9 +297,9 @@ Sequence<T>* Sequence<T>::get_patch_between_points(int a_x, int a_y, int a_t, in
 	}
 
 	// check if whole patch is inside the image
-	if (a_x < 0 || b_x >= _x_size ||
-		a_y < 0 || b_y >= _y_size ||
-		a_t < 0 || b_t >= _t_size) {
+	if (a_x < 0 || b_x >= _size_x ||
+		a_y < 0 || b_y >= _size_y ||
+		a_t < 0 || b_t >= _size_t) {
 		return 0;
 	}
 
@@ -315,28 +315,28 @@ Sequence<T>* Sequence<T>::get_patch_around_point(int center_x, int center_y, int
 
 
 template <class T>
-Sequence<T>* Sequence<T>::get_patch_around_point(int center_x, int center_y, int center_t, int frame_size, int t_size)
+Sequence<T>* Sequence<T>::get_patch_around_point(int center_x, int center_y, int center_t, int frame_size, int size_t)
 {
-	return get_patch_around_point(center_x, center_y, center_t, frame_size, frame_size, t_size);
+	return get_patch_around_point(center_x, center_y, center_t, frame_size, frame_size, size_t);
 }
 
 
 template <class T>
-Sequence<T>* Sequence<T>::get_patch_around_point(int center_x, int center_y, int center_t, int x_size, int y_size, int t_size)
+Sequence<T>* Sequence<T>::get_patch_around_point(int center_x, int center_y, int center_t, int size_x, int size_y, int size_t)
 {
-	if (x_size <= 0 || y_size <= 0 || t_size <= 0) {
+	if (size_x <= 0 || size_y <= 0 || size_t <= 0) {
 		return 0;
 	}
 
 	// force 'x_size', 'y_size' and 't_size' to be odd
-	if (!is_odd_number(x_size)) x_size--;
-	if (!is_odd_number(y_size)) y_size--;
-	if (!is_odd_number(t_size)) t_size--;
+	if (!is_odd_number(size_x)) size_x--;
+	if (!is_odd_number(size_y)) size_y--;
+	if (!is_odd_number(size_t)) size_t--;
 
 	// calculate left-top and bottom-right points of the patch
-	int x_offset = x_size / 2;
-	int y_offset = y_size / 2;
-	int t_offset = t_size / 2;
+	int x_offset = size_x / 2;
+	int y_offset = size_y / 2;
+	int t_offset = size_t / 2;
 	int a_x = center_x - x_offset;
 	int a_y = center_y - y_offset;
 	int b_x = center_x + x_offset;
@@ -345,9 +345,9 @@ Sequence<T>* Sequence<T>::get_patch_around_point(int center_x, int center_y, int
 	int b_t = center_t + t_offset;
 
 	// check if whole patch is inside the image
-	if (a_x < 0 || b_x >= _x_size ||
-		a_y < 0 || b_y >= _y_size ||
-		a_t < 0 || b_t >= _t_size) {
+	if (a_x < 0 || b_x >= _size_x ||
+		a_y < 0 || b_y >= _size_y ||
+		a_t < 0 || b_t >= _size_t) {
 		return 0;
 	}
 

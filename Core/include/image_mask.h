@@ -19,8 +19,8 @@ public:
 	typedef MaskIterator iterator;
 
 	ImageMask();
-	ImageMask(int x_size,int y_size);
-	ImageMask(int x_size,int y_size, bool value);
+	ImageMask(int size_x,int size_y);
+	ImageMask(int size_x,int size_y, bool value);
 	ImageMask(const Image<bool> &source);
 	ImageMask(const ImageMask &source);
 	~ImageMask();

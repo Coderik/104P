@@ -14,15 +14,15 @@ ImageMask::ImageMask()
 }
 
 
-ImageMask::ImageMask(int x_size,int y_size)
-	: Image<bool>(x_size, y_size, false)
+ImageMask::ImageMask(int size_x,int size_y)
+	: Image<bool>(size_x, size_y, false)
 {
 
 }
 
 
-ImageMask::ImageMask(int x_size,int y_size, bool value)
-	: Image<bool>(x_size, y_size, value)
+ImageMask::ImageMask(int size_x,int size_y, bool value)
+	: Image<bool>(size_x, size_y, value)
 {
 
 }
@@ -93,8 +93,8 @@ void ImageMask::unmask(int x, int y)
 void ImageMask::invert()
 {
 	// TODO: may be move to specialization Image<bool>
-	for (int y = 0; y < _y_size; y++) {
-		for (int x = 0; x < _x_size; x++) {
+	for (int y = 0; y < _size_y; y++) {
+		for (int x = 0; x < _size_x; x++) {
 			set_value(x, y, !get_value(x, y));
 		}
 	}
@@ -105,8 +105,8 @@ void ImageMask::invert()
 // TODO: optimize
 Point ImageMask::first() const
 {
-	for (int y = 0; y < _y_size; y++) {
-		for (int x = 0; x < _x_size; x++) {
+	for (int y = 0; y < _size_y; y++) {
+		for (int x = 0; x < _size_x; x++) {
 			if (get_value(x, y)) {
 				return Point(x, y, 0);
 			}
@@ -119,8 +119,8 @@ Point ImageMask::first() const
 
 Point ImageMask::last() const
 {
-	for (int y = _y_size - 1; y >= 0; y--) {
-		for (int x = _x_size - 1; x >= 0; x--) {
+	for (int y = _size_y - 1; y >= 0; y--) {
+		for (int x = _size_x - 1; x >= 0; x--) {
 			if (get_value(x, y)) {
 				return Point(x, y, 0);
 			}
@@ -134,8 +134,8 @@ Point ImageMask::last() const
 Point ImageMask::next(const Point current) const
 {
 	int from_x = current.x + 1;
-	for (int y = current.y; y < _y_size; y++) {
-		for (int x = from_x; x < _x_size; x++) {
+	for (int y = current.y; y < _size_y; y++) {
+		for (int x = from_x; x < _size_x; x++) {
 			if (get_value(x, y)) {
 				return Point(x, y, 0);
 			}
@@ -156,7 +156,7 @@ Point ImageMask::prev(const Point current) const
 				return Point(x, y, 0);
 			}
 		}
-		from_x = _x_size - 1;
+		from_x = _size_x - 1;
 	}
 
 	return Point(-1, -1, -1);

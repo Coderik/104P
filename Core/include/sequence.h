@@ -19,9 +19,9 @@ template <class T = float>
 class Sequence
 {
 public:
-	Sequence(int x_size, int y_size, int t_size, T value);
-	Sequence(int x_size, int y_size, int t_size);
-	Sequence(int x_size, int y_size);
+	Sequence(int size_x, int size_y, int size_t, T value);
+	Sequence(int size_x, int size_y, int size_t);
+	Sequence(int size_x, int size_y);
 	Sequence(Shape size, T value);
 	Sequence(Shape size);
 	Sequence(Image<T> *first_frame);
@@ -47,11 +47,11 @@ public:
 	int drop_empty_frames();
 	Sequence<T>* get_patch_between_points(int a_x, int a_y, int a_t, int b_x, int b_y, int b_t);
 	Sequence<T>* get_patch_around_point(int center_x, int center_y, int center_t, int size);
-	Sequence<T>* get_patch_around_point(int center_x, int center_y, int center_t, int frame_size, int t_size);
-	Sequence<T>* get_patch_around_point(int center_x, int center_y, int center_t, int x_size, int y_size, int t_size);
+	Sequence<T>* get_patch_around_point(int center_x, int center_y, int center_t, int frame_size, int size_t);
+	Sequence<T>* get_patch_around_point(int center_x, int center_y, int center_t, int size_x, int size_y, int size_t);
 
 protected:
-	int _x_size, _y_size, _t_size;
+	int _size_x, _size_y, _size_t;
 	Point _coordinates;
 	vector<Image<T>* > _frames;
 

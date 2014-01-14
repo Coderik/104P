@@ -10,8 +10,8 @@
 CompositeImageMask::CompositeImageMask()
 {
 	_points = 0;
-	_x_size = 0;
-	_y_size = 0;
+	_size_x = 0;
+	_size_y = 0;
 	_first_component = 0;
 	_second_component = 0;
 	_first_inverse = false;
@@ -23,8 +23,8 @@ CompositeImageMask::CompositeImageMask()
 CompositeImageMask::CompositeImageMask(TypeOfOperation type_of_operation)
 {
 	_points = 0;
-	_x_size = 0;
-	_y_size = 0;
+	_size_x = 0;
+	_size_y = 0;
 	_first_component = 0;
 	_second_component = 0;
 	_first_inverse = false;
@@ -51,7 +51,7 @@ CompositeImageMask::CompositeImageMask(ImageMask *first,
 
 bool CompositeImageMask::get_value(int x, int y) const
 {
-	if ( x < 0 || y < 0 || x >= _x_size || y >= _y_size) {
+	if ( x < 0 || y < 0 || x >= _size_x || y >= _size_y) {
 		return false;
 	}
 
@@ -106,8 +106,8 @@ bool CompositeImageMask::set_component(ImageMask *&new_ref,
 		// drop component
 		new_ref = 0;
 		if (!existing_ref) {
-			_x_size = 0;
-			_y_size = 0;
+			_size_x = 0;
+			_size_y = 0;
 		}
 		new_inverse_ref = inverse;
 		return true;
@@ -118,8 +118,8 @@ bool CompositeImageMask::set_component(ImageMask *&new_ref,
 		return false;
 	}
 
-	_x_size = component->get_size_x();
-	_y_size = component->get_size_y();
+	_size_x = component->get_size_x();
+	_size_y = component->get_size_y();
 
 	new_ref = component;
 	new_inverse_ref = inverse;
