@@ -15,7 +15,7 @@
 #include "image_mask.h"
 #include "interpolation.h"
 #include "filtering.h"
-#include "gaussian_kernel.h"
+#include "gaussian_weights.h"
 
 using namespace std;
 

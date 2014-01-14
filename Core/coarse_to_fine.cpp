@@ -16,8 +16,8 @@ void CoarseToFine::downsample(const float* in, float* out, uint size_x, uint siz
 	// TODO: handle different factors for x and y dimentions.
 	float sigma = sqrt(factor_x / 2);
 	int kernel_size = 2 * round(1.5 * sigma) + 1;
-	GaussianKernel kernel(kernel_size, 1, 1, sigma, 0, 0);
-	const float *filter = kernel.get_raw();
+	Image<float> kernel = GaussianWeights::calculate_1d(kernel_size, sigma);
+	const float *filter = kernel.get_raw_data();
 
 	// smooth image
 	float *buffer = new float[size_x * size_y];

@@ -230,6 +230,7 @@ Image<T> Sequence<T>::get_frame(int t) const
 }
 
 
+// TODO: rename to get_frame_copy
 template <class T>
 Image<T>* Sequence<T>::get_frame_as_is(int t) const
 {
