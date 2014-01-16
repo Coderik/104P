@@ -49,6 +49,6 @@ protected:
 };
 
 // NOTE: include implementation, because Image is a template
-//#include "../image.cpp"
+#include "../image.hpp"
 
 #endif /* IMAGE_H_ */

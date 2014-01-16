@@ -1,5 +1,5 @@
 /*
- * Image.cpp
+ * Image.hpp
  *
  *  Created on: Nov 5, 2012
  *      Author: Vadim Fedorov
@@ -7,8 +7,6 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-
-#include "image.h"
 
 template <class T>
 Image<T>::Image()
@@ -281,8 +279,3 @@ Image<T>* Image<T>::get_patch_internal(int a_x, int a_y, int b_x, int b_y)
 
 	return patch;
 }
-
-// Explicit instantiations
-template class Image<float>;
-template class Image<bool>;
-template class Image<Point>;

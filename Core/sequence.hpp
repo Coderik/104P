@@ -5,8 +5,6 @@
  *      Author: Vadim Fedorov
  */
 
-#include "sequence.h"
-
 template <class T>
 Sequence<T>::Sequence(int size_x, int size_y, int size_t, T value)
 {
@@ -385,13 +383,3 @@ inline bool Sequence<T>::is_odd_number(int number)
 {
 	return number % 2 == 1;
 }
-
-
-// Explicit instantiations
-template class Sequence<float>;
-template class Sequence<bool>;
-template class Sequence<Point>;
-
-
-
-

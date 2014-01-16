@@ -59,5 +59,7 @@ protected:
 	inline bool is_odd_number(int number);
 };
 
+// NOTE: include implementation, because Sequence is a template
+#include "../sequence.hpp"
 
 #endif /* SEQUENCE_H_ */

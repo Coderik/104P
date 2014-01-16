@@ -14,7 +14,6 @@ distance_transform.cpp \
 field_operations.cpp \
 filtering.cpp \
 gaussian_kernel.cpp \
-image.cpp \
 image_mask.cpp \
 intensity_code.cpp \
 interpolation.cpp \
@@ -26,7 +25,6 @@ patch.cpp \
 pgm_util.cpp \
 point.cpp \
 range_parameter.cpp \
-sequence.cpp \
 sequence_mask.cpp \
 shape.cpp \
 utility.cpp \
