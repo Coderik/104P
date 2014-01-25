@@ -141,7 +141,7 @@ Point SequenceMask::last() const
 }
 
 
-Point SequenceMask::next(const Point current) const
+Point SequenceMask::next(const Point &current) const
 {
 	int from_x = current.x + 1;
 	int from_y = current.y;
@@ -161,7 +161,7 @@ Point SequenceMask::next(const Point current) const
 }
 
 
-Point SequenceMask::prev(const Point current) const
+Point SequenceMask::prev(const Point &current) const
 {
 	int from_x = current.x - 1;
 	int from_y = current.y;

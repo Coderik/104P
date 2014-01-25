@@ -39,8 +39,8 @@ public:
 	/* I_Iterable_Mask methods */
 	virtual Point first() const;
 	virtual Point last() const;
-	virtual Point next(const Point current) const;
-	virtual Point prev(const Point current) const;
+	virtual Point next(const Point &current) const;
+	virtual Point prev(const Point &current) const;
 
 	static iterator empty_iterator();
 };

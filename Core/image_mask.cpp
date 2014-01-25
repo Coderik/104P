@@ -189,7 +189,7 @@ Point ImageMask::last() const
 }
 
 
-Point ImageMask::next(const Point current) const
+Point ImageMask::next(const Point &current) const
 {
 	int from_x = current.x + 1;
 	for (int y = current.y; y < _size_y; y++) {
@@ -205,7 +205,7 @@ Point ImageMask::next(const Point current) const
 }
 
 
-Point ImageMask::prev(const Point current) const
+Point ImageMask::prev(const Point &current) const
 {
 	int from_x = current.x - 1;
 	for (int y = current.y; y >= 0; y--) {

@@ -17,8 +17,8 @@ public:
 
 	virtual Point first() const = 0;
 	virtual Point last() const = 0;
-	virtual Point next(const Point current) const = 0;
-	virtual Point prev(const Point current) const = 0;
+	virtual Point next(const Point &current) const = 0;
+	virtual Point prev(const Point &current) const = 0;
 };
 
 
