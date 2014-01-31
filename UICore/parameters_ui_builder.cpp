@@ -43,15 +43,23 @@ Gtk::VBox* ParametersUIBuilder::build_ui()
 			// create new slider for range parameter
 			Gtk::Frame *frame = new Gtk::Frame(parameter->get_display_name());
 			frame->set_shadow_type(Gtk::SHADOW_NONE);
+			Gtk::Box *slider_box = new Gtk::HBox();
 			Gtk::Scale *slider = new Gtk::Scale(Gtk::ORIENTATION_HORIZONTAL);
-			slider->set_value_pos(Gtk::POS_LEFT);
-			frame->add(*slider);
+			slider->set_draw_value(false);
+			NumericalEntry *slider_input = new NumericalEntry();
+			slider_box->pack_start(*slider_input, Gtk::PACK_SHRINK);
+			slider_box->pack_start(*slider, Gtk::PACK_EXPAND_WIDGET);
+			frame->add(*slider_box);
 			parameters_box->pack_start(*frame, Gtk::PACK_SHRINK);
 
 			// initialize slider
 			slider->set_range(parameter->get_lower_boundary(), parameter->get_upper_boundary());
 			slider->set_digits(parameter->get_digits());
 			slider->set_value(parameter->get());
+
+			slider_input->set_digits(parameter->get_digits());
+			slider_input->set_adjustment(slider->get_adjustment());
+			slider_input->set_value(parameter->get());
 
 			slider->signal_value_changed().connect( sigc::bind<Gtk::Scale*, IRangeParameter* >( sigc::mem_fun(*this, &ParametersUIBuilder::set_range_parameter), slider, parameter) );
 
