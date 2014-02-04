@@ -27,6 +27,7 @@
 #include <algorithm>
 
 #include "i_hull.h"
+#include "hull_proxy.h"
 #include "rig.h"
 #include "i_rig_manager.h"
 #include "fitting.h"

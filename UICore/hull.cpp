@@ -76,7 +76,9 @@ void Hull::initialize_rigs()
 {
 	vector<Fitting* >::iterator it;
 	for (it = _fittings.begin(); it != _fittings.end(); ++it) {
-		(*it)->rig->initialize(this);
+		HullProxy *proxy = new HullProxy(this);
+		(*it)->rig->initialize(proxy);
+		(*it)->proxy = proxy;
 	}
 	_ui.set_fittings(_fittings);
 }
@@ -569,6 +571,7 @@ void Hull::update_fitting()
 {
 	if (_current_fitting) {
 		_current_fitting->rig->deactivate();
+		_current_fitting->proxy->disable();
 		if (_connection_interaction_manager_signal_ui_updated.connected()) {
 			_connection_interaction_manager_signal_ui_updated.disconnect();
 		}
@@ -577,6 +580,7 @@ void Hull::update_fitting()
 	}
 
 	_current_fitting = _ui.get_fitting();
+	_current_fitting->proxy->enable();
 	_current_fitting->rig->activate();
 
 	update_toolbar();
