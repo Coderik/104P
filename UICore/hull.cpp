@@ -357,6 +357,56 @@ int Hull::request_current_time()
 }
 
 
+/**************************
+ * IModuleManager members *
+ **************************/
+
+void Hull::add_module(IModule *module)
+{
+	// TODO: implement
+	_modules.push_back(module);
+	module->initialize(this);
+}
+
+
+sigc::signal<void> Hull::signal_sequence_changed()
+{
+	return _signal_sequence_changed;
+}
+
+
+void Hull::assign_menu(Gtk::Menu *menu, string title)
+{
+	_ui.assign_menu(menu, title);
+}
+
+
+string Hull::request_open_filename(string dialog_title, Glib::RefPtr<Gtk::FileFilter> filter)
+{
+	Gtk::FileChooserDialog dialog(dialog_title, Gtk::FILE_CHOOSER_ACTION_OPEN);
+	dialog.set_transient_for(*this);
+
+	// add response buttons the the dialog:
+	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	dialog.add_button(Gtk::Stock::OPEN, Gtk::RESPONSE_OK);
+
+	// add filters, so that only certain file types can be selected:
+	if (filter) {
+		dialog.add_filter(filter);
+	}
+
+	// show the dialog and wait for a user response:
+	int result = dialog.run();
+
+	string filename;
+	if (result == Gtk::RESPONSE_OK) {
+		filename = dialog.get_filename();
+	}
+
+	return filename;
+}
+
+
 template <typename T>
 void Hull::reset_vector_of_pointers(std::vector<T*> &v, int size)
 {

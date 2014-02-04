@@ -28,6 +28,8 @@
 
 #include "i_hull.h"
 #include "hull_proxy.h"
+#include "i_modulable.h"
+#include "i_module_manager.h"
 #include "rig.h"
 #include "i_rig_manager.h"
 #include "fitting.h"
@@ -50,7 +52,7 @@
 
 using namespace std;
 
-class Hull : public Gtk::Window, public IHull, public IRigManager
+class Hull : public Gtk::Window, public IHull, public IRigManager, public IModulable, public IModuleManager
 {
 public:
 	Hull(string application_id);
@@ -67,6 +69,12 @@ public:
 	virtual InteractionManager* request_interaction_manager();
 	virtual Gtk::Box* request_ui_placeholder();
 	virtual int request_current_time();
+
+	virtual void add_module(IModule *module);
+
+	virtual sigc::signal<void> signal_sequence_changed();
+	virtual void assign_menu(Gtk::Menu *menu, string title);
+	virtual string request_open_filename(string dialog_title, Glib::RefPtr<Gtk::FileFilter> filter = Glib::RefPtr<Gtk::FileFilter>());
 
 protected:
 	/* slots */
@@ -90,6 +98,8 @@ protected:
 	bool key_pressed(GdkEventKey* event);
 
 private:
+	sigc::signal<void> _signal_sequence_changed;
+	vector<IModule* > _modules;
 	vector<Fitting* > _fittings;
 	Fitting *_current_fitting;
 	Sequence<float> *_sequence;
@@ -129,6 +139,5 @@ private:
 	//tmp
 	int write_flow(float *u, float *v, int w, int h);
 };
-
 
 #endif /* HULL_H_ */
