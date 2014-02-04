@@ -30,7 +30,7 @@ LIB_OUT = bin/libUICore.a
 %.o: %.cpp libCore.a
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ $(ARCH) -o $(OBJ_DIR)"$@" "$<" -I"../Core" -I"../Core/include" `pkg-config gtkmm-3.0 --cflags` -O0 -g3 -Wall -c -fmessage-length=0
+	g++ $(ARCH) -o $(OBJ_DIR)"$@" "$<" -Iinclude -I"../Core" -I"../Core/include" `pkg-config gtkmm-3.0 --cflags` -O0 -g3 -Wall -c -fmessage-length=0
 	@echo 'Finished building: $<'
 	@echo ' '
 

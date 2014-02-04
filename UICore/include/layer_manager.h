@@ -49,6 +49,6 @@ private:
 	void notify_layer_changed();
 };
 
-#include "layer_manager.hpp"	// Implementations for template methods
+#include "../layer_manager.hpp"	// Implementations for template methods
 
 #endif /* LAYER_MANAGER_H_ */
