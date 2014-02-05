@@ -10,6 +10,7 @@
 
 #include <string>
 #include <gtkmm/menu.h>
+#include <gtkmm/filefilter.h>
 #include <sigc++/sigc++.h>
 
 #include "sequence.h"

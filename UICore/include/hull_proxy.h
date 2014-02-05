@@ -29,6 +29,7 @@ public:
 	virtual InteractionManager* request_interaction_manager();
 	virtual Gtk::Box* request_ui_placeholder();
 	virtual int request_current_time();
+	virtual void request_module(RequestBase<IModule> &request);
 
 private:
 	IHull *_proxied_hull;

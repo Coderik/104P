@@ -357,6 +357,12 @@ int Hull::request_current_time()
 }
 
 
+void Hull::request_module(RequestBase<IModule> &request)
+{
+	request.match(_modules.begin(), _modules.end());
+}
+
+
 /**************************
  * IModuleManager members *
  **************************/

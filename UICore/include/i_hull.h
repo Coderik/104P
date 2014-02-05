@@ -13,6 +13,8 @@
 #include "optical_flow_container.h"
 #include "layer_manager.h"
 #include "interaction_manager.h"
+#include "request_module.h"
+#include "i_module.h"
 
 class IHull
 {
@@ -30,6 +32,8 @@ public:
 	virtual Gtk::Box* request_ui_placeholder() = 0;
 	virtual int request_current_time() = 0;
 	// TODO: add requests for b.g. worker, ...
+
+	virtual void request_module(RequestBase<IModule> &request) = 0;
 };
 
 
