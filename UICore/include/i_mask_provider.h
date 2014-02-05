@@ -9,6 +9,7 @@
 #define I_MASK_PROVIDER_H_
 
 #include "sequence_mask.h"
+#include "i_mask_aware.h"
 
 class IMaskProvider
 {

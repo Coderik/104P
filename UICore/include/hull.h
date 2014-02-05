@@ -76,6 +76,7 @@ public:
 	virtual sigc::signal<void> signal_sequence_changed();
 	virtual void assign_menu(Gtk::Menu *menu, string title);
 	virtual string request_open_filename(string dialog_title, Glib::RefPtr<Gtk::FileFilter> filter = Glib::RefPtr<Gtk::FileFilter>());
+	virtual void request_active_rig(RequestBase<IRig> &request);
 
 protected:
 	/* slots */

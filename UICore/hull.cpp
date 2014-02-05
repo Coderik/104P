@@ -413,6 +413,14 @@ string Hull::request_open_filename(string dialog_title, Glib::RefPtr<Gtk::FileFi
 }
 
 
+void Hull::request_active_rig(RequestBase<IRig> &request)
+{
+	if (_current_fitting && _current_fitting->rig) {
+		request.match(_current_fitting->rig);
+	}
+}
+
+
 template <typename T>
 void Hull::reset_vector_of_pointers(std::vector<T*> &v, int size)
 {
