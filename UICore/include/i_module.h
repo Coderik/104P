@@ -16,6 +16,8 @@ public:
 	virtual ~IModule() {}
 
 	virtual void initialize(IModulable *modulable) = 0;
+
+	// TODO: notify module about rig change
 };
 
 

@@ -23,14 +23,17 @@
 #include <gtkmm/recentmanager.h>
 #include <gtkmm/toggleaction.h>
 #include <gtkmm/radioaction.h>
+#include <gtkmm/radiomenuitem.h>
 #include <gtkmm/infobar.h>
 #include <sigc++/sigc++.h>
 #include <gtkmm/menubar.h>
 #include <glibmm/convert.h>
+#include <giomm/menu.h>
 
 #include "image_viewer.h"
 #include "layer_manager.h"
 #include "fitting.h"
+#include "view_info.h"
 
 using namespace std;
 
@@ -70,6 +73,12 @@ public:
 		return _signal_fitting_changed;
 	}
 
+	typedef sigc::signal<void, Descriptor> type_signal_active_view_changed;
+	type_signal_active_view_changed signal_active_view_changed()
+	{
+		return _signal_active_view_changed;
+	}
+
 	enum View
 	{
 		VIEW_ORIGINAL_IMAGE,
@@ -95,6 +104,7 @@ public:
 	 */
 	void set_view(View view);
 	void allow_optical_flow_views(bool is_allowed);
+	void update_veiw_menu(const vector<ViewInfo> &views, Descriptor active);
 
 	void set_fittings(std::vector<Fitting* > fittings);
 	Fitting* get_fitting();
@@ -103,11 +113,13 @@ private:
 	string _application_id;
 	Glib::RefPtr<Gtk::UIManager> _menu_manager;
 	Gtk::MenuBar *_menu_bar;
+	Gtk::MenuItem *_view_nemu_item;
 	int _fitting_submenu_merge_id;
 	std::map<View, Glib::RefPtr<Gtk::RadioAction> > _view_map;
 	std::map<Glib::ustring, Fitting* > _fitting_map;
 	type_signal_view_changed _signal_view_changed;
 	type_signal_fitting_changed _signal_fitting_changed;
+	type_signal_active_view_changed _signal_active_view_changed;
 	View _current_view;
 	Fitting *_current_fitting;
 
@@ -115,6 +127,8 @@ private:
 	void add_recent_document_internal(string path, string mime_type);
 
 	void set_view_internal(const Glib::RefPtr<Gtk::RadioAction>& current);
+
+	void view_changed_internal(const Descriptor& current);
 
 	void set_fitting_internal(const Glib::RefPtr<Gtk::RadioAction>& current);
 

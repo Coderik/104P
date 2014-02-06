@@ -25,6 +25,7 @@
 #include <string.h>
 #include <iostream>
 #include <algorithm>
+#include <map>
 
 #include "i_hull.h"
 #include "hull_proxy.h"
@@ -58,9 +59,11 @@ public:
 	Hull(string application_id);
 	virtual ~Hull();
 
+	// IRigManager members:
 	virtual void add_rig(Rig* rig, std::string display_name);
 	virtual void initialize_rigs();
 
+	// IHull members:
 	virtual Sequence<float>* request_sequence();
 	virtual vector<OpticalFlowContainer*> request_forward_optical_flow();
 	virtual vector<OpticalFlowContainer*> request_backward_optical_flow();
@@ -71,12 +74,17 @@ public:
 	virtual int request_current_time();
 	virtual void request_module(RequestBase<IModule> &request);
 
+	// IModuleManager members:
 	virtual void add_module(IModule *module);
 
+	// IModulable members:
 	virtual sigc::signal<void> signal_sequence_changed();
 	virtual void assign_menu(Gtk::Menu *menu, string title);
 	virtual string request_open_filename(string dialog_title, Glib::RefPtr<Gtk::FileFilter> filter = Glib::RefPtr<Gtk::FileFilter>());
 	virtual void request_active_rig(RequestBase<IRig> &request);
+	virtual Descriptor add_view(IView view);
+	virtual bool alter_view(Descriptor view_descriptor, IView view);
+	virtual bool remove_view(Descriptor view_descriptor);
 
 protected:
 	/* slots */
@@ -89,6 +97,7 @@ protected:
 	void set_time();
 	void restore_optical_flow();
 	void update_view();
+	void active_view_changed(const Descriptor &active_view);
 	void update_fitting();
 	void update_toolbar();
 	void set_layers_visibility();
@@ -105,6 +114,9 @@ private:
 	vector<Fitting* > _fittings;
 	Fitting *_current_fitting;
 	Sequence<float> *_sequence;
+	std::map<Descriptor, IView> _view_map;
+	Descriptor _active_view = Descriptor::create();
+	Descriptor _original_image_view = Descriptor::create();
 	Glib::RefPtr<Gdk::Pixbuf> _optical_flow_view;
 	std::vector<OpticalFlowContainer*> _forward_optical_flow_list;
 	std::vector<OpticalFlowContainer*> _backward_optical_flow_list;
@@ -125,6 +137,8 @@ private:
 
 	template <typename T>
 	void reset_vector_of_pointers(std::vector<T*> &v, int size);
+
+	void refresh_view_menu();
 
 	Glib::RefPtr<Gdk::Pixbuf> wrap_raw_image_data(Image<float> *image);
 	void update_image_control(int current_time);

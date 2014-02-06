@@ -117,6 +117,8 @@ void UI_Container::setup_ui(Gtk::Window* window, string application_id)
 		window_layout->pack_start(*_menu_bar, Gtk::PACK_SHRINK);
 	}
 
+	_view_nemu_item = dynamic_cast<Gtk::MenuItem*>(_menu_manager->get_widget("/MenuBar/ViewMenu"));
+
 	background_work_infobar = new Gtk::InfoBar();
 	background_work_infobar->set_message_type(Gtk::MESSAGE_INFO);
 	window_layout->pack_start(*background_work_infobar, Gtk::PACK_SHRINK);
@@ -242,6 +244,26 @@ void UI_Container::allow_optical_flow_views(bool is_allowed)
 }
 
 
+void UI_Container::update_veiw_menu(const vector<ViewInfo> &views, Descriptor active)
+{
+	Gtk::Menu *menu = Gtk::manage(new Gtk::Menu());
+
+	Gtk::RadioAction::Group group = Gtk::RadioAction::Group();
+	vector<ViewInfo>::const_iterator it;
+	for (it = views.begin(); it != views.end(); ++it) {
+		Gtk::MenuItem *item = Gtk::manage(new Gtk::RadioMenuItem(group, it->title));
+		if (it->descriptor == active) {
+			item->activate();
+		}
+		item->signal_activate().connect( sigc::bind<Descriptor>(sigc::mem_fun(*this, &UI_Container::view_changed_internal), it->descriptor) );
+		menu->append(*item);
+	}
+
+	_view_nemu_item->set_submenu(*menu);
+	_view_nemu_item->show_all_children(true);
+}
+
+
 void UI_Container::set_fittings(std::vector<Fitting* > fittings)
 {
 	// TODO: handle multiple call (do nothing or reinitialize)
@@ -327,6 +349,12 @@ void UI_Container::set_view_internal(const Glib::RefPtr<Gtk::RadioAction>& curre
 	}
 
 	_signal_view_changed.emit();
+}
+
+
+void UI_Container::view_changed_internal(const Descriptor& current)
+{
+	_signal_active_view_changed.emit(current);
 }
 
 void UI_Container::set_fitting_internal(const Glib::RefPtr<Gtk::RadioAction>& current)

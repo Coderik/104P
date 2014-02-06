@@ -23,6 +23,7 @@ Hull::Hull(string application_id)
 	_ui.background_work_infobar->signal_response().connect( sigc::mem_fun(*this, &Hull::perceive_background_worker) );
 	_ui.layers_visibility_toggle_action->signal_toggled().connect( sigc::mem_fun(*this, &Hull::set_layers_visibility) );
 	_ui.signal_view_changed().connect( sigc::mem_fun(*this, &Hull::update_view) );
+	_ui.signal_active_view_changed().connect( sigc::mem_fun(*this, &Hull::active_view_changed) );
 	_ui.signal_fitting_changed().connect( sigc::mem_fun(*this, &Hull::update_fitting) );
 
 	_ui.image_control->signal_left_button_pressed().connect( sigc::mem_fun(*this, &Hull::left_button_pressed) );
@@ -46,6 +47,10 @@ Hull::Hull(string application_id)
 	_ui.view_action_group->set_sensitive(false);
 	_ui.time_slider->set_sensitive(false);
 	_ui.layers_visibility_toggle_action->set_active(true);
+
+	// TODO: create Original Image view
+	/*_original_image_view = add_view(...);
+	active_view_changed(_original_image_view);*/
 
 	// TODO: add preferences and controls for that api
 	// NOTE: code for ImageViewer api testing
@@ -131,6 +136,8 @@ void Hull::load_image(string filename)
 	_has_optical_flow_data = false;
 
 	// Replace single image with sequence of the only element for computational uniformity.
+	if (_sequence)
+		delete _sequence;
 	_sequence = new Sequence<float>(image);
 
 	// Show image
@@ -421,6 +428,46 @@ void Hull::request_active_rig(RequestBase<IRig> &request)
 }
 
 
+Descriptor Hull::add_view(IView view)
+{
+	Descriptor descriptor = Descriptor::create();
+	_view_map[descriptor] = view;
+
+	refresh_view_menu();
+
+	return descriptor;
+}
+
+
+bool Hull::alter_view(Descriptor view_descriptor, IView view)
+{
+	if (_view_map.find(view_descriptor) == _view_map.end()) {
+		return false;
+	}
+
+	_view_map[view_descriptor] = view;
+
+	refresh_view_menu();
+
+	return true;
+}
+
+
+bool Hull::remove_view(Descriptor view_descriptor)
+{
+	if (_view_map.find(view_descriptor) == _view_map.end()) {
+		return false;
+	}
+
+	_view_map.erase(view_descriptor);
+	// TODO: if this was active, set another active
+
+	refresh_view_menu();
+
+	return true;
+}
+
+
 template <typename T>
 void Hull::reset_vector_of_pointers(std::vector<T*> &v, int size)
 {
@@ -631,6 +678,17 @@ void Hull::update_view()
 	update_image_control(_current_time);
 }
 
+
+void Hull::active_view_changed(const Descriptor &active_view)
+{
+	if (_active_view != active_view) {
+		_active_view = active_view;
+
+		// TODO: call update_image_control()
+	}
+}
+
+
 void Hull::update_fitting()
 {
 	if (_current_fitting) {
@@ -681,6 +739,18 @@ void Hull::update_toolbar()
 }
 
 /* private */
+void Hull::refresh_view_menu()
+{
+	vector<ViewInfo> view_infos;
+	std::map<Descriptor, IView>::iterator it;
+	for (it = _view_map.begin(); it != _view_map.end(); ++it) {
+		view_infos.push_back(ViewInfo(it->second.get_title(), it->first));
+	}
+
+	_ui.update_veiw_menu(view_infos, _active_view);
+}
+
+
 int Hull::write_flow(float *u, float *v, int w, int h)
 {
 	FILE *fp;
@@ -736,6 +806,7 @@ Glib::RefPtr<Gdk::Pixbuf> Hull::wrap_raw_image_data(Image<float> *image)
 
 void Hull::update_image_control(int current_time)
 {
+	// TODO: rewrite to get pixbuf from _view_map by _active_view descriptor
 	UI_Container::View view = _ui.get_view();
 
 	Glib::RefPtr<Gdk::Pixbuf> buffer;

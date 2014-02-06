@@ -16,6 +16,8 @@
 #include "sequence.h"
 #include "request.h"
 #include "i_rig.h"
+#include "descriptor.h"
+#include "i_view.h"
 
 using namespace std;
 
@@ -36,6 +38,10 @@ public:
 	//       Module have to request for an active rig every time and not store it internally, because active rig might change.
 	//TODO: Another way should be based on module's proxy and signals
 	virtual void request_active_rig(RequestBase<IRig> &request) = 0;
+
+	virtual Descriptor add_view(IView view) = 0;
+	virtual bool alter_view(Descriptor view_descriptor, IView view) = 0;
+	virtual bool remove_view(Descriptor view_descriptor) = 0;
 };
 
 
