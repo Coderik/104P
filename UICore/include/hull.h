@@ -50,6 +50,7 @@
 #include "background_worker.h"
 #include "optical_flow_data.h"
 #include "mouse_event.h"
+#include "view.h"
 
 using namespace std;
 
@@ -82,8 +83,8 @@ public:
 	virtual void assign_menu(Gtk::Menu *menu, string title);
 	virtual string request_open_filename(string dialog_title, Glib::RefPtr<Gtk::FileFilter> filter = Glib::RefPtr<Gtk::FileFilter>());
 	virtual void request_active_rig(RequestBase<IRig> &request);
-	virtual Descriptor add_view(IView view);
-	virtual bool alter_view(Descriptor view_descriptor, IView view);
+	virtual Descriptor add_view(string title, sigc::slot1<Glib::RefPtr<Gdk::Pixbuf>, int> provider);
+	virtual bool alter_view(Descriptor view_descriptor, string title, sigc::slot1<Glib::RefPtr<Gdk::Pixbuf>, int> provider);
 	virtual bool remove_view(Descriptor view_descriptor);
 
 protected:
@@ -96,7 +97,6 @@ protected:
 	void left_button_drag(MouseEvent mouse_event);
 	void set_time();
 	void restore_optical_flow();
-	void update_view();
 	void active_view_changed(const Descriptor &active_view);
 	void update_fitting();
 	void update_toolbar();
@@ -108,13 +108,15 @@ protected:
 
 	bool key_pressed(GdkEventKey* event);
 
+	Glib::RefPtr<Gdk::Pixbuf> provide_original_image_view(unsigned int time);
+
 private:
 	sigc::signal<void> _signal_sequence_changed;
 	vector<IModule* > _modules;
 	vector<Fitting* > _fittings;
 	Fitting *_current_fitting;
 	Sequence<float> *_sequence;
-	std::map<Descriptor, IView> _view_map;
+	std::map<Descriptor, View* > _view_map;
 	Descriptor _active_view = Descriptor::create();
 	Descriptor _original_image_view = Descriptor::create();
 	Glib::RefPtr<Gdk::Pixbuf> _optical_flow_view;

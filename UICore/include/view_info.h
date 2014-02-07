@@ -19,10 +19,16 @@ public:
 	string title;
 	Descriptor descriptor;
 
-	ViewInfo(string title, Descriptor descriptor) : title(title), descriptor(descriptor) { }
+	ViewInfo(string title, Descriptor descriptor, int position) : title(title), descriptor(descriptor), _position(position) { }
+
+	inline bool operator< (const ViewInfo& other) const
+	{
+		return _position < other._position;
+	}
+
+private:
+	int _position;
 };
-
-
 
 
 #endif /* VIEW_INFO_H_ */

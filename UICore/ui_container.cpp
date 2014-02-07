@@ -10,7 +10,6 @@
 void UI_Container::setup_ui(Gtk::Window* window, string application_id)
 {
 	_application_id = application_id;
-	_current_view = VIEW_ORIGINAL_IMAGE;
 
 	// adjust main window
 	window->set_title("Image & video processing testing environment");
@@ -44,26 +43,9 @@ void UI_Container::setup_ui(Gtk::Window* window, string application_id)
 	optical_flow_action_group->add(restore_optical_flow_action);
 	_menu_manager->insert_action_group(optical_flow_action_group);
 
-	view_action_group = Gtk::ActionGroup::create();
+	Glib::RefPtr<Gtk::ActionGroup> view_action_group = Gtk::ActionGroup::create();
 	view_action_group->add(Gtk::Action::create("ViewMenu", "View"));
-	Gtk::RadioAction::Group view_group = Gtk::RadioAction::Group();
-	Glib::RefPtr<Gtk::RadioAction> view_action = Gtk::RadioAction::create(view_group, "ImageView", "Original Image");
-	view_action_group->add(view_action);
-	_view_map[VIEW_ORIGINAL_IMAGE] = view_action;
-	view_action = Gtk::RadioAction::create(view_group, "ForwardOFColorView", "Forward Optical Flow (direction and magnitude)");
-	view_action_group->add(view_action);
-	_view_map[VIEW_FORWARD_OF_COLOR] = view_action;
-	view_action = Gtk::RadioAction::create(view_group, "ForwardOFGrayView", "Forward Optical Flow (magnitude)");
-	view_action_group->add(view_action);
-	_view_map[VIEW_FORWARD_OF_GRAY] = view_action;
-	view_action = Gtk::RadioAction::create(view_group, "BackwardOFColorView", "Backward Optical Flow (direction and magnitude)");
-	view_action_group->add(view_action);
-	_view_map[VIEW_BACKWARD_OF_COLOR] = view_action;
-	view_action = Gtk::RadioAction::create(view_group, "BackwardOFGrayView", "Backward Optical Flow (magnitude)");
-	view_action_group->add(view_action);
-	_view_map[VIEW_BACKWARD_OF_GRAY] = view_action;
 	_menu_manager->insert_action_group(view_action_group);
-	view_action->signal_changed().connect( sigc::mem_fun(*this, &UI_Container::set_view_internal) );
 
 	fitting_action_group = Gtk::ActionGroup::create();
 	fitting_action_group->add(Gtk::Action::create("FittingMenu", "Fitting"));
@@ -93,11 +75,6 @@ void UI_Container::setup_ui(Gtk::Window* window, string application_id)
 		"      <menuitem action='ProceedOptFlow'/>"
 		"    </menu>"
 		"    <menu action='ViewMenu'>"
-		"      <menuitem action='ImageView'/>"
-		"      <menuitem action='ForwardOFColorView'/>"
-		"      <menuitem action='ForwardOFGrayView'/>"
-		"      <menuitem action='BackwardOFColorView'/>"
-		"      <menuitem action='BackwardOFGrayView'/>"
 		"    </menu>"
 		"    <menu action='LayerMenu'>"
 		"      <menuitem action='LayersVisibility'/>"
@@ -117,7 +94,7 @@ void UI_Container::setup_ui(Gtk::Window* window, string application_id)
 		window_layout->pack_start(*_menu_bar, Gtk::PACK_SHRINK);
 	}
 
-	_view_nemu_item = dynamic_cast<Gtk::MenuItem*>(_menu_manager->get_widget("/MenuBar/ViewMenu"));
+	_view_menu_item = dynamic_cast<Gtk::MenuItem*>(_menu_manager->get_widget("/MenuBar/ViewMenu"));
 
 	background_work_infobar = new Gtk::InfoBar();
 	background_work_infobar->set_message_type(Gtk::MESSAGE_INFO);
@@ -216,51 +193,23 @@ void UI_Container::assign_menu(Gtk::Menu *menu, string title)
 }
 
 
-UI_Container::View UI_Container::get_view()
-{
-	return _current_view;
-}
-
-
-/*
- * NOTE: Does not emit 'signal_view_changed'.
- */
-void UI_Container::set_view(View view)
-{
-	if (_current_view != view) {
-		_current_view = view;
-		_view_map[_current_view]->set_active(true);
-	}
-}
-
-
-void UI_Container::allow_optical_flow_views(bool is_allowed)
-{
-	// NOTE: This must be generalized when there would be more categories of views
-	_view_map[VIEW_FORWARD_OF_COLOR]->set_sensitive(is_allowed);
-	_view_map[VIEW_FORWARD_OF_GRAY]->set_sensitive(is_allowed);
-	_view_map[VIEW_BACKWARD_OF_COLOR]->set_sensitive(is_allowed);
-	_view_map[VIEW_BACKWARD_OF_GRAY]->set_sensitive(is_allowed);
-}
-
-
-void UI_Container::update_veiw_menu(const vector<ViewInfo> &views, Descriptor active)
+void UI_Container::update_veiw_menu(const vector<ViewInfo> &view_infos, Descriptor active)
 {
 	Gtk::Menu *menu = Gtk::manage(new Gtk::Menu());
 
 	Gtk::RadioAction::Group group = Gtk::RadioAction::Group();
 	vector<ViewInfo>::const_iterator it;
-	for (it = views.begin(); it != views.end(); ++it) {
-		Gtk::MenuItem *item = Gtk::manage(new Gtk::RadioMenuItem(group, it->title));
+	for (it = view_infos.begin(); it != view_infos.end(); ++it) {
+		Gtk::RadioMenuItem *item = Gtk::manage(new Gtk::RadioMenuItem(group, it->title));
 		if (it->descriptor == active) {
 			item->activate();
 		}
-		item->signal_activate().connect( sigc::bind<Descriptor>(sigc::mem_fun(*this, &UI_Container::view_changed_internal), it->descriptor) );
+		item->signal_toggled().connect( sigc::bind<Descriptor, Gtk::RadioMenuItem* >(sigc::mem_fun(*this, &UI_Container::view_changed_internal), it->descriptor, item) );
 		menu->append(*item);
 	}
 
-	_view_nemu_item->set_submenu(*menu);
-	_view_nemu_item->show_all_children(true);
+	_view_menu_item->set_submenu(*menu);
+	_view_menu_item->show_all_children(true);
 }
 
 
@@ -331,30 +280,12 @@ void UI_Container::add_recent_document_internal(string path, string mime_type)
 }
 
 
-void UI_Container::set_view_internal(const Glib::RefPtr<Gtk::RadioAction>& current)
+void UI_Container::view_changed_internal(const Descriptor& current, Gtk::RadioMenuItem* item)
 {
-	Glib::ustring name = current->get_name();
-	if (name == "ImageView") {
-		_current_view = VIEW_ORIGINAL_IMAGE;
-	} else if (name == "ForwardOFColorView") {
-		_current_view = VIEW_FORWARD_OF_COLOR;
-	} else if (name == "ForwardOFGrayView") {
-		_current_view = VIEW_FORWARD_OF_GRAY;
-	} else if (name == "BackwardOFColorView") {
-		_current_view = VIEW_BACKWARD_OF_COLOR;
-	} else if (name == "BackwardOFGrayView") {
-		_current_view = VIEW_BACKWARD_OF_GRAY;
-	} else {
-		_current_view = VIEW_ORIGINAL_IMAGE;
+	// NOTE: this method is called twice: first for the deactivated menu item and second for the activated one.
+	if (item->get_active()) {
+		_signal_active_view_changed.emit(current);
 	}
-
-	_signal_view_changed.emit();
-}
-
-
-void UI_Container::view_changed_internal(const Descriptor& current)
-{
-	_signal_active_view_changed.emit(current);
 }
 
 void UI_Container::set_fitting_internal(const Glib::RefPtr<Gtk::RadioAction>& current)

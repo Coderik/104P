@@ -22,7 +22,6 @@ Hull::Hull(string application_id)
 	_ui.restore_optical_flow_action->signal_activate().connect( sigc::mem_fun(*this, &Hull::restore_optical_flow) );
 	_ui.background_work_infobar->signal_response().connect( sigc::mem_fun(*this, &Hull::perceive_background_worker) );
 	_ui.layers_visibility_toggle_action->signal_toggled().connect( sigc::mem_fun(*this, &Hull::set_layers_visibility) );
-	_ui.signal_view_changed().connect( sigc::mem_fun(*this, &Hull::update_view) );
 	_ui.signal_active_view_changed().connect( sigc::mem_fun(*this, &Hull::active_view_changed) );
 	_ui.signal_fitting_changed().connect( sigc::mem_fun(*this, &Hull::update_fitting) );
 
@@ -44,13 +43,12 @@ Hull::Hull(string application_id)
 
 	_ui.background_work_infobar->hide();
 	_ui.optical_flow_action_group->set_sensitive(false);
-	_ui.view_action_group->set_sensitive(false);
 	_ui.time_slider->set_sensitive(false);
 	_ui.layers_visibility_toggle_action->set_active(true);
 
-	// TODO: create Original Image view
-	/*_original_image_view = add_view(...);
-	active_view_changed(_original_image_view);*/
+	// create Original Image view
+	_original_image_view = add_view("Original Image", sigc::mem_fun(*this, &Hull::provide_original_image_view ));
+	active_view_changed(_original_image_view);
 
 	// TODO: add preferences and controls for that api
 	// NOTE: code for ImageViewer api testing
@@ -127,7 +125,6 @@ void Hull::load_image(string filename)
 	// Adjust UI
 	_ui.layer_action_group->set_sensitive(true);
 	_ui.optical_flow_action_group->set_sensitive(false);
-	_ui.view_action_group->set_sensitive(false);
 	_ui.time_slider->set_sensitive(false);
 	_ui.time_slider->set_range(0, 0);
 
@@ -225,10 +222,8 @@ void Hull::load_sequence(string path)
 	_has_optical_flow_data = false;
 
 	// Adjust UI
-	_ui.set_view(UI_Container::VIEW_ORIGINAL_IMAGE);
 	_ui.layer_action_group->set_sensitive(true);
 	_ui.optical_flow_action_group->set_sensitive(true);
-	_ui.view_action_group->set_sensitive(true);
 	_ui.time_slider->set_sensitive(true);
 	_ui.time_slider->set_range(0, _sequence->get_size_t() - 1);
 	_ui.time_slider->set_digits(0);
@@ -250,9 +245,7 @@ void Hull::load_sequence(string path)
 
 	_ui.restore_optical_flow_action->set_sensitive(is_optical_flow_calculated);
 	// NOTE: no auto restore, so menu item could be shaded and motion compensation denied
-	_ui.allow_optical_flow_views(false);
 	_ui.proceed_optical_flow_action->set_sensitive(false);
-	//_ui.motion_compensation_picker->set_sensitive(false); // TODO: ?????
 
 	// [Re]set optical flow
 	reset_vector_of_pointers(_forward_optical_flow_list, _sequence->get_size_t() - 1);
@@ -428,10 +421,10 @@ void Hull::request_active_rig(RequestBase<IRig> &request)
 }
 
 
-Descriptor Hull::add_view(IView view)
+Descriptor Hull::add_view(string title, sigc::slot1<Glib::RefPtr<Gdk::Pixbuf>, int> provider)
 {
 	Descriptor descriptor = Descriptor::create();
-	_view_map[descriptor] = view;
+	_view_map[descriptor] = new View(title, provider);
 
 	refresh_view_menu();
 
@@ -439,13 +432,15 @@ Descriptor Hull::add_view(IView view)
 }
 
 
-bool Hull::alter_view(Descriptor view_descriptor, IView view)
+bool Hull::alter_view(Descriptor view_descriptor, string title, sigc::slot1<Glib::RefPtr<Gdk::Pixbuf>, int> provider)
 {
 	if (_view_map.find(view_descriptor) == _view_map.end()) {
 		return false;
 	}
 
-	_view_map[view_descriptor] = view;
+	View* view = _view_map[view_descriptor];
+	view->set_title(title);
+	view->set_provider(provider);
 
 	refresh_view_menu();
 
@@ -460,7 +455,7 @@ bool Hull::remove_view(Descriptor view_descriptor)
 	}
 
 	_view_map.erase(view_descriptor);
-	// TODO: if this was active, set another active
+	// TODO: if this was active, set another active somehow
 
 	refresh_view_menu();
 
@@ -572,6 +567,12 @@ bool Hull::key_pressed(GdkEventKey* event)
 }
 
 
+Glib::RefPtr<Gdk::Pixbuf> Hull::provide_original_image_view(unsigned int time)
+{
+	return wrap_raw_image_data(_sequence->get_frame(time));
+}
+
+
 void Hull::perceive_background_worker(int responce_id)
 {
 	if (responce_id == 0)
@@ -632,9 +633,9 @@ void Hull::restore_optical_flow()
 		}
 	}
 
-	if (has_some_data) {
+	/*if (has_some_data) {
 		_ui.allow_optical_flow_views(true);
-	}
+	}*/
 
 	if (has_some_data != _has_optical_flow_data) {
 		_has_optical_flow_data = has_some_data;
@@ -673,18 +674,12 @@ void Hull::fill_task_list(std::vector<OpticalFlowContainer*> &forward_flow, std:
 }
 
 
-void Hull::update_view()
-{
-	update_image_control(_current_time);
-}
-
-
 void Hull::active_view_changed(const Descriptor &active_view)
 {
 	if (_active_view != active_view) {
 		_active_view = active_view;
 
-		// TODO: call update_image_control()
+		update_image_control(_current_time);
 	}
 }
 
@@ -742,10 +737,13 @@ void Hull::update_toolbar()
 void Hull::refresh_view_menu()
 {
 	vector<ViewInfo> view_infos;
-	std::map<Descriptor, IView>::iterator it;
+	std::map<Descriptor, View* >::iterator it;
 	for (it = _view_map.begin(); it != _view_map.end(); ++it) {
-		view_infos.push_back(ViewInfo(it->second.get_title(), it->first));
+		view_infos.push_back(ViewInfo(it->second->get_title(), it->first, it->second->get_position()));
 	}
+
+	// sort according to the position property
+	std::sort(view_infos.begin(), view_infos.end());
 
 	_ui.update_veiw_menu(view_infos, _active_view);
 }
@@ -806,14 +804,29 @@ Glib::RefPtr<Gdk::Pixbuf> Hull::wrap_raw_image_data(Image<float> *image)
 
 void Hull::update_image_control(int current_time)
 {
-	// TODO: rewrite to get pixbuf from _view_map by _active_view descriptor
-	UI_Container::View view = _ui.get_view();
+	// ?TODO: receive Descriptor as parameter
+	if (_sequence && _view_map.find(_active_view) != _view_map.end()) {
+		View *view = _view_map[_active_view];
+
+		Glib::RefPtr<Gdk::Pixbuf> buffer = view->get_pixbuf(current_time);
+
+		// check buffer and replace it with default one, if needed
+		if (!buffer || buffer->get_width() != _sequence->get_size_x() || buffer->get_height() != _sequence->get_size_y()) {
+			buffer = create_empty_pixbuf(_sequence->get_size_x(), _sequence->get_size_y());
+		}
+
+		_ui.image_control->set_pixbuf(buffer);
+		_ui.image_control->queue_draw();
+	}
+
+	// TODO: remove after encapsulating optical flow computation in a separate module
+	/*UI_Container::View view = _ui.get_view();
 
 	Glib::RefPtr<Gdk::Pixbuf> buffer;
 
 	if (view == UI_Container::VIEW_ORIGINAL_IMAGE) {
 		buffer = wrap_raw_image_data(_sequence->get_frame(current_time));
-	} else if (view == UI_Container::VIEW_FORWARD_OF_COLOR) {
+	} else if (view == UI_Container::VIEW_FORWARD_OF_COLOR) {				// Forward Optical Flow (direction and magnitude)
 		if ((unsigned)current_time < _forward_optical_flow_list.size() &&
 				_forward_optical_flow_list[current_time] &&
 				_forward_optical_flow_list[current_time]->contains_data()) {
@@ -821,7 +834,7 @@ void Hull::update_image_control(int current_time)
 		} else {
 			buffer = create_empty_pixbuf(_sequence->get_size_x(), _sequence->get_size_y());
 		}
-	} else if (view == UI_Container::VIEW_FORWARD_OF_GRAY) {
+	} else if (view == UI_Container::VIEW_FORWARD_OF_GRAY) {				// Forward Optical Flow (magnitude)
 		if ((unsigned)current_time < _forward_optical_flow_list.size() &&
 				_forward_optical_flow_list[current_time] &&
 				_forward_optical_flow_list[current_time]->contains_data()) {
@@ -829,7 +842,7 @@ void Hull::update_image_control(int current_time)
 		} else {
 			buffer = create_empty_pixbuf(_sequence->get_size_x(), _sequence->get_size_y());
 		}
-	} else if (view == UI_Container::VIEW_BACKWARD_OF_COLOR) {
+	} else if (view == UI_Container::VIEW_BACKWARD_OF_COLOR) {				// Backward Optical Flow (direction and magnitude)
 		if (current_time > 0 &&
 				(unsigned)(current_time - 1) < _backward_optical_flow_list.size() &&
 				_backward_optical_flow_list[current_time - 1] &&
@@ -838,7 +851,7 @@ void Hull::update_image_control(int current_time)
 		} else {
 			buffer = create_empty_pixbuf(_sequence->get_size_x(), _sequence->get_size_y());
 		}
-	} else if (view == UI_Container::VIEW_BACKWARD_OF_GRAY) {
+	} else if (view == UI_Container::VIEW_BACKWARD_OF_GRAY) {				// Backward Optical Flow (magnitude)
 		if (current_time > 0 &&
 				(unsigned)(current_time - 1) < _backward_optical_flow_list.size() &&
 				_backward_optical_flow_list[current_time - 1] &&
@@ -850,7 +863,7 @@ void Hull::update_image_control(int current_time)
 	}
 
 	_ui.image_control->set_pixbuf(buffer);
-	_ui.image_control->queue_draw();
+	_ui.image_control->queue_draw();*/
 }
 
 
@@ -955,7 +968,7 @@ void Hull::take_optical_flow_frame(IData *data)
 	Glib::ustring message = Glib::ustring::compose("Optical flow. Frames finished: %1; frames left: %2.", _progress_counter, _progress_total - _progress_counter);
 	_ui.background_work_infobar_message->set_text(message);
 
-	_ui.allow_optical_flow_views(true);
+	//_ui.allow_optical_flow_views(true);
 	_has_optical_flow_data = true;
 	_current_fitting->rig->optical_flow_changed();
 
