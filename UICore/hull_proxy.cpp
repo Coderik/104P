@@ -32,24 +32,6 @@ Sequence<float>* HullProxy::request_sequence()
 }
 
 
-vector<OpticalFlowContainer*> HullProxy::request_forward_optical_flow()
-{
-	return (_is_enabled) ? _proxied_hull->request_forward_optical_flow() : vector<OpticalFlowContainer*>();
-}
-
-
-vector<OpticalFlowContainer*> HullProxy::request_backward_optical_flow()
-{
-	return (_is_enabled) ? _proxied_hull->request_backward_optical_flow() : vector<OpticalFlowContainer*>();
-}
-
-
-bool HullProxy::request_has_optical_flow_data()
-{
-	return (_is_enabled) ? _proxied_hull->request_has_optical_flow_data() : false;
-}
-
-
 LayerManager* HullProxy::request_layer_manager()
 {
 	return (_is_enabled) ? _proxied_hull->request_layer_manager() : 0;

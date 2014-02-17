@@ -42,7 +42,7 @@ void MaskModule::open_mask()
 
 		// TODO: ensure mask size matches current sequence
 
-		// TODO: notify all who may concern about mask changing
+		// notify all who may concern about mask changing
 		Request<IRig, IMaskAware> request;
 		_modulable->request_active_rig(request);
 		IMaskAware *mask_aware_rig = request.get_responce();

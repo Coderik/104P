@@ -14,6 +14,8 @@
 #include "i_background_worker.h"
 #include "i_background_insider.h"
 
+// Note: if there are several different works to compute in background, separate backgroung_worker might be used for each
+
 class BackgroundWorker : public IBackgroundWorker, public IBackgroundInsider
 {
 public:

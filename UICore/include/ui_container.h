@@ -44,10 +44,6 @@ public:
 	Glib::RefPtr<Gtk::Action> open_sequence_action;
 	Glib::RefPtr<Gtk::RecentAction> open_recent_action;
 	Glib::RefPtr<Gtk::Action> quit_action;
-	Glib::RefPtr<Gtk::ActionGroup> optical_flow_action_group;
-	Glib::RefPtr<Gtk::Action> calculate_optical_flow_action;
-	Glib::RefPtr<Gtk::Action> proceed_optical_flow_action;
-	Glib::RefPtr<Gtk::Action> restore_optical_flow_action;
 	Glib::RefPtr<Gtk::ActionGroup> fitting_action_group;
 	Glib::RefPtr<Gtk::ActionGroup> layer_action_group;
 	Glib::RefPtr<Gtk::ToggleAction> layers_visibility_toggle_action;

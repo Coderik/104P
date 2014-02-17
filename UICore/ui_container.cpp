@@ -33,16 +33,6 @@ void UI_Container::setup_ui(Gtk::Window* window, string application_id)
 	action_group->add(quit_action);
 	_menu_manager->insert_action_group(action_group);
 
-	optical_flow_action_group = Gtk::ActionGroup::create();
-	optical_flow_action_group->add(Gtk::Action::create("OpticalFlowMenu", "Optical Flow"));
-	calculate_optical_flow_action = Gtk::Action::create("CalculateOptFlow", "Calculate Optical Flow");
-	optical_flow_action_group->add(calculate_optical_flow_action);
-	proceed_optical_flow_action = Gtk::Action::create("ProceedOptFlow", "Proceed Calculaton");
-	optical_flow_action_group->add(proceed_optical_flow_action);
-	restore_optical_flow_action = Gtk::Action::create("RestoreOptFlow", "Restore Optical Flow");
-	optical_flow_action_group->add(restore_optical_flow_action);
-	_menu_manager->insert_action_group(optical_flow_action_group);
-
 	Glib::RefPtr<Gtk::ActionGroup> view_action_group = Gtk::ActionGroup::create();
 	view_action_group->add(Gtk::Action::create("ViewMenu", "View"));
 	_menu_manager->insert_action_group(view_action_group);
@@ -67,12 +57,6 @@ void UI_Container::setup_ui(Gtk::Window* window, string application_id)
 		"      <menuitem action='OpenRecent'/>"
 		"      <separator/>"
 		"      <menuitem action='Quit'/>"
-		"    </menu>"
-		"    <menu action='OpticalFlowMenu'>"
-		"      <menuitem action='RestoreOptFlow'/>"
-		"      <separator/>"
-		"      <menuitem action='CalculateOptFlow'/>"
-		"      <menuitem action='ProceedOptFlow'/>"
 		"    </menu>"
 		"    <menu action='ViewMenu'>"
 		"    </menu>"

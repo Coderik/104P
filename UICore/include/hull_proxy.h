@@ -21,9 +21,6 @@ public:
 	virtual void disable();
 
 	virtual Sequence<float>* request_sequence();
-	virtual vector<OpticalFlowContainer*> request_forward_optical_flow();
-	virtual vector<OpticalFlowContainer*> request_backward_optical_flow();
-	virtual bool request_has_optical_flow_data();
 
 	virtual LayerManager* request_layer_manager();
 	virtual InteractionManager* request_interaction_manager();

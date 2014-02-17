@@ -17,6 +17,8 @@ public:
 
 	float* flow_x;
 	float* flow_y;
+	int size_x;
+	int size_y;
 	int index;
 };
 
