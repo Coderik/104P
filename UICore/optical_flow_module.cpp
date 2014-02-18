@@ -61,6 +61,8 @@ bool OpticalFlowModule::request_has_optical_flow_data()
 void OpticalFlowModule::sequence_changed()
 {
 	remove_optical_flow_views();
+	reset_vector_of_pointers(_forward_optical_flow_list, 0);
+	reset_vector_of_pointers(_backward_optical_flow_list, 0);
 	_has_optical_flow_data = false;
 
 	Sequence<float> *sequence = _modulable->request_sequence();

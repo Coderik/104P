@@ -59,7 +59,7 @@ int HullProxy::request_current_time()
 void HullProxy::request_module(RequestBase<IModule> &request)
 {
 	// ?TODO: do we really need to check if current proxy is enabled here? Isn't it super safe to request module at any time?
-	if (_is_enabled) {
+	//if (_is_enabled) {
 		_proxied_hull->request_module(request);
-	}
+	//}
 }
