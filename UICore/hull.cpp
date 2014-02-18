@@ -20,6 +20,7 @@ Hull::Hull(string application_id)
 	_ui.layers_visibility_toggle_action->signal_toggled().connect( sigc::mem_fun(*this, &Hull::set_layers_visibility) );
 	_ui.signal_active_view_changed().connect( sigc::mem_fun(*this, &Hull::active_view_changed) );
 	_ui.signal_fitting_changed().connect( sigc::mem_fun(*this, &Hull::update_fitting) );
+	_ui.background_work_infobar->signal_response().connect( sigc::mem_fun(*this, &Hull::background_worker_infobar_responded) );
 
 	_ui.image_control->signal_left_button_pressed().connect( sigc::mem_fun(*this, &Hull::left_button_pressed) );
 	_ui.image_control->signal_left_button_released().connect( sigc::mem_fun(*this, &Hull::left_button_released) );
@@ -419,6 +420,41 @@ bool Hull::remove_view(Descriptor view_descriptor)
 }
 
 
+Descriptor Hull::add_background_work_info(sigc::slot0<void> cancel_slot, string message)
+{
+	_background_work_info = Descriptor::create();
+
+	_background_work_cancel_slot = cancel_slot;
+	_ui.background_work_infobar_message->set_text(message);
+	_ui.background_work_infobar->show();
+
+	return _background_work_info;
+}
+
+
+bool Hull::alter_background_work_info(Descriptor descriptor, string message)
+{
+	if (descriptor == _background_work_info) {
+		_ui.background_work_infobar_message->set_text(message);
+		return true;
+	}
+
+	return false;
+}
+
+
+bool Hull::remove_background_work_info(Descriptor descriptor)
+{
+	if (descriptor == _background_work_info) {
+		_ui.background_work_infobar->hide();
+		descriptor = Descriptor::create();	//TODO: set to empty
+		return true;
+	}
+
+	return false;
+}
+
+
 void Hull::set_layers_visibility()
 {
 	bool visibility = _ui.layers_visibility_toggle_action->get_active();
@@ -427,6 +463,14 @@ void Hull::set_layers_visibility()
 		if (_current_fitting && _current_fitting->layer_manager) {
 			_current_fitting->layer_manager->set_visibility(_layers_visibility);
 		}
+	}
+}
+
+
+void Hull::background_worker_infobar_responded(int responce_id)
+{
+	if (responce_id == 0 && !_background_work_cancel_slot.empty()) {
+		_background_work_cancel_slot();
 	}
 }
 

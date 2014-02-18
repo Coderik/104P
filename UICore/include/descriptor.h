@@ -12,7 +12,9 @@ class Descriptor
 {
 public:
 	static Descriptor create();
+	static Descriptor empty();
 
+	Descriptor();
 	Descriptor(const Descriptor &other);
 	~Descriptor();
 
@@ -32,7 +34,7 @@ private:
 
 	__Descriptor *_descriptor;
 
-	Descriptor();
+	Descriptor(__Descriptor *descriptor);
 };
 
 // NOTE: definitions are in header in order to overload two argument versions.

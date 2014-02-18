@@ -34,17 +34,7 @@ void OpticalFlowModule::initialize(IModulable *modulable)
 	_background_worker = new BackgroundWorker();
 	_background_worker->signal_data_prepared().connect( sigc::mem_fun(*this, &OpticalFlowModule::take_optical_flow_frame) );
 	_background_worker->signal_work_finished().connect( sigc::mem_fun(*this, &OpticalFlowModule::end_calculate_optical_flow) );
-
-	//_ui.background_work_infobar->signal_response().connect( sigc::mem_fun(*this, &Hull::perceive_background_worker) );
 }
-
-/*
-void Hull::perceive_background_worker(int responce_id)
-{
-	if (responce_id == 0)
-		cancel_calculate_optical_flow();
-}
-*/
 
 
 vector<OpticalFlowContainer*> OpticalFlowModule::request_forward_optical_flow()
@@ -292,10 +282,9 @@ void OpticalFlowModule::begin_optical_flow_calculation_internal(std::vector<int>
 	_background_worker->start(work);
 
 	Glib::ustring message = Glib::ustring::compose("Optical flow. Frames finished: %1; frames left: %2.", 0, _progress_total);
-	//_ui.background_work_infobar_message->set_text(message);	// TODO: implement
+	_background_work_info = _modulable->add_background_work_info(sigc::mem_fun(*this, &OpticalFlowModule::cancel_calculate_optical_flow), message);
 	_calculate_menu_item->set_sensitive(false);
 	_proceed_menu_item->set_sensitive(false);
-	//_ui.background_work_infobar->show();						// TODO: implement
 }
 
 
@@ -404,7 +393,7 @@ void OpticalFlowModule::take_optical_flow_frame(IData *data)
 	// Update progress
 	_progress_counter++;
 	Glib::ustring message = Glib::ustring::compose("Optical flow. Frames finished: %1; frames left: %2.", _progress_counter, _progress_total - _progress_counter);
-	//_ui.background_work_infobar_message->set_text(message);	// TODO: implement
+	_modulable->alter_background_work_info(_background_work_info, message);
 
 	if (!_has_optical_flow_data) {
 		add_optical_flow_views();
@@ -421,7 +410,7 @@ void OpticalFlowModule::take_optical_flow_frame(IData *data)
 
 void OpticalFlowModule::end_calculate_optical_flow()
 {
-	//_ui.background_work_infobar->hide();	// TODO: implement
+	_modulable->remove_background_work_info(_background_work_info);
 	_calculate_menu_item->set_sensitive(true);
 
 	fill_task_list(_forward_optical_flow_list, _backward_optical_flow_list, _task_list);
@@ -452,7 +441,7 @@ void OpticalFlowModule::store_optical_flow(OpticalFlowContainer &flow, int index
 
 void OpticalFlowModule::cancel_calculate_optical_flow()
 {
-	//_ui.background_work_infobar_message->set_text("Optical flow. Canceling... ");		// TODO: implement
+	_modulable->alter_background_work_info(_background_work_info, "Optical flow. Canceling... ");
 	_background_worker->cancel();
 }
 

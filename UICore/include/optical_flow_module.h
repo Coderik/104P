@@ -46,10 +46,11 @@ private:
 	int _progress_counter, _progress_total;
 	bool _has_optical_flow_data;
 	bool _optical_flow_legacy_format;
-	Descriptor _forward_optical_flow_vector_view = Descriptor::create();
-	Descriptor _forward_optical_flow_magnitude_view = Descriptor::create();
-	Descriptor _backward_optical_flow_vector_view = Descriptor::create();
-	Descriptor _backward_optical_flow_magnitude_view = Descriptor::create();
+	Descriptor _forward_optical_flow_vector_view;
+	Descriptor _forward_optical_flow_magnitude_view;
+	Descriptor _backward_optical_flow_vector_view;
+	Descriptor _backward_optical_flow_magnitude_view;
+	Descriptor _background_work_info;
 
 	// Slots
 	void sequence_changed();

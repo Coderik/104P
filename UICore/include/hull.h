@@ -78,6 +78,9 @@ public:
 	virtual Descriptor add_view(string title, sigc::slot1<Glib::RefPtr<Gdk::Pixbuf>, int> provider);
 	virtual bool alter_view(Descriptor view_descriptor, string title, sigc::slot1<Glib::RefPtr<Gdk::Pixbuf>, int> provider);
 	virtual bool remove_view(Descriptor view_descriptor);
+	virtual Descriptor add_background_work_info(sigc::slot0<void> cancel_slot, string message = "");
+	virtual bool alter_background_work_info(Descriptor descriptor, string message);
+	virtual bool remove_background_work_info(Descriptor descriptor);
 
 protected:
 	/* slots */
@@ -92,6 +95,7 @@ protected:
 	void update_fitting();
 	void update_toolbar();
 	void set_layers_visibility();
+	void background_worker_infobar_responded(int responce_id);
 
 	bool key_pressed(GdkEventKey* event);
 
@@ -104,8 +108,10 @@ private:
 	Fitting *_current_fitting;
 	Sequence<float> *_sequence;
 	std::map<Descriptor, View* > _view_map;
-	Descriptor _active_view = Descriptor::create();
-	Descriptor _original_image_view = Descriptor::create();
+	Descriptor _active_view;
+	Descriptor _original_image_view;
+	Descriptor _background_work_info;
+	sigc::slot0<void> _background_work_cancel_slot;
 	std::string _sequence_folder;
 	int _current_time;
 	bool _layers_visibility;

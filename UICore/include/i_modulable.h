@@ -42,6 +42,11 @@ public:
 	virtual Descriptor add_view(string title, sigc::slot1<Glib::RefPtr<Gdk::Pixbuf>, int> provider) = 0;
 	virtual bool alter_view(Descriptor view_descriptor, string title, sigc::slot1<Glib::RefPtr<Gdk::Pixbuf>, int> provider) = 0;
 	virtual bool remove_view(Descriptor view_descriptor) = 0;
+
+	// TODO: think about the better api for this (but note, that encapsulating message stuff in IBackgroundWorker is not an option)
+	virtual Descriptor add_background_work_info(sigc::slot0<void> cancel_slot, string message = "") = 0;
+	virtual bool alter_background_work_info(Descriptor descriptor, string message) = 0;
+	virtual bool remove_background_work_info(Descriptor descriptor) = 0;
 };
 
 
