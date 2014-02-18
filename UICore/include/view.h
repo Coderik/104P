@@ -32,7 +32,7 @@ private:
 	static unsigned long __next_position__;	// NOTE: this helps to sort list of views in the order of their creation.
 	unsigned long _position;
 	string _title;
-	sigc::signal1<Glib::RefPtr<Gdk::Pixbuf>, int> _signal_request_pixbuf;
+	sigc::slot1<Glib::RefPtr<Gdk::Pixbuf>, int> _provider;
 };
 
 

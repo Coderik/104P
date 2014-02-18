@@ -117,6 +117,7 @@ void Hull::load_image(string filename)
 	_ui.layer_action_group->set_sensitive(true);
 	_ui.time_slider->set_sensitive(false);
 	_ui.time_slider->set_range(0, 0);
+	active_view_changed(_original_image_view);
 
 	// Set default values
 	_sequence_folder = "";
@@ -218,6 +219,7 @@ void Hull::load_sequence(string path)
 	_ui.time_slider->set_sensitive(true);
 	_ui.time_slider->set_range(0, _sequence->get_size_t() - 1);
 	_ui.time_slider->set_digits(0);
+	active_view_changed(_original_image_view);
 
 	// Show first frame
 	update_image_control(_current_time);

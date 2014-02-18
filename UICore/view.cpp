@@ -12,7 +12,7 @@ unsigned long View::__next_position__ = 0;
 View::View(string title, sigc::slot1<Glib::RefPtr<Gdk::Pixbuf>, int> provider)
 : _title(title)
 {
-	_signal_request_pixbuf.connect( provider );
+	_provider = provider;
 	_position = __next_position__++;
 }
 
@@ -31,8 +31,7 @@ void View::set_title(string value)
 
 void View::set_provider(sigc::slot1<Glib::RefPtr<Gdk::Pixbuf>, int> provider)
 {
-	_signal_request_pixbuf.clear();
-	_signal_request_pixbuf.connect( provider );
+	_provider = provider;
 }
 
 
@@ -45,8 +44,8 @@ int View::get_position()
 Glib::RefPtr<Gdk::Pixbuf> View::get_pixbuf(unsigned int time)
 {
 	Glib::RefPtr<Gdk::Pixbuf> pixbuf;
-	if (!_signal_request_pixbuf.empty()) {
-		pixbuf = _signal_request_pixbuf.emit(time);
+	if (!_provider.empty()) {
+		pixbuf = _provider(time);
 	}
 
 	return pixbuf;

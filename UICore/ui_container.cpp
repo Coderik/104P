@@ -193,7 +193,7 @@ void UI_Container::update_veiw_menu(const vector<ViewInfo> &view_infos, Descript
 	}
 
 	_view_menu_item->set_submenu(*menu);
-	_view_menu_item->show_all_children(true);
+	_view_menu_item->show_all();
 }
 
 
