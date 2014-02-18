@@ -53,6 +53,12 @@ Descriptor::~Descriptor()
 }
 
 
+bool Descriptor::is_empty()
+{
+	return _descriptor == 0;
+}
+
+
 Descriptor& Descriptor::operator= (const Descriptor &other)
 {
     // check for self-assignment by comparing the address of the

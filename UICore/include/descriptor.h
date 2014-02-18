@@ -18,6 +18,8 @@ public:
 	Descriptor(const Descriptor &other);
 	~Descriptor();
 
+	bool is_empty();
+
 	Descriptor& operator= (const Descriptor &rhs);
 	bool operator== (const Descriptor &d) const;
 	bool operator!= (const Descriptor &d) const;

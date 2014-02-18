@@ -13,10 +13,12 @@
 
 #include "i_module.h"
 #include "i_mask_provider.h"
+#include "io_utility.h"
 
 class MaskModule: public IModule, public IMaskProvider
 {
 public:
+	MaskModule();
 	virtual ~MaskModule() {}
 
 	// IModule members
@@ -25,8 +27,12 @@ public:
 	// IMaskProvider members
 	virtual SequenceMask* request_mask();
 
+	Glib::RefPtr<Gdk::Pixbuf> provide_mask_view(unsigned int time);
+
 private:
 	IModulable *_modulable;
+	SequenceMask *_mask;
+	Descriptor _mask_view;
 
 	// slots
 	void open_mask();
