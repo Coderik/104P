@@ -33,7 +33,6 @@ public:
 	virtual void deactivate() {};
 
 	virtual void sequence_changed() {};
-	virtual void optical_flow_changed() {};
 	virtual void current_time_changed() {};
 
 	virtual void key_pressed(GdkEventKey* event) {};
