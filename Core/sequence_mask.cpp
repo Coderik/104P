@@ -28,6 +28,13 @@ SequenceMask::SequenceMask(int size_x, int size_y)
 }
 
 
+SequenceMask::SequenceMask(Shape size)
+	: Sequence<bool>(size, false)
+{
+
+}
+
+
 SequenceMask::SequenceMask(Image<bool> *first_frame)
 	: Sequence<bool>(first_frame)
 {

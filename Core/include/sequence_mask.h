@@ -21,6 +21,7 @@ public:
 	SequenceMask(int size_x, int size_y, int size_t, bool value);
 	SequenceMask(int size_x, int size_y, int size_t);
 	SequenceMask(int size_x, int size_y);
+	SequenceMask(Shape size);
 	SequenceMask(Image<bool> *first_frame);
 	SequenceMask(SequenceMask& source);
 	~SequenceMask();
