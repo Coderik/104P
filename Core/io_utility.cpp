@@ -100,7 +100,7 @@ void IOUtility::write_pgm_image(const string &name, Image<float> *image)
 string IOUtility::compose_file_name(const string &name, int index, const string &extension)
 {
 	stringstream stream;
-	stream << name << "_" << index << "." << extension;
+	stream << name << "_" << setfill('0') << setw(3) << index << "." << extension;
 	string file_name = stream.str();
 	return file_name;
 }
