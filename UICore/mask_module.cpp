@@ -26,6 +26,26 @@ void MaskModule::initialize(IModulable *modulable)
 	Gtk::MenuItem *open_mask_menu_item = Gtk::manage(new Gtk::MenuItem("Open Mask..."));
 	open_mask_menu_item->signal_activate().connect( sigc::mem_fun(*this, &MaskModule::open_mask) );
 	menu->append(*open_mask_menu_item);
+	/*Gtk::MenuItem *save_mask_menu_item = Gtk::manage(new Gtk::MenuItem("Save Mask"));
+	save_mask_menu_item->signal_activate().connect( sigc::mem_fun(*this, &MaskModule::open_mask) );
+	menu->append(*save_mask_menu_item);
+	Gtk::MenuItem *save_mask_as_menu_item = Gtk::manage(new Gtk::MenuItem("Save Mask As..."));
+	save_mask_as_menu_item->signal_activate().connect( sigc::mem_fun(*this, &MaskModule::open_mask) );
+	menu->append(*save_mask_as_menu_item);*/
+	Gtk::MenuItem *separator_menu_item = Gtk::manage(new Gtk::SeparatorMenuItem());
+	menu->append(*separator_menu_item);
+	Gtk::MenuItem *set_mask_menu_item = Gtk::manage(new Gtk::MenuItem("Replace Mask"));
+	set_mask_menu_item->signal_activate().connect( sigc::mem_fun(*this, &MaskModule::set_mask) );
+	menu->append(*set_mask_menu_item);
+	Gtk::MenuItem *add_mask_menu_item = Gtk::manage(new Gtk::MenuItem("Add to Mask"));
+	add_mask_menu_item->signal_activate().connect( sigc::mem_fun(*this, &MaskModule::add_mask) );
+	menu->append(*add_mask_menu_item);
+	Gtk::MenuItem *subtract_mask_menu_item = Gtk::manage(new Gtk::MenuItem("Subtract from Mask"));
+	subtract_mask_menu_item->signal_activate().connect( sigc::mem_fun(*this, &MaskModule::subtract_mask) );
+	menu->append(*subtract_mask_menu_item);
+	Gtk::MenuItem *intersect_mask_menu_item = Gtk::manage(new Gtk::MenuItem("Intersect with Mask"));
+	intersect_mask_menu_item->signal_activate().connect( sigc::mem_fun(*this, &MaskModule::intersect_mask) );
+	menu->append(*intersect_mask_menu_item);
 
 	_modulable->assign_menu(menu, "Mask");
 }
@@ -79,17 +99,19 @@ void MaskModule::open_mask()
 	}
 
 	// TODO: add filters
-	string filename = _modulable->request_open_filename("Open Mask File");
+	string file_name = _modulable->request_open_dialog_result("Open Mask File");
 
-	if (!filename.empty()) {
+	if (!file_name.empty()) {
 		// read mask file
-		Image<float> *mask_image = IOUtility::read_pgm_image(filename);
+		Image<float> *mask_image = IOUtility::read_pgm_image(file_name);
 
 		// ensure mask size matches current sequence
 		if (mask_image->get_size_x() != sequence->get_size_x() || mask_image->get_size_y() != sequence->get_size_y()) {
 			// TODO: make some notification
 			return;
 		}
+
+		_mask_file_name = file_name;
 
 		// [re]allocate memory
 		if (_mask) {
@@ -117,12 +139,141 @@ void MaskModule::open_mask()
 			_mask_view = _modulable->add_view("Mask", sigc::mem_fun(*this, &MaskModule::provide_mask_view));
 		}
 
-		// notify all who may concern about mask changing
+		// set mask immediately after loading in case if there were no mask before
 		Request<IRig, IMaskAware> request;
 		_modulable->request_active_rig(request);
 		IMaskAware *mask_aware_rig = request.get_responce();
 		if (mask_aware_rig) {
-			mask_aware_rig->mask_changed();
+			MaskGroup *group = mask_aware_rig->get_mask_group();
+			if (group && group->is_empty()) {
+				group->set_mask(*_mask);
+			}
+		}
+	}
+}
+
+
+void MaskModule::save_mask()
+{
+	SequenceMask *mask = 0;
+
+	Request<IRig, IMaskAware> request;
+	_modulable->request_active_rig(request);
+	IMaskAware *mask_aware_rig = request.get_responce();
+	if (mask_aware_rig) {
+		MaskGroup *group = mask_aware_rig->get_mask_group();
+		if (group) {
+			mask = group->get_mask();
+		}
+	}
+
+	if (!mask) {
+		return;
+	}
+
+	string file_name = _mask_file_name;
+	if (file_name.empty()) {
+		file_name = _modulable->request_save_dialog_result("Save Mask As");
+	}
+
+	// TODO: write mask
+
+	// TODO: set that mask as current
+}
+
+
+void MaskModule::save_mask_as()
+{
+	SequenceMask *mask = 0;
+
+	Request<IRig, IMaskAware> request;
+	_modulable->request_active_rig(request);
+	IMaskAware *mask_aware_rig = request.get_responce();
+	if (mask_aware_rig) {
+		MaskGroup *group = mask_aware_rig->get_mask_group();
+		if (group) {
+			mask = group->get_mask();
+		}
+	}
+
+	if (!mask) {
+		return;
+	}
+
+	// TODO: add filters
+	string file_name = _modulable->request_save_dialog_result("Save Mask As");
+
+	// TODO: write mask
+}
+
+
+void MaskModule::set_mask()
+{
+	if (!_mask) {
+		return;
+	}
+
+	Request<IRig, IMaskAware> request;
+	_modulable->request_active_rig(request);
+	IMaskAware *mask_aware_rig = request.get_responce();
+	if (mask_aware_rig) {
+		MaskGroup *group = mask_aware_rig->get_mask_group();
+		if (group) {
+			group->set_mask(*_mask);
+		}
+	}
+}
+
+
+void MaskModule::add_mask()
+{
+	if (!_mask) {
+		return;
+	}
+
+	Request<IRig, IMaskAware> request;
+	_modulable->request_active_rig(request);
+	IMaskAware *mask_aware_rig = request.get_responce();
+	if (mask_aware_rig) {
+		MaskGroup *group = mask_aware_rig->get_mask_group();
+		if (group) {
+			group->add_mask(*_mask);
+		}
+	}
+}
+
+
+void MaskModule::subtract_mask()
+{
+	if (!_mask) {
+		return;
+	}
+
+	Request<IRig, IMaskAware> request;
+	_modulable->request_active_rig(request);
+	IMaskAware *mask_aware_rig = request.get_responce();
+	if (mask_aware_rig) {
+		MaskGroup *group = mask_aware_rig->get_mask_group();
+		if (group) {
+			group->subtract_mask(*_mask);
+		}
+	}
+}
+
+
+void MaskModule::intersect_mask()
+{
+	if (!_mask) {
+		return;
+	}
+
+	Request<IRig, IMaskAware> request;
+	_modulable->request_active_rig(request);
+	IMaskAware *mask_aware_rig = request.get_responce();
+	if (mask_aware_rig) {
+		MaskGroup *group = mask_aware_rig->get_mask_group();
+		if (group) {
+			group->intersect_mask(*_mask);
 		}
 	}
 }

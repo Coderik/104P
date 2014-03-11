@@ -8,11 +8,13 @@
 #ifndef I_MASK_AWARE_H_
 #define I_MASK_AWARE_H_
 
+#include "mask_group.h"
+
 class IMaskAware
 {
 public:
 	virtual ~IMaskAware() {}
-	virtual void mask_changed() = 0;
+	virtual MaskGroup* get_mask_group() = 0;
 };
 
 

@@ -49,6 +49,13 @@ SequenceMask::SequenceMask(SequenceMask& source)
 }
 
 
+SequenceMask::SequenceMask(const SequenceMask& source)
+	: Sequence<bool>(source)
+{
+
+}
+
+
 SequenceMask::~SequenceMask()
 {
 
@@ -95,9 +102,21 @@ void SequenceMask::mask(int x, int y, int t)
 }
 
 
+void SequenceMask::mask(Point p)
+{
+	set_value(p.x, p.y, p.t, true);
+}
+
+
 void SequenceMask::unmask(int x, int y, int t)
 {
 	set_value(x, y, t, false);
+}
+
+
+void SequenceMask::unmask(Point p)
+{
+	set_value(p.x, p.y, p.t, false);
 }
 
 

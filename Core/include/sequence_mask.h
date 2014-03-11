@@ -24,6 +24,7 @@ public:
 	SequenceMask(Shape size);
 	SequenceMask(Image<bool> *first_frame);
 	SequenceMask(SequenceMask& source);
+	SequenceMask(const SequenceMask& source);
 	~SequenceMask();
 
 	ImageMask* get_mask_frame(int t) const;
@@ -34,7 +35,9 @@ public:
 	iterator rend() const;
 
 	void mask(int x, int y, int t);
+	void mask(Point p);
 	void unmask(int x, int y, int t);
+	void unmask(Point p);
 	void invert();
 
 	/* I_Iterable_Mask methods */

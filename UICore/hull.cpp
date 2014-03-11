@@ -346,7 +346,7 @@ string Hull::request_sequence_path()
 }
 
 
-string Hull::request_open_filename(string dialog_title, Glib::RefPtr<Gtk::FileFilter> filter)
+string Hull::request_open_dialog_result(string dialog_title, Glib::RefPtr<Gtk::FileFilter> filter)
 {
 	Gtk::FileChooserDialog dialog(dialog_title, Gtk::FILE_CHOOSER_ACTION_OPEN);
 	dialog.set_transient_for(*this);
@@ -354,6 +354,32 @@ string Hull::request_open_filename(string dialog_title, Glib::RefPtr<Gtk::FileFi
 	// add response buttons the the dialog:
 	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 	dialog.add_button(Gtk::Stock::OPEN, Gtk::RESPONSE_OK);
+
+	// add filters, so that only certain file types can be selected:
+	if (filter) {
+		dialog.add_filter(filter);
+	}
+
+	// show the dialog and wait for a user response:
+	int result = dialog.run();
+
+	string filename;
+	if (result == Gtk::RESPONSE_OK) {
+		filename = dialog.get_filename();
+	}
+
+	return filename;
+}
+
+
+string Hull::request_save_dialog_result(string dialog_title, Glib::RefPtr<Gtk::FileFilter> filter)
+{
+	Gtk::FileChooserDialog dialog(dialog_title, Gtk::FILE_CHOOSER_ACTION_SAVE);
+	dialog.set_transient_for(*this);
+
+	// add response buttons the the dialog:
+	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	dialog.add_button(Gtk::Stock::SAVE_AS, Gtk::RESPONSE_OK);
 
 	// add filters, so that only certain file types can be selected:
 	if (filter) {
