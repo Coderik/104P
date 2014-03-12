@@ -8,6 +8,7 @@
 #ifndef MASK_MODULE_H_
 #define MASK_MODULE_H_
 
+#include <sigc++/sigc++.h>
 #include <gtkmm/menuitem.h>
 #include <gtkmm/separatormenuitem.h>
 #include <gtkmm/filechooserdialog.h>
@@ -15,6 +16,7 @@
 #include "i_module.h"
 #include "i_mask_provider.h"
 #include "io_utility.h"
+#include "visualization.h"
 
 class MaskModule: public IModule, public IMaskProvider
 {
@@ -35,6 +37,7 @@ private:
 	SequenceMask *_mask;
 	Descriptor _mask_view;
 	string _mask_file_name;
+	sigc::signal<void, bool> _signal_enable_mask_actions_menu_items;
 
 	// slots
 	void open_mask();

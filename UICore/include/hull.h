@@ -79,6 +79,7 @@ public:
 	virtual Descriptor add_view(string title, sigc::slot1<Glib::RefPtr<Gdk::Pixbuf>, int> provider);
 	virtual bool alter_view(Descriptor view_descriptor, string title, sigc::slot1<Glib::RefPtr<Gdk::Pixbuf>, int> provider);
 	virtual bool remove_view(Descriptor view_descriptor);
+	virtual bool queue_view_draw(Descriptor view_descriptor);
 	virtual Descriptor add_background_work_info(sigc::slot0<void> cancel_slot, string message = "");
 	virtual bool alter_background_work_info(Descriptor descriptor, string message);
 	virtual bool remove_background_work_info(Descriptor descriptor);

@@ -448,6 +448,17 @@ bool Hull::remove_view(Descriptor view_descriptor)
 }
 
 
+bool Hull::queue_view_draw(Descriptor view_descriptor)
+{
+	if (_active_view == view_descriptor) {
+		update_image_control(_current_time);
+		return true;
+	}
+
+	return false;
+}
+
+
 Descriptor Hull::add_background_work_info(sigc::slot0<void> cancel_slot, string message)
 {
 	_background_work_info = Descriptor::create();
