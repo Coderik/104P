@@ -5,9 +5,9 @@
  *      Author: Vadim Fedorov
  */
 
-#include "point_selection.h"
+#include "point_picker.h"
 
-PointSelection::PointSelection()
+PointPicker::PointPicker()
 {
 	_display_name = "Point";
 	_tooltip_text = "Select a point";
@@ -20,7 +20,7 @@ PointSelection::PointSelection()
 }
 
 
-void PointSelection::left_button_pressed(MouseEvent event)
+void PointPicker::left_button_pressed(MouseEvent event)
 {
 	EventArgs args;
 
@@ -36,7 +36,7 @@ void PointSelection::left_button_pressed(MouseEvent event)
 }
 
 
-void PointSelection::key_pressed(GdkEventKey* event)
+void PointPicker::key_pressed(GdkEventKey* event)
 {
 	EventArgs args;
 	switch(event->keyval) {

@@ -1,12 +1,12 @@
 /*
- * point_selection.h
+ * point_picker.h
  *
  *  Created on: Sep 29, 2013
  *      Author: Vadim Fedorov
  */
 
-#ifndef POINT_SELECTION_H_
-#define POINT_SELECTION_H_
+#ifndef POINT_PICKER_H_
+#define POINT_PICKER_H_
 
 #include <gtkmm/icontheme.h>
 #include <sigc++/sigc++.h>
@@ -16,7 +16,7 @@
 #include "mouse_event.h"
 #include "../icons/icon_point_selection_24.h"
 
-class PointSelection : public Interaction
+class PointPicker : public Interaction
 {
 public:
 	struct EventArgs
@@ -28,7 +28,7 @@ public:
 		bool is_alt_modifier;
 	};
 
-	PointSelection();
+	PointPicker();
 
 	virtual void left_button_pressed(MouseEvent event);
 	virtual void key_pressed(GdkEventKey* event);
@@ -43,4 +43,4 @@ private:
 };
 
 
-#endif /* POINT_SELECTION_H_ */
+#endif /* POINT_PICKER_H_ */
