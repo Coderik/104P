@@ -83,6 +83,7 @@ void Hull::open_image()
 {
 	Gtk::FileChooserDialog dialog("Please choose an image", Gtk::FILE_CHOOSER_ACTION_OPEN);
 	dialog.set_transient_for(*this);
+	dialog.set_current_folder(Glib::get_current_dir());
 
 	//Add response buttons the the dialog:
 	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
@@ -152,6 +153,7 @@ void Hull::open_sequence()
 {
 	Gtk::FileChooserDialog dialog("Please choose a sequence folder", Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER);
 	dialog.set_transient_for(*this);
+	dialog.set_current_folder(Glib::get_current_dir());
 
 	//Add response buttons the the dialog:
 	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
@@ -350,6 +352,7 @@ string Hull::request_open_dialog_result(string dialog_title, Glib::RefPtr<Gtk::F
 {
 	Gtk::FileChooserDialog dialog(dialog_title, Gtk::FILE_CHOOSER_ACTION_OPEN);
 	dialog.set_transient_for(*this);
+	dialog.set_current_folder(Glib::get_current_dir());
 
 	// add response buttons the the dialog:
 	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
@@ -376,6 +379,7 @@ string Hull::request_save_dialog_result(string dialog_title, Glib::RefPtr<Gtk::F
 {
 	Gtk::FileChooserDialog dialog(dialog_title, Gtk::FILE_CHOOSER_ACTION_SAVE);
 	dialog.set_transient_for(*this);
+	dialog.set_current_folder(Glib::get_current_dir());
 
 	// add response buttons the the dialog:
 	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
