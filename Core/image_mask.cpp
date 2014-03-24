@@ -134,9 +134,21 @@ void ImageMask::mask(int x, int y)
 }
 
 
+void ImageMask::mask(Point p)
+{
+	set_value(p.x, p.y, true);
+}
+
+
 void ImageMask::unmask(int x, int y)
 {
 	set_value(x, y, false);
+}
+
+
+void ImageMask::unmask(Point p)
+{
+	set_value(p.x, p.y, false);
 }
 
 

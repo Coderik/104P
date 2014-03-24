@@ -38,7 +38,9 @@ public:
 	virtual void set_value(Point p, bool value);
 
     void mask(int x, int y);
+    void mask(Point p);
     void unmask(int x, int y);
+    void unmask(Point p);
     void invert();
 
     vector<Point> get_masked_points() const;

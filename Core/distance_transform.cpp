@@ -7,20 +7,20 @@
 
 #include "distance_transform.h"
 
-Image<float>* DistanceTransform::calculate(ImageMask &mask, DistanceEnum distance_type)
+Image<float>* DistanceTransform::calculate(const ImageMask &mask, DistanceEnum distance_type)
 {
 	return calculate_internal(mask, distance_type, true);
 }
 
 
-Image<float>* DistanceTransform::calculate_inverse(ImageMask &mask, DistanceEnum distance_type)
+Image<float>* DistanceTransform::calculate_inverse(const ImageMask &mask, DistanceEnum distance_type)
 {
 	return calculate_internal(mask, distance_type, false);
 }
 
 /* Private */
 
-Image<float>* DistanceTransform::calculate_internal(ImageMask &mask, DistanceEnum distance_type, bool direct)
+Image<float>* DistanceTransform::calculate_internal(const ImageMask &mask, DistanceEnum distance_type, bool direct)
 {
 	// NOTE: it's hard to give meaningful names to the variables,
 	// therefore, most of them are named like in the paper.
