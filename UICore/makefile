@@ -8,14 +8,27 @@ ARCH = -m64
 # Add inputs to the build variables 
 SOURCES += \
 background_worker.cpp \
+descriptor.cpp \
 hull.cpp \
+hull_proxy.cpp \
 image_viewer.cpp \
 interaction_manager.cpp \
 layer.cpp \
 layer_manager.cpp \
+mask_group.cpp \
+mask_module.cpp \
+numerical_entry.cpp \
 optical_flow.cpp \
+optical_flow_module.cpp \
+painter.cpp \
 parameters_ui_builder.cpp \
-signal_watchdog.cpp
+point_picker.cpp \
+rectangular_selection.cpp \
+rectangular_selection_layer.cpp \
+selection_interaction.cpp \
+signal_watchdog.cpp \
+ui_container.cpp \
+view.cpp
 
 OBJ_DIR = bin/
 OBJECTS = $(patsubst %.cpp,%.o,$(SOURCES))
