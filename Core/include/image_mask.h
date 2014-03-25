@@ -38,7 +38,9 @@ public:
 	virtual void set_value(Point p, bool value);
 
     void mask(int x, int y);
+    void mask(Point p);
     void unmask(int x, int y);
+    void unmask(Point p);
     void invert();
 
     vector<Point> get_masked_points() const;
@@ -46,8 +48,8 @@ public:
 	/* I_Iterable_Mask methods */
 	virtual Point first() const;
 	virtual Point last() const;
-	virtual Point next(const Point current) const;
-	virtual Point prev(const Point current) const;
+	virtual Point next(const Point &current) const;
+	virtual Point prev(const Point &current) const;
 
 private:
 	mutable Point _first;

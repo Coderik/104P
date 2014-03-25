@@ -36,16 +36,16 @@ public:
 	 * For each point assigns the distance to the nearest point NOT belonging to the mask
 	 * (masked points receive non-zero distances).
 	 */
-	static Image<float>* calculate(ImageMask &mask, DistanceEnum distance_type = Distance::Euclidean);
+	static Image<float>* calculate(const ImageMask &mask, DistanceEnum distance_type = Distance::Euclidean);
 
 	/**
 	 * For each point assigns the distance to the nearest point belonging to the mask
 	 * (unmasked points receive non-zero distances).
 	 */
-	static Image<float>* calculate_inverse(ImageMask &mask, DistanceEnum distance_type = Distance::Euclidean);
+	static Image<float>* calculate_inverse(const ImageMask &mask, DistanceEnum distance_type = Distance::Euclidean);
 
 private:
-	static Image<float>* calculate_internal(ImageMask &mask, DistanceEnum distance_type, bool direct);
+	static Image<float>* calculate_internal(const ImageMask &mask, DistanceEnum distance_type, bool direct);
 	static inline float f(int x, int x_i, float g_i, DistanceEnum distance_type);
 	static inline int sep(int i, int u, float g_i, float g_u, int inf, DistanceEnum distance_type);
 };

@@ -96,7 +96,8 @@ bool Zach_TVL1_OpticalFlow::calculate(float *I0, float *I1, float *u1, float *u2
 
 	FieldOperations::centered_gradient(I1, I1x, I1y, nx, ny);
 
-	for(int warp = 0; warp < _nwarps; warp++) {
+	bool interrupt = false;
+	for(int warp = 0; warp < _nwarps && !interrupt; warp++) {
 		//calculate the warpings of the target image and its derivatives
 		Warping::warp(I1,  u1, u2, I1w,  nx, ny);
 		Warping::warp(I1x, u1, u2, I1wx, nx, ny);
@@ -116,7 +117,7 @@ bool Zach_TVL1_OpticalFlow::calculate(float *I0, float *I1, float *u1, float *u2
 			rho_c[i] = (I1w[i] - I1wx[i] * u1[i] - I1wy[i] * u2[i] - I0[i]);
 		}
 
-		for(int n_outer = 0; n_outer < _outit; n_outer++) {
+		for(int n_outer = 0; n_outer < _outit && !interrupt; n_outer++) {
 			//estimate the values of the variable (v1, v2)
 			for(int i = 0; i < size; i++) {
 				const float rho = rho_c[i] + (I1wx[i] * u1[i] + I1wy[i] * u2[i]);
@@ -182,11 +183,12 @@ bool Zach_TVL1_OpticalFlow::calculate(float *I0, float *I1, float *u1, float *u2
 				}
 			}
 
-			if (!can_continue())
-				return false;	//TODO: free memory
+			if (!can_continue()) {
+				 interrupt = true;
+			}
 		}
 
-		if (_median > 1) {
+		if (_median > 1 && !interrupt) {
 			Filtering::median(u1, nx, ny, _median);
 			Filtering::median(u2, nx, ny, _median);
 		}
@@ -214,7 +216,7 @@ bool Zach_TVL1_OpticalFlow::calculate(float *I0, float *I1, float *u1, float *u2
 	delete []u2x;
 	delete []u2y;
 
-	return true;
+	return !interrupt;
 }
 
 

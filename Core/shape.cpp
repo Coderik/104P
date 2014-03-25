@@ -55,7 +55,7 @@ bool Shape::operator!= (const Shape &other) const
 
 bool Shape::is_empty() const
 {
-	return size_x <= 0 || size_y <= 0 || size_t <= 0;
+	return size_x == 0 || size_y == 0 || size_t == 0;
 }
 
 

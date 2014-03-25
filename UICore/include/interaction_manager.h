@@ -28,7 +28,7 @@ public:
 
 	Gtk::Box* get_ui();
 	Interaction* get_active();
-	void add_interation(Interaction *interaction);
+	void add_interaction(Interaction *interaction);
 	int get_interactions_amount();
 
 	typedef sigc::signal<void> type_signal_ui_updated;

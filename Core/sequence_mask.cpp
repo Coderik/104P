@@ -28,6 +28,13 @@ SequenceMask::SequenceMask(int size_x, int size_y)
 }
 
 
+SequenceMask::SequenceMask(Shape size)
+	: Sequence<bool>(size, false)
+{
+
+}
+
+
 SequenceMask::SequenceMask(Image<bool> *first_frame)
 	: Sequence<bool>(first_frame)
 {
@@ -36,6 +43,13 @@ SequenceMask::SequenceMask(Image<bool> *first_frame)
 
 
 SequenceMask::SequenceMask(SequenceMask& source)
+	: Sequence<bool>(source)
+{
+
+}
+
+
+SequenceMask::SequenceMask(const SequenceMask& source)
 	: Sequence<bool>(source)
 {
 
@@ -88,9 +102,21 @@ void SequenceMask::mask(int x, int y, int t)
 }
 
 
+void SequenceMask::mask(Point p)
+{
+	set_value(p.x, p.y, p.t, true);
+}
+
+
 void SequenceMask::unmask(int x, int y, int t)
 {
 	set_value(x, y, t, false);
+}
+
+
+void SequenceMask::unmask(Point p)
+{
+	set_value(p.x, p.y, p.t, false);
 }
 
 
@@ -141,7 +167,7 @@ Point SequenceMask::last() const
 }
 
 
-Point SequenceMask::next(const Point current) const
+Point SequenceMask::next(const Point &current) const
 {
 	int from_x = current.x + 1;
 	int from_y = current.y;
@@ -161,7 +187,7 @@ Point SequenceMask::next(const Point current) const
 }
 
 
-Point SequenceMask::prev(const Point current) const
+Point SequenceMask::prev(const Point &current) const
 {
 	int from_x = current.x - 1;
 	int from_y = current.y;

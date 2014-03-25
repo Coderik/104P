@@ -134,9 +134,21 @@ void ImageMask::mask(int x, int y)
 }
 
 
+void ImageMask::mask(Point p)
+{
+	set_value(p.x, p.y, true);
+}
+
+
 void ImageMask::unmask(int x, int y)
 {
 	set_value(x, y, false);
+}
+
+
+void ImageMask::unmask(Point p)
+{
+	set_value(p.x, p.y, false);
 }
 
 
@@ -189,7 +201,7 @@ Point ImageMask::last() const
 }
 
 
-Point ImageMask::next(const Point current) const
+Point ImageMask::next(const Point &current) const
 {
 	int from_x = current.x + 1;
 	for (int y = current.y; y < _size_y; y++) {
@@ -205,7 +217,7 @@ Point ImageMask::next(const Point current) const
 }
 
 
-Point ImageMask::prev(const Point current) const
+Point ImageMask::prev(const Point &current) const
 {
 	int from_x = current.x - 1;
 	for (int y = current.y; y >= 0; y--) {

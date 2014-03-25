@@ -7,30 +7,30 @@ ARCH = -m64
 
 # Add inputs to the build variables 
 SOURCES += \
-coarse_to_fine.cpp \
 color_code.cpp \
 composite_image_mask.cpp \
 distance_transform.cpp \
 field_operations.cpp \
 filtering.cpp \
-gaussian_kernel.cpp \
+gaussian_weights.cpp \
 image_mask.cpp \
 intensity_code.cpp \
 interpolation.cpp \
+io_utility.cpp \
 mask_iterator.cpp \
 optical_flow_container.cpp \
 optical_flow_io.cpp \
 optical_flow_io_legacy.cpp \
 patch.cpp \
-pgm_util.cpp \
 point.cpp \
 range_parameter.cpp \
+sampling.cpp \
 sequence_mask.cpp \
 shape.cpp \
-utility.cpp \
 visualization.cpp \
 warping.cpp \
 zach_TVL1_optical_flow.cpp
+
 
 OBJ_DIR = bin/
 OBJECTS = $(patsubst %.cpp,%.o,$(SOURCES))

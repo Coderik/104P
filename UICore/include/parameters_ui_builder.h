@@ -13,10 +13,12 @@
 #include <gtkmm/frame.h>
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/scale.h>
+#include <gtkmm/spinbutton.h>
 #include <sigc++/sigc++.h>
 #include "i_parameterizable.h"
 #include "i_range_parameter.h"
 #include "i_list_parameter.h"
+#include "numerical_entry.h"
 
 using namespace std;
 

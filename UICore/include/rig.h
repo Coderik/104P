@@ -10,6 +10,7 @@
 
 #include <gdk/gdk.h>
 #include "i_hull.h"
+#include "i_rig.h"
 #include "mouse_event.h"
 
 /*
@@ -18,7 +19,7 @@
  * There ia a default dummy implementation, therefore one can override in derived class
  * only those methods, which are useful for a specific Rig and just ignore the others.
  */
-class Rig
+class Rig : public IRig
 {
 public:
 	virtual ~Rig() {};
@@ -32,7 +33,6 @@ public:
 	virtual void deactivate() {};
 
 	virtual void sequence_changed() {};
-	virtual void optical_flow_changed() {};
 	virtual void current_time_changed() {};
 
 	virtual void key_pressed(GdkEventKey* event) {};

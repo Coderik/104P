@@ -25,6 +25,7 @@ Image<float>* IOUtility::read_pgm_image(const string &name)
 	int c, x_size,y_size,depth;
 
 	if ( fgetc(f) != 'P' ) {
+		fclose(f);
 		return 0;
 	}
 
@@ -33,6 +34,7 @@ Image<float>* IOUtility::read_pgm_image(const string &name)
 	} else if ( c == '5' ) {
 		isBinary = true;
 	} else {
+		fclose(f);
 		return 0;
 	}
 
@@ -98,7 +100,7 @@ void IOUtility::write_pgm_image(const string &name, Image<float> *image)
 string IOUtility::compose_file_name(const string &name, int index, const string &extension)
 {
 	stringstream stream;
-	stream << name << "_" << index << "." << extension;
+	stream << name << "_" << setfill('0') << setw(3) << index << "." << extension;
 	string file_name = stream.str();
 	return file_name;
 }

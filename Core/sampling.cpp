@@ -68,6 +68,27 @@ Image<float>* Sampling::downsample(const Image<float> &in, float factor)
 }
 
 
+Sequence<float>* Sampling::downsample(const Sequence<float> &in, float factor)
+{
+	if (factor <= 0 || factor >= 1.0) {
+		return 0;
+	}
+
+	int sample_size_x = get_sample_size(in.get_size_x(), factor);
+	int sample_size_y = get_sample_size(in.get_size_y(), factor);
+
+	Sequence<float> *result = new Sequence<float>(sample_size_x, sample_size_y);
+	for (int t = 0; t < in.get_size_t(); t++) {
+		Image<float> *in_frame = in.get_frame_as_is(t);
+		Image<float> *out_frame = new Image<float>(sample_size_x, sample_size_y);
+		downsample(in_frame->get_raw_data(), out_frame->get_raw_data(), in.get_size_x(), in.get_size_y(), sample_size_x, sample_size_y);
+		result->add_frame(out_frame);
+		delete in_frame;
+	}
+	return result;
+}
+
+
 // TODO: look for other options
 ImageMask* Sampling::downsample(const ImageMask &in, float factor, float threshold)
 {
@@ -87,6 +108,36 @@ ImageMask* Sampling::downsample(const ImageMask &in, float factor, float thresho
 		for (int x = 0; x < sampled_float_mask->get_size_x(); x++) {
 			if (sampled_float_mask->get_value(x, y) > threshold) {
 				out->mask(x, y);
+			}
+		}
+	}
+
+	delete sampled_float_mask;
+
+	return out;
+}
+
+
+SequenceMask* Sampling::downsample(const SequenceMask &in, float factor, float threshold)
+{
+	// binary to float
+	Sequence<float> float_mask(in.get_size(), 0.0);
+	SequenceMask::iterator it;
+	for (it = in.begin(); it != in.end(); ++it) {
+		float_mask.set_value(it->x, it->y, it->t, 1.0);
+	}
+
+	Sequence<float> *sampled_float_mask = Sampling::downsample(float_mask, factor);
+
+	// float to binary
+	threshold = fmax(0.0, fmin(1.0, threshold));
+	SequenceMask *out = new SequenceMask(sampled_float_mask->get_size());
+	for (int t = 0; t < sampled_float_mask->get_size_t(); t++) {
+		for (int y = 0; y < sampled_float_mask->get_size_y(); y++) {
+			for (int x = 0; x < sampled_float_mask->get_size_x(); x++) {
+				if (sampled_float_mask->get_value(x, y, t) > threshold) {
+					out->mask(x, y, t);
+				}
 			}
 		}
 	}
@@ -146,6 +197,27 @@ Image<float>* Sampling::upsample(const Image<float> &in, float factor)
 	Image<float> *out = new Image<float>(sample_size_x, sample_size_y);
 	upsample(in.get_raw_data(), out->get_raw_data(), in.get_size_x(), in.get_size_y(), sample_size_x, sample_size_y);
 	return out;
+}
+
+
+Sequence<float>* Sampling::upsample(const Sequence<float> &in, float factor)
+{
+	if (factor <= 1.0) {
+		return 0;
+	}
+
+	int sample_size_x = get_sample_size(in.get_size_x(), factor);
+	int sample_size_y = get_sample_size(in.get_size_y(), factor);
+
+	Sequence<float> *result = new Sequence<float>(sample_size_x, sample_size_y);
+	for (int t = 0; t < in.get_size_t(); t++) {
+		Image<float> *in_frame = in.get_frame_as_is(t);
+		Image<float> *out_frame = new Image<float>(sample_size_x, sample_size_y);
+		upsample(in_frame->get_raw_data(), out_frame->get_raw_data(), in.get_size_x(), in.get_size_y(), sample_size_x, sample_size_y);
+		result->add_frame(out_frame);
+		delete in_frame;
+	}
+	return result;
 }
 
 

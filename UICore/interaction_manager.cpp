@@ -28,7 +28,7 @@ Interaction* InteractionManager::get_active()
 }
 
 
-void InteractionManager::add_interation(Interaction *interaction)
+void InteractionManager::add_interaction(Interaction *interaction)
 {
 	_interactions.push_back(interaction);
 
