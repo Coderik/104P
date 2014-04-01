@@ -107,6 +107,47 @@ void Filtering::separate_convolution(Image<float> &in_out, const float *filter_x
 }
 
 
+void Filtering::convolution_2d(const float *in, float *out, int size_x, int size_y, const float *filter_2d, int filter_size_x, int filter_size_y)
+{
+	int filter_center_x = filter_size_x / 2;
+	int filter_center_y = filter_size_y / 2;
+
+	for (int y = 0; y < size_y; y++) {
+		for (int x = 0; x < size_x; x++) {
+			float sum = 0;
+			for (int f_y = 0; f_y < filter_size_y; f_y++) {
+				for (int f_x = 0; f_x < filter_size_x; f_x++) {
+					int f_id = (filter_size_y - 1 - f_y) * filter_size_x + (filter_size_x - 1 - f_x);
+					int aux_x = x - filter_center_x + f_x;
+					int aux_y = y - filter_center_y + f_y;
+
+					// apply symmetric boundary conditions ( | 3 2 1 0 | 0 1 2 3 | 3 2 1 0 | )
+					while ((aux_x < 0) || (aux_x >= size_x)) {
+						if (aux_x < 0) {
+							aux_x = -aux_x - 1;
+						}
+						if (aux_x >= size_x) {
+							aux_x = 2 * size_x - aux_x -1;
+						}
+					}
+					while ((aux_y < 0) || (aux_y >= size_y)) {
+						if (aux_y < 0) {
+							aux_y = -aux_y - 1;
+						}
+						if (aux_y >= size_y) {
+							aux_y = 2 * size_y - aux_y -1;
+						}
+					}
+
+					sum += filter_2d[f_id] * in[aux_y * size_x + aux_x];
+				}
+			}
+			out[y * size_x + x] = sum;
+		}
+	}
+}
+
+
 void Filtering::median(const float *in, float *out, int size_x, int size_y, int window_size)
 {
 	float window[window_size * window_size];
