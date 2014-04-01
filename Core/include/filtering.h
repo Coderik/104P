@@ -26,6 +26,8 @@ public:
 	static Image<float>* separate_convolution(const Image<float> &in, const float *filter_x, const float *filter_y, int filter_x_size, int filter_y_size);
 	static void separate_convolution(Image<float> &in_out, const float *filter_x, const float *filter_y, int filter_x_size, int filter_y_size);
 
+	static void convolution_2d(const float *in, float *out, int size_x, int size_y, const float *filter_2d, int filter_size_x, int filter_size_y);
+
 	static void median(const float *in, float *out, int size_x, int size_y, int window_size);
 	static void median(float *in_out, int size_x, int size_y, int window_size);
 	static Image<float>* median(const Image<float> &in, int window_size);
