@@ -8,16 +8,22 @@
 #ifndef IMAGE_H_
 #define IMAGE_H_
 
+#include <cstring>
 #include <algorithm>
 #include <stdexcept>
-#include "point.h"
-#include "shape.h"
+#include "base_image.h"
 
 // TODO: handle casting to Sequence and back
 typedef unsigned int uint;
 
-template <class T = float>
-class Image {
+using namespace std;
+
+template <class T>
+class ConstImage;
+
+template <class T>
+class Image : public BaseImage<T> {
+friend class ConstImage<T>;
 public:
 	Image();
 	Image(uint size_x, uint size_y);
@@ -29,56 +35,52 @@ public:
 	Image(Shape size, T default_value);
 	Image(Shape size, uint number_of_channels, T default_value);
 	Image(const Image<T> &source);
+	Image(const ConstImage<T> &source);
 	~Image();
 
-	const Image<T>& operator= (const Image<T> &other);
+	Image<T>& operator= (Image<T> &other);
+	Image<T>& operator= (ConstImage<T> &other);
 
 	Image<T> clone() const;
 
-	uint get_size_x() const;
-	uint get_size_y() const;
-	uint get_number_of_channels() const;
-
-	const T& operator() (uint x, uint y) const;
-	const T& operator() (uint x, uint y, uint channel) const;
-	const T& operator() (Point p) const;
-	const T& operator() (Point p, uint channel) const;
 	T& operator() (uint x, uint y);
 	T& operator() (uint x, uint y, uint channel);
 	T& operator() (Point p);
 	T& operator() (Point p, uint channel);
 
-	const T& at(uint x, uint y) const;
-	const T& at(uint x, uint y, uint channel) const;
-	const T& at(Point p) const;
-	const T& at(Point p, uint channel) const;
 	T& at(uint x, uint y);
 	T& at(uint x, uint y, uint channel);
 	T& at(Point p);
 	T& at(Point p, uint channel);
 
-	bool try_get_value(uint x, uint y, T& value) const;
-	bool try_get_value(uint x, uint y, uint channel, T& value) const;
-	bool try_get_value(Point p, T& value) const;
-	bool try_get_value(Point p, uint channel, T& value) const;
-
 	void fill(const T &value);
 
-	const T* raw() const;
 	T* raw();
-private:
-	struct __Ref {
-		int counter;
-	};
+};
 
-	uint _size_x, _size_y;
-	uint _number_of_channels;
-	T* _data;
-	__Ref *_ref;
 
-	void release();
-	inline void init(uint size_x, uint size_y, uint number_of_channels);
-	inline uint get_index(uint x, uint y, uint channel) const;
+
+template <class T = float>
+class ConstImage : public BaseImage<T> {
+friend class Image<T>;
+public:
+	ConstImage();
+	ConstImage(uint size_x, uint size_y);
+	ConstImage(uint size_x, uint size_y, uint number_of_channels);
+	ConstImage(uint size_x, uint size_y, T default_value);
+	ConstImage(uint size_x, uint size_y, uint number_of_channels, T default_value);
+	ConstImage(Shape size);
+	ConstImage(Shape size, uint number_of_channels);
+	ConstImage(Shape size, T default_value);
+	ConstImage(Shape size, uint number_of_channels, T default_value);
+	ConstImage(const ConstImage<T> &source);
+	ConstImage(const Image<T> &source);
+	~ConstImage();
+
+	ConstImage<T>& operator= (ConstImage<T> &other);
+	ConstImage<T>& operator= (Image<T> &other);
+
+	ConstImage<T> clone() const;
 };
 
 // NOTE: include implementation, because Image is a template
