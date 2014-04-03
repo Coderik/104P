@@ -187,10 +187,10 @@ template <class T>
 T& Image<T>::at(uint x, uint y)
 {
 	if (x >= this->_size_x || y >= this->_size_y) {
-		throw std::out_of_range();
+		throw std::out_of_range("");					// TODO: add exception messages everywhere
 	}
 
-	return (T*)(this->_data + Image<T>::get_index(x, y, 0));
+	return this->_data[Image<T>::get_index(x, y, 0)];
 }
 
 
@@ -198,32 +198,32 @@ template <class T>
 T& Image<T>::at(uint x, uint y, uint channel)
 {
 	if (x >= this->_size_x || y >= this->_size_y || channel >= this->_number_of_channels) {
-		throw std::out_of_range();
+		throw std::out_of_range("");
 	}
 
-	return (T*)(this->_data + Image<T>::get_index(x, y, channel));
+	return this->_data[Image<T>::get_index(x, y, channel)];
 }
 
 
 template <class T>
 T& Image<T>::at(Point p)
 {
-	if (p.x >= this->_size_x || p.y >= this->_size_y) {
-		throw std::out_of_range();
+	if (p.x < 0 || p.x >= this->_size_x || p.y < 0 || p.y >= this->_size_y) {
+		throw std::out_of_range("");
 	}
 
-	return (T*)(this->_data + Image<T>::get_index(p.x, p.y, 0));
+	return this->_data[Image<T>::get_index(p.x, p.y, 0)];
 }
 
 
 template <class T>
 T& Image<T>::at(Point p, uint channel)
 {
-	if (p.x >= this->_size_x || p.y >= this->_size_y || channel >= this->_number_of_channels) {
-		throw std::out_of_range();
+	if (p.x < 0 || p.x >= this->_size_x || p.y < 0 || p.y >= this->_size_y || channel >= this->_number_of_channels) {
+		throw std::out_of_range("");
 	}
 
-	return (T*)(this->_data + Image<T>::get_index(p.x, p.y, channel));
+	return this->_data[Image<T>::get_index(p.x, p.y, channel)];
 }
 
 
