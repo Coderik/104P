@@ -10,7 +10,6 @@
 #define IMAGE_VIEWER_H_
 
 #include <vector>
-#include <gdkmm/general.h>
 #include <gtkmm/drawingarea.h>
 #include <gdkmm/pixbuf.h>
 #include <gtkmm/uimanager.h>
@@ -18,6 +17,7 @@
 #include <gtkmm/filechooserdialog.h>
 #include <gtkmm/stock.h>
 #include <cairomm/context.h>
+#include <gdkmm/general.h>
 #include <sigc++/sigc++.h>
 #include "layer_manager.h"
 #include "mouse_event.h"
