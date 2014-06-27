@@ -97,6 +97,12 @@ void IOUtility::write_pgm_image(const string &name, Image<float> *image)
 }
 
 
+void IOUtility::write_float_image(const string &name, Image<float> *image)
+{
+	iio_save_image_float_split(const_cast<char*>(name.data()), image->get_raw_data(), image->get_size_x(), image->get_size_y(), 1);
+}
+
+
 string IOUtility::compose_file_name(const string &name, int index, const string &extension)
 {
 	stringstream stream;
