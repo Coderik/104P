@@ -10,10 +10,12 @@
 #define IMAGE_VIEWER_H_
 
 #include <vector>
+#include <sstream>
 #include <gtkmm/drawingarea.h>
 #include <gdkmm/pixbuf.h>
 #include <gtkmm/uimanager.h>
 #include <gtkmm/menu.h>
+#include <gtkmm/toggleaction.h>
 #include <gtkmm/filechooserdialog.h>
 #include <gtkmm/stock.h>
 #include <cairomm/context.h>
@@ -41,7 +43,12 @@ public:
 	void set_handy_pan_enabled(bool enabled);
 	void set_zoom_by_wheel_enabled(bool enabled);
 
+	void set_mouse_coordinates_enabled(bool enabled);
+	void set_text_color(float r, float g, float b, float a);
+
+	// slots
 	void save_content();
+	void toggle_show_mouse_coordinates();
 
 	typedef sigc::signal<void, MouseEvent> type_mouse_signal;
 	type_mouse_signal signal_left_button_pressed()
@@ -80,9 +87,12 @@ private:
 	int _content_width, _content_height;
 	int _scaled_content_width, _scaled_content_height;
 	int _width, _height;
+	int _mouse_x, _mouse_y;
 	bool _is_common_pan_enabled;
 	bool _is_handy_pan_enabled;
 	bool _is_zoom_by_wheel_enabled;
+	bool _show_mouse_coordinates;
+	float _text_color_r, _text_color_g, _text_color_b, _text_color_a;
 
 	bool _is_dragging;
 	bool _is_panning;
@@ -95,6 +105,7 @@ private:
 	Gtk::Menu *_context_menu;
 	float _scale;
 
+	void draw_mouse_coordinates(const Cairo::RefPtr<Cairo::Context>& cr, int width, int height, int margin, int mouse_x, int mouse_y);
 	void save_content_internal(const string& filename);
 
 	inline bool is_pan_allowed(int x, int y, int margin);

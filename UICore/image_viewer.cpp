@@ -9,6 +9,19 @@
 #include "image_viewer.h"
 
 ImageViewer::ImageViewer()
+: _is_common_pan_enabled(false),
+  _is_handy_pan_enabled(false),
+  _is_zoom_by_wheel_enabled(false),
+  _show_mouse_coordinates(true),
+  _text_color_r(1.0),
+  _text_color_g(0.0),
+  _text_color_b(0.0),
+  _text_color_a(1.0),
+  _is_dragging(false),
+  _is_panning(false),
+  _mouse_x(0),
+  _mouse_y(0),
+  _scale(1)
 {
 	add_events(Gdk::BUTTON_PRESS_MASK);
 	add_events(Gdk::BUTTON_RELEASE_MASK);
@@ -21,6 +34,8 @@ ImageViewer::ImageViewer()
 	action_group->add(Gtk::Action::create("ContextMenu", "Context Menu"));
 	action_group->add(Gtk::Action::create("SaveAction", "Save To PNG"),
 						sigc::mem_fun(*this, &ImageViewer::save_content ));
+	action_group->add(Gtk::ToggleAction::create("ShowCoordinates", "Show Mouse Coordinates"),
+							sigc::mem_fun(*this, &ImageViewer::toggle_show_mouse_coordinates ));
 
 	_menu_manager = Gtk::UIManager::create();
 	_menu_manager->insert_action_group(action_group);
@@ -29,19 +44,14 @@ ImageViewer::ImageViewer()
 		"<ui>"
 		"	<popup name='ContextMenu'>"
 		"		<menuitem action='SaveAction'/>"
+		"		<separator/>"
+		"		<menuitem action='ShowCoordinates'/>"
 		"  </popup>"
 		"</ui>";
 	_menu_manager->add_ui_from_string(ui_info);
 
 	// Keep context menu instance.
 	_context_menu = dynamic_cast<Gtk::Menu*>(_menu_manager->get_widget("/ContextMenu"));
-
-	_scale = 1;
-	_is_common_pan_enabled = false;
-	_is_handy_pan_enabled = false;
-	_is_zoom_by_wheel_enabled = false;
-	_is_dragging = false;
-	_is_panning = false;
 }
 
 
@@ -188,6 +198,28 @@ void ImageViewer::set_zoom_by_wheel_enabled(bool enabled)
 }
 
 
+void ImageViewer::set_mouse_coordinates_enabled(bool enabled)
+{
+	_show_mouse_coordinates = enabled;
+
+	Gtk::Allocation allocation = get_allocation();
+	int width = allocation.get_width();
+	int height = allocation.get_height();
+
+	// NOTE: we assume that coordinates are drawn in the right bottom corner within the rectangle of size 100x30
+	this->get_window()->invalidate_rect(Gdk::Rectangle(width - 100, height - 30, 100, 30), false);
+}
+
+
+void ImageViewer::set_text_color(float r, float g, float b, float a)
+{
+	_text_color_r = max(0.0f, min(1.0f, r));
+	_text_color_g = max(0.0f, min(1.0f, g));
+	_text_color_b = max(0.0f, min(1.0f, b));
+	_text_color_a = max(0.0f, min(1.0f, a));
+}
+
+
 void ImageViewer::save_content()
 {
 	Gtk::FileChooserDialog dialog("Saving content as image...", Gtk::FILE_CHOOSER_ACTION_SAVE);
@@ -213,6 +245,11 @@ void ImageViewer::save_content()
 	}
 }
 
+
+void ImageViewer::toggle_show_mouse_coordinates()
+{
+	set_mouse_coordinates_enabled(!_show_mouse_coordinates);
+}
 
 /* protected */
 
@@ -268,6 +305,18 @@ bool ImageViewer::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 	}
 
 	cr->restore();
+
+	if (_show_mouse_coordinates) {
+		cr->save();
+
+		int pixel_x = (_mouse_x - _content_x) / _scale;
+		int pixel_y = (_mouse_y - _content_y) / _scale;
+
+		cr->set_source_rgba(_text_color_r, _text_color_g, _text_color_b, _text_color_a);
+		draw_mouse_coordinates(cr, _width, _height, 10, pixel_x, pixel_y);
+
+		cr->restore();
+	}
 
 	return true;
 }
@@ -346,6 +395,11 @@ bool ImageViewer::on_motion_notify_event(GdkEventMotion *event)
 		return false;
 	}
 
+	if (_show_mouse_coordinates) {
+		_mouse_x = event->x;
+		_mouse_y = event->y;
+	}
+
 	if (_is_dragging) {
 		if (_is_panning) {
 			// Left mouse button: pan.
@@ -374,16 +428,16 @@ bool ImageViewer::on_motion_notify_event(GdkEventMotion *event)
 		}
 
 		return true;
-	} else {
-		// TODO: get rid of blinking on WIN
-		/*if (is_pan_allowed(event->x, event->y, HANDY_PAN_MARGIN)) {
-			Glib::RefPtr<Gdk::Window> window = this->get_window();
-			Glib::RefPtr<Gdk::Cursor> cursor = Gdk::Cursor::create(Gdk::FLEUR);
-			window->set_cursor(cursor);
-		} else {
-			Glib::RefPtr<Gdk::Window> window = this->get_window();
-			window-> set_cursor();
-		}*/
+	}
+
+	// to update mouse coordinates ask for redrawing, if this has not been done before
+	if (_show_mouse_coordinates) {
+		Gtk::Allocation allocation = get_allocation();
+		int width = allocation.get_width();
+		int height = allocation.get_height();
+
+		// NOTE: we assume that coordinates are drawn in the right bottom corner within the rectangle of size 100x30
+		this->get_window()->invalidate_rect(Gdk::Rectangle(width - 100, height - 30, 100, 30), false);
 
 		return true;
 	}
@@ -409,6 +463,32 @@ bool ImageViewer::on_scroll_event (GdkEventScroll* event)
 
 
 /* private */
+
+void ImageViewer::draw_mouse_coordinates(const Cairo::RefPtr<Cairo::Context>& cr, int width, int height, int margin, int mouse_x, int mouse_y)
+{
+	stringstream stream;
+	stream << mouse_x << " " << mouse_y;
+	string coordinates = stream.str();
+
+	Pango::FontDescription font;	// http://developer.gnome.org/pangomm/unstable/classPango_1_1FontDescription.html
+
+	font.set_family("Monospace");
+	font.set_weight(Pango::WEIGHT_BOLD);
+
+	Glib::RefPtr<Pango::Layout> layout = create_pango_layout(coordinates);	// http://developer.gnome.org/pangomm/unstable/classPango_1_1Layout.html
+
+	layout->set_font_description(font);
+
+	//get the text dimensions (it updates the variables -- by reference)
+	int text_width;
+	int text_height;
+	layout->get_pixel_size(text_width, text_height);
+
+	// Position the text in the middle
+	cr->move_to(width - text_width - margin, height - text_height - margin);
+
+	layout->show_in_cairo_context(cr);
+}
 
 
 void ImageViewer::save_content_internal(const string& filename)
