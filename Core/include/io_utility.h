@@ -29,6 +29,10 @@ public:
 	static Image<float>* read_pgm_image(const string &name);
 	static void write_pgm_image(const string &name, Image<float> *image);
 
+	/// Reading and writing of a grayscale image using IIO.
+	static Image<float>* read_mono_image(const string &name);
+	static void write_mono_image(const string &name, Image<float> *image);
+
 	static void write_float_image(const string &name, Image<float> *image);
 
 	static string compose_file_name(const string &name, int index, const string &extension);
