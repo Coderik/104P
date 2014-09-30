@@ -137,7 +137,7 @@ Image<float> calculate_anisotropic_2d(unsigned int size_x, unsigned int size_y, 
 
 			for (unsigned int s = 0; s < SEGMENTS; s++) {
 				double x = x_a + i + step * s + half_step;
-				double partial = exp(-(pow(x, 2) / pow(sigma_x, 2)));
+				double partial = exp(-(pow(x, 2) / (2 * pow(sigma_x, 2))));
 				value += partial;
 			}
 			values[get_index(i, 0, size_x)] = value;
