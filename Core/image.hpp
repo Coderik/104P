@@ -62,6 +62,33 @@ Image<T>::~Image()
 	}
 }
 
+
+template <class T>
+Image<T>& Image<T>::operator= (const Image<T> &other)
+{
+	// check for self-assignment
+	if(this == &other) {
+		return *this;
+	}
+
+	// finish all deals with the previous data
+	if (_points) {
+		delete[] _points;
+	}
+
+	// assign new data
+	_size_x = other._size_x;
+	_size_y = other._size_y;
+	_points = new T[_size_x * _size_y];
+
+	// TODO: rewrite copying
+	for (int i = 0; i < _size_x * _size_y; i++) {
+		_points[i] = other._points[i];
+	}
+
+	return *this;
+}
+
 /* public */
 template <class T>
 T Image<T>::get_value(int x, int y) const
