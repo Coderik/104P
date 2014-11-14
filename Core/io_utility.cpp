@@ -11,13 +11,13 @@
  * Reads image in PGM format from file with provided path\name
  * to the object of 'Image' class
  */
-Image<float>* IOUtility::read_pgm_image(const string &name)
+Image<float> IOUtility::read_pgm_image(const string &name)
 {
 	/* open file */
 	// COMPATIBILITY: for win 'rb' file mode instead of just 'r'
 	FILE *f = fopen(name.data(),"rb");
 	if( f == NULL ) {
-		return 0;
+		return Image<float>();
 	}
 
 	/* read header */
@@ -26,7 +26,7 @@ Image<float>* IOUtility::read_pgm_image(const string &name)
 
 	if ( fgetc(f) != 'P' ) {
 		fclose(f);
-		return 0;
+		return Image<float>();
 	}
 
 	if( (c=fgetc(f)) == '2' ) {
@@ -35,7 +35,7 @@ Image<float>* IOUtility::read_pgm_image(const string &name)
 		isBinary = true;
 	} else {
 		fclose(f);
-		return 0;
+		return Image<float>();
 	}
 
 	skip_spaces_and_comments(f);
@@ -46,7 +46,7 @@ Image<float>* IOUtility::read_pgm_image(const string &name)
 	fscanf(f,"%d",&depth);
 
 	/* get memory */
-	Image<float> *image = new Image<float>(x_size, y_size);
+	Image<float> image(x_size, y_size);
 
 	/* read data */
 	skip_spaces_and_comments(f);
@@ -54,7 +54,7 @@ Image<float>* IOUtility::read_pgm_image(const string &name)
 	for(int y=0;y<y_size;y++) {
 		for(int x=0;x<x_size;x++) {
 			value = isBinary ? fgetc(f) : get_number(f);
-			image->set_value(x,y,value);
+			image(x,y) = value;
 		}
 	}
 
@@ -69,7 +69,7 @@ Image<float>* IOUtility::read_pgm_image(const string &name)
  * Writes image in PGM format to file with provided path\name
  * from the object of 'Image' class
  */
-void IOUtility::write_pgm_image(const string &name, Image<float> *image)
+void IOUtility::write_pgm_image(const string &name, const ImageFx<float> &image)
 {
 	/* open file */
 	FILE *f = fopen(name.data(),"wb");
@@ -79,15 +79,15 @@ void IOUtility::write_pgm_image(const string &name, Image<float> *image)
 	putc('5', f);
 
 	/* write attributes */
-	int x_size = image->get_size_x();
-	int y_size = image->get_size_y();
+	int x_size = image.size_x();
+	int y_size = image.size_y();
 	fprintf(f, "\n%d %d\n%d\n", x_size, y_size, 255);
 
 	/* write data */
 	char value;
 	for (int y = 0;y < y_size;y++) {
 		for (int x = 0;x < x_size;x++) {
-			value = (char)image->get_value(x,y);
+			value = (char)image(x,y);
 			putc(value, f);
 		}
 	}
@@ -97,7 +97,7 @@ void IOUtility::write_pgm_image(const string &name, Image<float> *image)
 }
 
 
-Image<float>* IOUtility::read_mono_image(const string &name)
+Image<float> IOUtility::read_mono_image(const string &name)
 {
 	int width, height;
 
@@ -105,17 +105,17 @@ Image<float>* IOUtility::read_mono_image(const string &name)
 
 	if (!image_data) {
 		fprintf(stderr, "read_mono_image: cannot read %s\n", name.data());
-		return 0;
+		return Image<float>();
 	}
 
-	Image<float> *image = new Image<float>(width, height);
+	Image<float> image(width, height);
 
 	// copy from image_data to Image<float>
 	for (int y = 0; y < height; y++) {
 		for (int x = 0; x < width; x++) {
 			int index = (y * width + x);
 			float value = image_data[index];
-			image->set_value(x, y, value);
+			image(x, y) = value;
 		}
 	}
 
@@ -125,10 +125,10 @@ Image<float>* IOUtility::read_mono_image(const string &name)
 }
 
 
-void IOUtility::write_mono_image(const string &name, Image<float> *image)
+void IOUtility::write_mono_image(const string &name, const ImageFx<float> &image)
 {
-	int width = image->get_size_x();
-	int height = image->get_size_y();
+	int width = image.size_x();
+	int height = image.size_y();
 
 	float *image_data = new float[width * height];
 
@@ -136,7 +136,7 @@ void IOUtility::write_mono_image(const string &name, Image<float> *image)
 	for (int y = 0; y < height; y++) {
 		for (int x = 0; x < width; x++) {
 			int index = (y * width + x);
-			image_data[index] = image->get_value(x, y);
+			image_data[index] = image(x, y);
 		}
 	}
 
@@ -145,9 +145,9 @@ void IOUtility::write_mono_image(const string &name, Image<float> *image)
 }
 
 
-void IOUtility::write_float_image(const string &name, Image<float> *image)
+void IOUtility::write_float_image(const string &name, const ImageFx<float> &image)
 {
-	iio_save_image_float_split(const_cast<char*>(name.data()), image->get_raw_data(), image->get_size_x(), image->get_size_y(), 1);
+	iio_save_image_float_split(const_cast<char*>(name.data()), const_cast<float*>(image.raw()), image.size_x(), image.size_y(), 1);
 }
 
 

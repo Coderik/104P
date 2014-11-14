@@ -88,12 +88,12 @@ void Filtering::separate_convolution(float *in_out, int size_x, int size_y, cons
 }
 
 
-Image<float>* Filtering::separate_convolution(const Image<float> &in, const float *filter_x, const float *filter_y, int filter_x_size, int filter_y_size)
+Image<float> Filtering::separate_convolution(const ImageFx<float> &in, const float *filter_x, const float *filter_y, int filter_x_size, int filter_y_size)
 {
-	int size_x = in.get_size_x();
-	int size_y = in.get_size_y();
-	Image<float>* output = new Image<float>(size_x, size_y);
-	separate_convolution(in.get_raw_data(), output->get_raw_data(), size_x, size_y, filter_x, filter_y, filter_x_size, filter_y_size);
+	int size_x = in.size_x();
+	int size_y = in.size_y();
+	Image<float> output(size_x, size_y);
+	separate_convolution(in.raw(), output.raw(), size_x, size_y, filter_x, filter_y, filter_x_size, filter_y_size);
 
 	return output;
 }
@@ -101,9 +101,9 @@ Image<float>* Filtering::separate_convolution(const Image<float> &in, const floa
 
 void Filtering::separate_convolution(Image<float> &in_out, const float *filter_x, const float *filter_y, int filter_x_size, int filter_y_size)
 {
-	int size_x = in_out.get_size_x();
-	int size_y = in_out.get_size_y();
-	separate_convolution(in_out.get_raw_data(), size_x, size_y, filter_x, filter_y, filter_x_size, filter_y_size);
+	int size_x = in_out.size_x();
+	int size_y = in_out.size_y();
+	separate_convolution(in_out.raw(), size_x, size_y, filter_x, filter_y, filter_x_size, filter_y_size);
 }
 
 
@@ -201,21 +201,21 @@ void Filtering::median(float *in_out, int size_x, int size_y, int window_size)
 }
 
 
-Image<float>* Filtering::median(const Image<float> &in, int window_size)
+Image<float> Filtering::median(const ImageFx<float> &in, int window_size)
 {
-	int size_x = in.get_size_x();
-	int size_y = in.get_size_y();
-	Image<float>* output = new Image<float>(size_x, size_y);
-	median(in.get_raw_data(), output->get_raw_data(), size_x, size_y, window_size);
+	int size_x = in.size_x();
+	int size_y = in.size_y();
+	Image<float> output(size_x, size_y);
+	median(in.raw(), output.raw(), size_x, size_y, window_size);
 
 	return output;
 }
 
 void Filtering::median(Image<float> &in_out, int window_size)
 {
-	int size_x = in_out.get_size_x();
-	int size_y = in_out.get_size_y();
-	median(in_out.get_raw_data(), size_x, size_y, window_size);
+	int size_x = in_out.size_x();
+	int size_y = in_out.size_y();
+	median(in_out.raw(), size_x, size_y, window_size);
 }
 
 
@@ -223,7 +223,7 @@ void Filtering::gaussian_smoothing(const float *in, float *out, int size_x, int 
 {
 	float sigma = kernel_size / 6;	// TODO: get rid of magic number
 	Image<float> kernel = GaussianWeights::calculate_1d(kernel_size, sigma);
-	float* kernel_raw = kernel.get_raw_data();
+	float* kernel_raw = kernel.raw();
 	separate_convolution(in, out, size_x, size_y, kernel_raw, kernel_raw, kernel_size, kernel_size);
 }
 

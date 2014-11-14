@@ -7,9 +7,9 @@
 
 #include "interpolation.h"
 
-float Interpolation::bilinear(const Image<float> &input, float x, float y, BoundaryConditionEnum boundary_conditionn)
+float Interpolation::bilinear(const ImageFx<float> &input, float x, float y, BoundaryConditionEnum boundary_conditionn)
 {
-	return bilinear((float*)input.get_raw_data(), input.get_size_x(), input.get_size_y(), x, y, boundary_conditionn);
+	return bilinear((float*)input.raw(), input.size_x(), input.size_y(), x, y, boundary_conditionn);
 }
 
 
@@ -93,9 +93,9 @@ float Interpolation::bilinear(const float *input, int size_x, int size_y, float 
 	return result;
 }
 
-float Interpolation::bicubic(const Image<float> &input, float x, float y, BoundaryConditionEnum boundary_conditionn)
+float Interpolation::bicubic(const ImageFx<float> &input, float x, float y, BoundaryConditionEnum boundary_conditionn)
 {
-	return bicubic((float*)input.get_raw_data(), input.get_size_x(), input.get_size_y(), x, y, boundary_conditionn);
+	return bicubic((float*)input.raw(), input.size_x(), input.size_y(), x, y, boundary_conditionn);
 }
 
 

@@ -10,7 +10,7 @@
 MaskIterator::MaskIterator()
 {
 	_mask = 0;
-	_current = Point(-1, -1, -1); // TODO: add 'empty' static property to Point
+	_current = Point::empty;
 	_is_reverse = false;
 }
 

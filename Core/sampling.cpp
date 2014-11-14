@@ -17,7 +17,7 @@ void Sampling::downsample(const float* in, float* out, uint size_x, uint size_y,
 	float sigma = sqrt(factor_x / 2);
 	int kernel_size = 2 * round(1.5 * sigma) + 1;
 	Image<float> kernel = GaussianWeights::calculate_1d(kernel_size, sigma);
-	const float *filter = kernel.get_raw_data();
+	const float *filter = kernel.raw();
 
 	// smooth image
 	float *buffer = new float[size_x * size_y];
@@ -42,107 +42,107 @@ void Sampling::downsample(const float* in, float* out, uint size_x, uint size_y,
 }
 
 
-Image<float>* Sampling::downsample(const Image<float> &in, uint sample_size_x, uint sample_size_y)
+Image<float> Sampling::downsample(const ImageFx<float> &in, uint sample_size_x, uint sample_size_y)
 {
-	if (sample_size_x >= (uint)in.get_size_x() || sample_size_y >= (uint)in.get_size_y()) {
-		return 0;
+	if (sample_size_x >= (uint)in.size_x() || sample_size_y >= (uint)in.size_y()) {
+		return Image<float>();
 	}
 
-	Image<float> *out = new Image<float>(sample_size_x, sample_size_y);
-	downsample(in.get_raw_data(), out->get_raw_data(), in.get_size_x(), in.get_size_y(), sample_size_x, sample_size_y);
+	Image<float> out(sample_size_x, sample_size_y);
+	downsample(in.raw(), out.raw(), in.size_x(), in.size_y(), sample_size_x, sample_size_y);
 	return out;
 }
 
-Image<float>* Sampling::downsample(const Image<float> &in, float factor)
+Image<float> Sampling::downsample(const ImageFx<float> &in, float factor)
 {
 	if (factor <= 0 || factor >= 1.0) {
-		return 0;
+		return Image<float>();
 	}
 
-	int sample_size_x = get_sample_size(in.get_size_x(), factor);
-	int sample_size_y = get_sample_size(in.get_size_y(), factor);
+	int sample_size_x = get_sample_size(in.size_x(), factor);
+	int sample_size_y = get_sample_size(in.size_y(), factor);
 
-	Image<float> *out = new Image<float>(sample_size_x, sample_size_y);
-	downsample(in.get_raw_data(), out->get_raw_data(), in.get_size_x(), in.get_size_y(), sample_size_x, sample_size_y);
+	Image<float> out(sample_size_x, sample_size_y);
+	downsample(in.raw(), out.raw(), in.size_x(), in.size_y(), sample_size_x, sample_size_y);
 	return out;
 }
 
 
-Sequence<float>* Sampling::downsample(const Sequence<float> &in, float factor)
+Sequence<float> Sampling::downsample(const SequenceFx<float> &in, float factor)
 {
 	if (factor <= 0 || factor >= 1.0) {
-		return 0;
+		return Image<float>();
 	}
 
-	int sample_size_x = get_sample_size(in.get_size_x(), factor);
-	int sample_size_y = get_sample_size(in.get_size_y(), factor);
+	int sample_size_x = get_sample_size(in.size_x(), factor);
+	int sample_size_y = get_sample_size(in.size_y(), factor);
 
-	Sequence<float> *result = new Sequence<float>(sample_size_x, sample_size_y);
-	for (int t = 0; t < in.get_size_t(); t++) {
-		Image<float> *in_frame = in.get_frame_as_is(t);
-		Image<float> *out_frame = new Image<float>(sample_size_x, sample_size_y);
-		downsample(in_frame->get_raw_data(), out_frame->get_raw_data(), in.get_size_x(), in.get_size_y(), sample_size_x, sample_size_y);
-		result->add_frame(out_frame);
-		delete in_frame;
+	Sequence<float> result(sample_size_x, sample_size_y);
+	for (uint t = 0; t < in.size_t(); t++) {
+		ImageFx<float> in_frame = in.frame(t);
+		Image<float> out_frame(sample_size_x, sample_size_y);
+		downsample(in_frame.raw(), out_frame.raw(), in.size_x(), in.size_y(), sample_size_x, sample_size_y);
+		result.add(out_frame);
 	}
 	return result;
 }
 
 
 // TODO: look for other options
-ImageMask* Sampling::downsample(const ImageMask &in, float factor, float threshold)
+Mask Sampling::downsample(const MaskFx &in, float factor, float threshold)
 {
 	// binary to float
-	Image<float> float_mask(in.get_size_x(), in.get_size_y(), 0.0);
-	ImageMask::iterator it;
+	Image<float> float_mask(in.size_x(), in.size_y(), 0.0f);
+	Mask::iterator it;
 	for (it = in.begin(); it != in.end(); ++it) {
-		float_mask.set_value(*it, 1.0);
+		float_mask(*it) = 1.0;
 	}
 
-	Image<float> *sampled_float_mask = Sampling::downsample(float_mask, factor);
+	Image<float> sampled_float_mask = Sampling::downsample(float_mask, factor);
 
 	// float to binary
 	threshold = fmax(0.0, fmin(1.0, threshold));
-	ImageMask *out = new ImageMask(sampled_float_mask->get_size_x(), sampled_float_mask->get_size_y());
-	for (int y = 0; y < sampled_float_mask->get_size_y(); y++) {
-		for (int x = 0; x < sampled_float_mask->get_size_x(); x++) {
-			if (sampled_float_mask->get_value(x, y) > threshold) {
-				out->mask(x, y);
+	Mask out(sampled_float_mask.size_x(), sampled_float_mask.size_y());
+	for (uint y = 0; y < sampled_float_mask.size_y(); y++) {
+		for (uint x = 0; x < sampled_float_mask.size_x(); x++) {
+			if (sampled_float_mask(x, y) > threshold) {
+				out.mask(x, y);
 			}
 		}
 	}
-
-	delete sampled_float_mask;
 
 	return out;
 }
 
 
-SequenceMask* Sampling::downsample(const SequenceMask &in, float factor, float threshold)
+MaskSequence Sampling::downsample(const MaskSequenceFx &in, float factor, float threshold)
 {
 	// binary to float
-	Sequence<float> float_mask(in.get_size(), 0.0);
-	SequenceMask::iterator it;
-	for (it = in.begin(); it != in.end(); ++it) {
-		float_mask.set_value(it->x, it->y, it->t, 1.0);
+	Sequence<float> float_mask(in.size(), 0.0);
+	Mask::iterator it;
+	for (uint t = 0; t < in.size_t(); t++) {
+		Image<float> frame = float_mask.frame(t);
+		for (it = in[t].begin(); it != in[t].end(); ++it) {
+			frame(*it) = 1.0;
+		}
 	}
 
-	Sequence<float> *sampled_float_mask = Sampling::downsample(float_mask, factor);
+	Sequence<float> sampled_float_mask = Sampling::downsample(float_mask, factor);
 
 	// float to binary
 	threshold = fmax(0.0, fmin(1.0, threshold));
-	SequenceMask *out = new SequenceMask(sampled_float_mask->get_size());
-	for (int t = 0; t < sampled_float_mask->get_size_t(); t++) {
-		for (int y = 0; y < sampled_float_mask->get_size_y(); y++) {
-			for (int x = 0; x < sampled_float_mask->get_size_x(); x++) {
-				if (sampled_float_mask->get_value(x, y, t) > threshold) {
-					out->mask(x, y, t);
+	MaskSequence out(sampled_float_mask.size());
+	for (uint t = 0; t < sampled_float_mask.size_t(); t++) {
+		Image<float> sampled_float_mask_frame = sampled_float_mask.frame(t);
+		Mask out_frame = out.frame(t);
+		for (uint y = 0; y < sampled_float_mask.size_y(); y++) {
+			for (uint x = 0; x < sampled_float_mask.size_x(); x++) {
+				if (sampled_float_mask_frame(x, y) > threshold) {
+					out_frame.mask(x, y);
 				}
 			}
 		}
 	}
-
-	delete sampled_float_mask;
 
 	return out;
 }
@@ -173,50 +173,52 @@ void Sampling::upsample(const float* in, float* out, uint size_x, uint size_y, u
 }
 
 
-Image<float>* Sampling::upsample(const Image<float> &in, uint sample_size_x, uint sample_size_y)
+Image<float> Sampling::upsample(const ImageFx<float> &in, uint sample_size_x, uint sample_size_y)
 {
-	if (sample_size_x <= (uint)in.get_size_x() || sample_size_y <= (uint)in.get_size_y()) {
-		return 0;
+	if (sample_size_x <= in.size_x() || sample_size_y <= in.size_y()) {
+		return Image<float>();
 	}
 
-	Image<float> *out = new Image<float>(sample_size_x, sample_size_y);
-	upsample(in.get_raw_data(), out->get_raw_data(), in.get_size_x(), in.get_size_y(), sample_size_x, sample_size_y);
+	Image<float> out(sample_size_x, sample_size_y);
+	upsample(in.raw(), out.raw(), in.size_x(), in.size_y(), sample_size_x, sample_size_y);
+
 	return out;
 }
 
 
-Image<float>* Sampling::upsample(const Image<float> &in, float factor)
+Image<float> Sampling::upsample(const ImageFx<float> &in, float factor)
 {
 	if (factor <= 1.0) {
-		return 0;
+		return Image<float>();
 	}
 
-	int sample_size_x = get_sample_size(in.get_size_x(), factor);
-	int sample_size_y = get_sample_size(in.get_size_y(), factor);
+	int sample_size_x = get_sample_size(in.size_x(), factor);
+	int sample_size_y = get_sample_size(in.size_y(), factor);
 
-	Image<float> *out = new Image<float>(sample_size_x, sample_size_y);
-	upsample(in.get_raw_data(), out->get_raw_data(), in.get_size_x(), in.get_size_y(), sample_size_x, sample_size_y);
+	Image<float> out(sample_size_x, sample_size_y);
+	upsample(in.raw(), out.raw(), in.size_x(), in.size_y(), sample_size_x, sample_size_y);
+
 	return out;
 }
 
 
-Sequence<float>* Sampling::upsample(const Sequence<float> &in, float factor)
+Sequence<float> Sampling::upsample(const SequenceFx<float> &in, float factor)
 {
 	if (factor <= 1.0) {
-		return 0;
+		return Image<float>();
 	}
 
-	int sample_size_x = get_sample_size(in.get_size_x(), factor);
-	int sample_size_y = get_sample_size(in.get_size_y(), factor);
+	int sample_size_x = get_sample_size(in.size_x(), factor);
+	int sample_size_y = get_sample_size(in.size_y(), factor);
 
-	Sequence<float> *result = new Sequence<float>(sample_size_x, sample_size_y);
-	for (int t = 0; t < in.get_size_t(); t++) {
-		Image<float> *in_frame = in.get_frame_as_is(t);
-		Image<float> *out_frame = new Image<float>(sample_size_x, sample_size_y);
-		upsample(in_frame->get_raw_data(), out_frame->get_raw_data(), in.get_size_x(), in.get_size_y(), sample_size_x, sample_size_y);
-		result->add_frame(out_frame);
-		delete in_frame;
+	Sequence<float> result(sample_size_x, sample_size_y);
+	for (uint t = 0; t < in.size_t(); t++) {
+		ImageFx<float> in_frame = in.frame(t);
+		Image<float> out_frame(sample_size_x, sample_size_y);
+		upsample(in_frame.raw(), out_frame.raw(), in.size_x(), in.size_y(), sample_size_x, sample_size_y);
+		result.add(out_frame);
 	}
+
 	return result;
 }
 

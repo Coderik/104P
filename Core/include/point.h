@@ -12,6 +12,8 @@ struct Point
 {
 	int x, y, t;
 
+	static Point empty;
+
 	Point();
 	Point(int x, int y);
 	Point(int x, int y, int t);
@@ -23,14 +25,13 @@ struct Point
 	Point& operator-= (const Point &p);
 	const Point operator+ (const Point &p) const;
 	const Point operator- (const Point &p) const;
+	const Point spatial_add (const Point &p) const;
+	const Point spatial_subtract (const Point &p) const;
 
 	friend inline bool operator< (const Point& lhs, const Point& rhs);
 	friend inline bool operator> (const Point& lhs, const Point& rhs);
 	friend inline bool operator<=(const Point& lhs, const Point& rhs);
 	friend inline bool operator>=(const Point& lhs, const Point& rhs);
-
-	const Point spatial_add (const Point &p) const;
-	const Point spatial_subtract (const Point &p) const;
 };
 
 // NOTE: definitions are in header in order to overload two argument versions.

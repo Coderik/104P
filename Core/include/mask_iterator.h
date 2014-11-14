@@ -11,16 +11,14 @@
 #include <memory>
 #include "i_iterable_mask.h"
 
+/**
+ * STL-like bidirectional input (constant) iterator for masked points.
+ */
 class MaskIterator
 { 
 public:
-    typedef std::allocator<Point>::difference_type	difference_type;
-    typedef std::allocator<Point>::value_type		value_type;
-    typedef std::allocator<Point>::reference		reference;
-    typedef std::allocator<Point>::pointer			pointer;
     typedef std::allocator<Point>::const_reference	const_reference;
     typedef std::allocator<Point>::const_pointer	const_pointer;
-    typedef std::bidirectional_iterator_tag			iterator_category;
 
 	MaskIterator();
     MaskIterator(const IIterableMask *mask, Point current, bool reverse = false);
@@ -30,25 +28,14 @@ public:
     MaskIterator& operator=(const MaskIterator& source);
     bool operator==(const MaskIterator& other) const;
     bool operator!=(const MaskIterator& other) const;
-    //bool operator>(const Mask_Iterator&) const;						// Random Access
-    //bool operator<(const Mask_Iterator&) const;						// Random Access
-    //bool operator<=(const Mask_Iterator&) const;						// Random Access
-    //bool operator>=(const Mask_Iterator&) const;						// Random Access
 
     MaskIterator& operator++();
     MaskIterator operator++(int);
     MaskIterator& operator--();
     MaskIterator operator--(int);
-    //Mask_Iterator& operator+=(size_type);								// Random Access
-    //Mask_Iterator operator+(size_type) const;							// Random Access
-    //friend Mask_Iterator operator+(size_type, const Mask_Iterator&);	// Random Access
-    //Mask_Iterator& operator-=(size_type);								// Random Access            
-    //Mask_Iterator operator-(size_type) const;							// Random Access
-    //difference_type operator-(Mask_Iterator) const;					// Random Access
 
     const const_reference operator*() const;
     const const_pointer operator->() const;
-    //reference operator[](size_type) const;							// Random Access
 
 private:
 	const IIterableMask *_mask;

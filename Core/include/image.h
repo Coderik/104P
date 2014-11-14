@@ -1,53 +1,165 @@
 /*
  * image.h
  *
- *  Created on: Nov 5, 2012
+ *  Created on: March 26, 2014
  *      Author: Vadim Fedorov
  */
 
 #ifndef IMAGE_H_
 #define IMAGE_H_
 
+#include <cstring>
 #include <algorithm>
-#include "shape.h"
+#include <stdexcept>
 #include "point.h"
+#include "shape.h"
 
+using namespace std;
+
+template <class T>
+class Image;	// forward declaration
+
+/**
+ * Container for a 2d image with point type T. Manages memory internally by
+ * references counting. Constructing from the same type and assignment of
+ * a value of the same type lead to a data sharing. Method clone() should be
+ * used for explicit deep copy invocation.
+ *
+ * @note By design class provides no capabilities for changing its data,
+ * therefore, 'Fixed' here should be considered as 'Immutable'.
+ */
 template <class T = float>
-class Image
+class ImageFx
+{
+friend class Image<T>;
+public:
+	ImageFx();
+	ImageFx(uint size_x, uint size_y);
+	ImageFx(uint size_x, uint size_y, uint number_of_channels);
+	ImageFx(uint size_x, uint size_y, T default_value);
+	ImageFx(uint size_x, uint size_y, uint number_of_channels, T default_value);
+	ImageFx(Shape size);
+	ImageFx(Shape size, uint number_of_channels);
+	ImageFx(Shape size, T default_value);
+	ImageFx(Shape size, uint number_of_channels, T default_value);
+	ImageFx(const ImageFx<T> &source);				// without data copying, ref++
+	ImageFx(const Image<T> &source);				// without data copying, ref++
+	virtual ~ImageFx();
+
+	ImageFx<T>& operator= (const ImageFx<T> &other);		// without data copying, ref++
+	ImageFx<T>& operator= (const Image<T> &other);			// without data copying, ref++
+
+	/// Is current image not empty.
+	operator bool() const;
+	bool is_empty() const;
+
+	uint size_x() const;
+	uint size_y() const;
+	Shape size() const;
+	uint number_of_channels() const;
+
+	/// Returns read-only value without range checking.
+	const T& operator() (uint x, uint y) const;
+	const T& operator() (uint x, uint y, uint channel) const;
+	const T& operator() (Point p) const;
+	const T& operator() (Point p, uint channel) const;
+
+	/// Returns read-only value with range checking.
+	/// Throws std::out_of_range exception, if out of range.
+	const T& at(uint x, uint y) const;
+	const T& at(uint x, uint y, uint channel) const;
+	const T& at(Point p) const;
+	const T& at(Point p, uint channel) const;
+
+	/// Checks if all indexes are in range and modifies the value parameter.
+	bool try_get_value(uint x, uint y, T& value) const;
+	bool try_get_value(uint x, uint y, uint channel, T& value) const;
+	bool try_get_value(Point p, T& value) const;
+	bool try_get_value(Point p, uint channel, T& value) const;
+
+	/// Returns pointer to internal data.
+	const T* raw() const;
+
+	/// Invokes deep copy.
+	ImageFx<T> clone() const;
+
+protected:
+	struct __Ref {
+		int counter;
+	};
+
+	uint _size_x, _size_y;
+	uint _number_of_channels;
+	T* _data;
+	__Ref *_ref;
+
+	inline void init(uint size_x, uint size_y, uint number_of_channels);
+	void fill_internal(const T &value);
+
+	void release() const;
+	virtual void destroy() const;
+
+	inline uint index(uint x, uint y, uint channel) const;
+};
+
+
+/**
+ * Container for a 2d image with point type T. Manages memory internally by
+ * references counting. Constructing from the same type and assignment of
+ * a value of the same type lead to a data sharing. Method clone() should be
+ * used for explicit deep copy invocation.
+ *
+ * @note Extends the FixedImage<T> class with the data modification capabilities.
+ */
+template <class T>
+class Image : public ImageFx<T>
 {
 public:
 	Image();
-	Image(int size_x,int size_y);
-	Image(int size_x,int size_y, T value);
-	Image(const Image &source);
+	Image(uint size_x, uint size_y);
+	Image(uint size_x, uint size_y, uint number_of_channels);
+	Image(uint size_x, uint size_y, T default_value);
+	Image(uint size_x, uint size_y, uint number_of_channels, T default_value);
+	Image(Shape size);
+	Image(Shape size, uint number_of_channels);
+	Image(Shape size, T default_value);
+	Image(Shape size, uint number_of_channels, T default_value);
+	Image(const Image<T> &source);				// without data copying, ref++
+	Image(const ImageFx<T> &source);			// deep copy
 	virtual ~Image();
 
-	Image<T>& operator= (const Image<T> &other);
+	Image<T>& operator= (const Image<T> &other);			// without data copying, ref++
+	Image<T>& operator= (const ImageFx<T> &other);			// deep copy
 
-	int get_size_x() const;
-	int get_size_y() const;
-	Shape get_size() const;
-	void set_coordinates(Point coordinates);
-	Point get_coordinates();
-	virtual T get_value(int x, int y) const;
-	virtual T get_value(Point p) const;
-	bool try_get_value(int x, int y, T& value) const;
-	virtual void set_value(int x, int y, T value);
-	virtual void set_value(Point p, T value);
-	void fill(T value);
-	Image<T>* get_patch_between_points(int a_x, int a_y, int b_x, int b_y);
-	Image<T>* get_patch_around_point(int center_x, int center_y, int size_x, int size_y);
-	Image<T>* get_patch_around_point(int center_x, int center_y, int size);
-	int get_raw_data_length() const;
-	const T* get_raw_data() const;
-	T* get_raw_data();
+	// prevent hiding of const versions of these methods
+	using ImageFx<T>::operator();
+	using ImageFx<T>::at;
+	using ImageFx<T>::raw;
+
+	/// Returns a reference to the element without range checking.
+	T& operator() (uint x, uint y);
+	T& operator() (uint x, uint y, uint channel);
+	T& operator() (Point p);
+	T& operator() (Point p, uint channel);
+
+	/// Returns a reference to the element with range checking.
+	/// Throws std::out_of_range exception, if out of range.
+	T& at(uint x, uint y);
+	T& at(uint x, uint y, uint channel);
+	T& at(Point p);
+	T& at(Point p, uint channel);
+
+	/// Assigns a given value to all elements.
+	void fill(const T &value);
+
+	/// Returns pointer to internal data.
+	T* raw();
+
+	/// Invokes deep copy.
+	Image<T> clone() const;
+
 protected:
-	int _size_x, _size_y;
-	T *_points;
-	Point _coordinates;
-	inline int get_index(int x, int y) const;
-	inline bool is_odd_number(int number);
-	Image<T>* get_patch_internal(int a_x, int a_y, int b_x, int b_y);
+	virtual void destroy() const;
 };
 
 // NOTE: include implementation, because Image is a template

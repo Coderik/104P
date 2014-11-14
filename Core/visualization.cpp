@@ -7,44 +7,49 @@
 
 #include "visualization.h"
 
-Sequence<float>* Visualization::mask_to_greyscale(const SequenceMask &mask)
+Sequence<float> Visualization::mask_to_greyscale(const MaskSequenceFx &mask)
 {
-	Shape size = mask.get_size();
-	Sequence<float> *result = new Sequence<float>(size.size_x, size.size_y, size.size_t, 0.0);
+	Shape size = mask.size();
+	Sequence<float> result(size, 0.0);
 
-	SequenceMask::iterator it;
-	for (it = mask.begin(); it != mask.end(); ++it) {
-		result->set_value(it->x, it->y, it->t, 255.0);
+	Mask::iterator it;
+	for (uint t = 0; t < size.size_t; t++) {
+		Image<float> result_frame = result.frame(t);
+		for (it = mask[t].begin(); it != mask[t].end(); ++it) {
+			result_frame(*it) = 255.0;
+		}
 	}
 
 	return result;
 }
 
 
-Image<float>* Visualization::mask_to_greyscale(const ImageMask &mask)
+Image<float> Visualization::mask_to_greyscale(const MaskFx &mask)
 {
-	Shape size = mask.get_size();
-	Image<float> *result = new Image<float>(size.size_x, size.size_y, 0.0);
+	Shape size = mask.size();
+	Image<float> result(size, 0.0f);
 
-	ImageMask::iterator it;
+	Mask::iterator it;
 	for (it = mask.begin(); it != mask.end(); ++it) {
-		result->set_value(it->x, it->y, 255.0);
+		result(*it) = 255.0;
 	}
 
 	return result;
 }
 
 
-Sequence<float>* Visualization::probability_to_greyscale(const Sequence<float> &probabilities)
+Sequence<float> Visualization::probability_to_greyscale(const SequenceFx<float> &probabilities)
 {
-	Shape size = probabilities.get_size();
-	Sequence<float> *result = new Sequence<float>(size.size_x, size.size_y, size.size_t, 0.0);
+	Shape size = probabilities.size();
+	Sequence<float> result(size, 0.0f);
 
-	for (unsigned int t = 0; t < size.size_t; t++) {
-		for (unsigned int y = 0; y < size.size_y; y++) {
-			for (unsigned int x = 0; x < size.size_x; x++) {
-				float value = fmax(0.0, fmin(1.0, probabilities.get_value(x, y, t)));
-				result->set_value(x, y, t, 255.0 * value);
+	for (uint t = 0; t < size.size_t; t++) {
+		ImageFx<float> probabilities_frame = probabilities.frame(t);
+		Image<float> result_frame = result.frame(t);
+		for (uint y = 0; y < size.size_y; y++) {
+			for (uint x = 0; x < size.size_x; x++) {
+				float value = fmax(0.0, fmin(1.0, probabilities_frame(x, y)));
+				result_frame(x, y) = 255.0 * value;
 			}
 		}
 	}
@@ -53,15 +58,15 @@ Sequence<float>* Visualization::probability_to_greyscale(const Sequence<float> &
 }
 
 
-Image<float>* Visualization::probability_to_greyscale(const Image<float> &probabilities)
+Image<float> Visualization::probability_to_greyscale(const ImageFx<float> &probabilities)
 {
-	Shape size = probabilities.get_size();
-	Image<float> *result = new Image<float>(size.size_x, size.size_y, 0.0);
+	Shape size = probabilities.size();
+	Image<float> result(size, 0.0f);
 
-	for (unsigned int y = 0; y < size.size_y; y++) {
-		for (unsigned int x = 0; x < size.size_x; x++) {
-			float value = fmax(0.0, fmin(1.0, probabilities.get_value(x, y)));
-			result->set_value(x, y, 255.0 * value);
+	for (uint y = 0; y < size.size_y; y++) {
+		for (uint x = 0; x < size.size_x; x++) {
+			float value = fmax(0.0, fmin(1.0, probabilities(x, y)));
+			result(x, y) = 255.0 * value;
 		}
 	}
 

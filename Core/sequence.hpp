@@ -1,385 +1,375 @@
 /*
- * Sequence.cpp
+ * sequence.hpp
  *
- *  Created on: Nov 26, 2012
- *      Author: Vadim Fedorov
+ *  Created on: Nov 11, 2014
+ *      Author: upf
  */
 
-template <class T>
-Sequence<T>::Sequence(int size_x, int size_y, int size_t, T value)
+/* Sequence */
+
+template<class T>
+Sequence<T>::Sequence()
 {
-	_size_x = size_x;
-	_size_y = size_y;
-	_size_t = size_t;
 
-	_frames = vector<Image<T>* >(_size_t);
-
-	fill(value);
 }
 
 
-template <class T>
-Sequence<T>::Sequence(int size_x,int size_y,int size_t)
-{
-	_size_x = size_x;
-	_size_y = size_y;
-	_size_t = size_t;
-
-	_frames = vector<Image<T>* >(_size_t, (Image<T>*)0);
-}
-
-
-// TODO: test it
-template <class T>
-Sequence<T>::Sequence(int size_x,int size_y)
-{
-	_size_x = size_x;
-	_size_y = size_y;
-	_size_t = 0;
-
-	_frames = vector<Image<T>* >();
-}
-
-
-template <class T>
-Sequence<T>::Sequence(Shape size, T value)
-{
-	_size_x = size.size_x;
-	_size_y = size.size_y;
-	_size_t = size.size_t;
-
-	_frames = vector<Image<T>* >(_size_t);
-
-	fill(value);
-}
-
-
-template <class T>
+template<class T>
 Sequence<T>::Sequence(Shape size)
+: _size(size)
 {
-	_size_x = size.size_x;
-	_size_y = size.size_y;
-	_size_t = size.size_t;
+	_frames.reserve(size.size_t);
 
-	_frames = vector<Image<T>* >(_size_t, (Image<T>*)0);
-}
-
-
-template <class T>
-Sequence<T>::Sequence(Image<T> *first_frame)
-{
-	_size_x = first_frame->get_size_x();
-	_size_y = first_frame->get_size_y();
-	_size_t = 1;
-
-	_frames = vector<Image<T>* >(1, first_frame);
-}
-
-template <class T>
-Sequence<T>::Sequence(const Sequence<T>& source)
-{
-	_size_x = source.get_size_x();
-	_size_y = source.get_size_y();
-	_size_t = source.get_size_t();
-
-	_frames = vector<Image<T>* >(_size_t, (Image<T>*)0);
-	for (int i = 0; i < _size_t; i++) {
-		_frames[i] = source.get_frame_as_is(i);
+	for (int i = 0; i < size.size_t; i++) {
+		_frames.push_back(Image<T>(size));
 	}
 }
 
 
-template <class T>
+template<class T>
+Sequence<T>::Sequence(Shape size, T default_value)
+: _size(size)
+{
+	_frames.reserve(size.size_t);
+
+	for (int i = 0; i < size.size_t; i++) {
+		_frames.push_back(Image<T>(size, default_value));
+	}
+}
+
+
+template<class T>
+Sequence<T>::Sequence(uint size_x, uint size_y)
+: _size(size_x, size_y, 0)
+{
+
+}
+
+
+template<class T>
+Sequence<T>::Sequence(uint size_x, uint size_y, uint size_t)
+: _size(size_x, size_y, size_t)
+{
+	_frames.reserve(size_t);
+
+	for (int i = 0; i < size_t; i++) {
+		_frames.push_back(Image<T>(size));
+	}
+}
+
+
+template<class T>
+Sequence<T>::Sequence(uint size_x, uint size_y, uint size_t, T default_value)
+: _size(size_x, size_y, size_t)
+{
+	_frames.reserve(size_t);
+
+	for (int i = 0; i < size_t; i++) {
+		_frames.push_back(Image<T>(_size, default_value));
+	}
+}
+
+
+template<class T>
+Sequence<T>::Sequence(const Image<T> &frame, uint size_t)
+{
+	_frames.reserve(size_t);
+	_frames.push_back(frame);
+
+	_size = frame.size();
+	_size.size_t = 1;
+}
+
+
+template<class T>
+Sequence<T>::Sequence(const ImageFx<T> &frame, uint size_t)
+{
+	_frames.reserve(size_t);
+	_frames.push_back(frame);
+
+	_size = frame.size();
+	_size.size_t = 1;
+}
+
+
+template<class T>
+Sequence<T>::Sequence(const Sequence<T> &other)	// copy constructor
+{
+
+	vector<Image<T> > aux(other._frames.begin(), other._frames.end());
+	_frames.swap(aux);
+	_size = other._size;
+}
+
+
+template<class T>
+Sequence<T>::Sequence(const SequenceFx<T> &other)	// copy constructor
+{
+	vector<Image<T> > aux(other._frames.begin(), other._frames.end());
+	_frames.swap(aux);
+	_size = other._size;
+
+
+}
+
+
+template<class T>
 Sequence<T>::~Sequence()
 {
-	typename vector<Image<T>* >::iterator it;
-	for (it = _frames.begin(); it != _frames.end(); ++it) {
-		if (*it) {
-			delete *it;
-		}
+
+}
+
+
+template<class T>
+bool Sequence<T>::add(const Image<T> &frame)	// use &&
+{
+	if (frame.size().size_x == _size.size_x && frame.size().size_y == _size.size_y) {
+		_frames.push_back(frame);
+		_size.size_t++;
+		return true;
 	}
 
-	_frames.clear();
+	return false;
 }
 
 
-template <class T>
-int Sequence<T>::get_size_x() const
+template<class T>
+uint Sequence<T>::size_x() const
 {
-	return _size_x;
+	return _size.size_x;
 }
 
 
-template <class T>
-int Sequence<T>::get_size_y() const
+template<class T>
+uint Sequence<T>::size_y() const
 {
-	return _size_y;
+	return _size.size_y;
 }
 
 
-template <class T>
-int Sequence<T>::get_size_t() const
+template<class T>
+uint Sequence<T>::size_t() const
 {
-	return _size_t;
+	return _size.size_t;
 }
 
 
-template <class T>
-Shape Sequence<T>::get_size() const
+template<class T>
+Shape Sequence<T>::size() const
 {
-	return Shape(_size_x, _size_y, _size_t);
+	return _size;
 }
 
 
-template <class T>
-void Sequence<T>::set_coordinates(Point coordinates)
+template<class T>
+Sequence<T>::operator bool() const
 {
-	_coordinates = coordinates;
+	return _size.size_t == 0;
 }
 
 
-template <class T>
-Point Sequence<T>::get_coordinates()
+template<class T>
+bool Sequence<T>::is_empty() const
 {
-	return _coordinates;
+	return _size.size_t == 0;
 }
 
 
-/*
- * Note: if outside the range, returns default value.
- */
-template <class T>
-T Sequence<T>::get_value(int x, int y, int t) const
+/// Returns value without range checking.
+template<class T>
+const Image<T>& Sequence<T>::operator[] (uint t) const
 {
-	if (t < 0 || t >= _size_t || !_frames[t])
-		return T();
-
-	return _frames[t]->get_value(x, y);
+	return _frames[t];
 }
 
 
-/*
- * Note: if outside the range, returns default value.
- */
-template <class T>
-T Sequence<T>::get_value(Point p) const
+template<class T>
+Image<T>& Sequence<T>::operator[] (uint t)
 {
-	if (p.t < 0 || p.t >= _size_t || !_frames[p.t])
-		return T();
-
-	return _frames[p.t]->get_value(p.x, p.y);
+	return _frames[t];
 }
 
 
-template <class T>
-bool Sequence<T>::try_get_value(int x, int y, int t, T& value)
+/// Returns value with range checking.
+/// Throws std::out_of_range exception, if out of range.
+template<class T>
+const Image<T>& Sequence<T>::frame(uint t) const
 {
-	if (t < 0 || t >= _size_t || !_frames[t])
-		return false;
-
-	return _frames[t]->try_get_value(x, y, value);
-}
-
-
-template <class T>
-void Sequence<T>::set_value(int x, int y, int t, T value)
-{
-	if (t < 0 || t >= _size_t)
-		return;
-
-	if (!_frames[t]) {
-		_frames[t] = new Image<T>(_size_x, _size_y);
+	if (t >= _size.size_t) {
+		throw std::out_of_range("t coordinate is out of range");
 	}
 
-	_frames[t]->set_value(x, y, value);
+	return (const Image<T>)_frames[t];
 }
 
 
-template <class T>
-void Sequence<T>::fill(T value)
+template<class T>
+Image<T>& Sequence<T>::frame(uint t)
 {
-	for (int t = 0; t < _size_t; t++ ) {
-		if (!_frames[t]) {
-			_frames[t] = new Image<T>(_size_x, _size_y);
-		}
-
-		_frames[t]->fill(value);
+	if (t >= _size.size_t) {
+		throw std::out_of_range("t coordinate is out of range");
 	}
-}
-
-
-template <class T>
-Image<T>* Sequence<T>::get_frame(int t)
-{
-	if (t < 0 || t >= _size_t)
-		return 0;
 
 	return _frames[t];
 }
 
 
-template <class T>
-Image<T> Sequence<T>::get_frame(int t) const
-{
-	if (t < 0 || t >= _size_t)
-		return Image<T>(_size_x, _size_y, T());
 
-	return Image<T>(*_frames[t]);
+
+/* SequenceFx */
+
+template<class T>
+SequenceFx<T>::SequenceFx()
+{
+
 }
 
 
-// TODO: rename to get_frame_copy
-template <class T>
-Image<T>* Sequence<T>::get_frame_as_is(int t) const
+template<class T>
+SequenceFx<T>::SequenceFx(Shape size)
+: _size(size.size_x, size.size_y, 0)
 {
-	if (t < 0 || t >= _size_t || !_frames[t])
-		return 0;
-
-	return new Image<T>(*_frames[t]);
+	_frames.reserve(size.size_t);
 }
 
 
-template <class T>
-bool Sequence<T>::set_frame(int t, Image<T> *frame)
+template<class T>
+SequenceFx<T>::SequenceFx(uint size_x, uint size_y)
+: _size(size_x, size_y, 0)
 {
-	if (t < 0 || t >= _size_t)
-		return false;
 
-	if (frame && (
-			_size_x != frame->get_size_x() ||
-			_size_y != frame->get_size_y() ))
-		return false;
-
-	_frames[t] = frame;
-	return true;
 }
 
 
-template <class T>
-bool Sequence<T>::add_frame(Image<T> *frame)
+template<class T>
+SequenceFx<T>::SequenceFx(const ImageFx<T> &frame, uint size_t)
 {
-	if (frame && (
-			_size_x != frame->get_size_x() ||
-			_size_y != frame->get_size_y() ))
-		return false;
-
+	_frames.reserve(size_t);
 	_frames.push_back(frame);
-	_size_t++;
-	return true;
+
+	_size = frame.size();
+	_size.size_t = 1;
 }
 
 
-template <class T>
-int Sequence<T>::drop_empty_frames()
+template<class T>
+SequenceFx<T>::SequenceFx(const Image<T> &frame, uint size_t)
 {
-	// TODO: check
-	typename vector<Image<T>* >::iterator i = _frames.begin();
-	while (i != _frames.end()) {
-		if (!i.base()) {
-			i = _frames.erase(i);
-		} else {
-			++i;
-		}
+	_frames.reserve(size_t);
+	_frames.push_back(frame);
+
+	_size = frame.size();
+	_size.size_t = 1;
+}
+
+
+template<class T>
+SequenceFx<T>::SequenceFx(const SequenceFx<T> &other)	// copy constructor
+{
+	vector<ImageFx<T> > aux(other._frames.begin(), other._frames.end());
+	_frames.swap(aux);
+	_size = other._size;
+}
+
+
+template<class T>
+SequenceFx<T>::SequenceFx(const Sequence<T> &other)	// copy constructor
+{
+	vector<ImageFx<T> > aux(other._frames.begin(), other._frames.end());
+	_frames.swap(aux);
+	_size = other._size;
+}
+
+
+template<class T>
+SequenceFx<T>::~SequenceFx()
+{
+
+}
+
+
+template<class T>
+bool SequenceFx<T>::add(const ImageFx<T> &frame)	// use &&
+{
+	if (frame.size().size_x == _size.size_x && frame.size().size_y == _size.size_y) {
+		_frames.push_back(frame);
+		_size.size_t++;
+		return true;
 	}
 
-	_size_t = _frames.size();
-
-	return _size_t;
+	return false;
 }
 
 
-template <class T>
-Sequence<T>* Sequence<T>::get_patch_between_points(int a_x, int a_y, int a_t, int b_x, int b_y, int b_t)
+template<class T>
+uint SequenceFx<T>::size_x() const
 {
-	if (a_x > b_x || a_y > b_y || a_t > b_t) {
-		return 0;
+	return _size.size_x;
+}
+
+
+template<class T>
+uint SequenceFx<T>::size_y() const
+{
+	return _size.size_y;
+}
+
+
+template<class T>
+uint SequenceFx<T>::size_t() const
+{
+	return _size.size_t;
+}
+
+
+template<class T>
+Shape SequenceFx<T>::size() const
+{
+	return _size;
+}
+
+
+template<class T>
+bool SequenceFx<T>::is_empty() const
+{
+	return _size.size_t == 0;
+}
+
+
+/// Returns value without range checking.
+template<class T>
+const ImageFx<T>& SequenceFx<T>::operator[] (uint t) const
+{
+	return (const ImageFx<T>)_frames[t];
+}
+
+
+template<class T>
+ImageFx<T>& SequenceFx<T>::operator[] (uint t)
+{
+	return _frames[t];
+}
+
+
+/// Returns value with range checking.
+/// Throws std::out_of_range exception, if out of range.
+template<class T>
+const ImageFx<T>& SequenceFx<T>::frame(uint t) const
+{
+	if (t >= _size.size_t) {
+		throw std::out_of_range("t coordinate is out of range");
 	}
 
-	// check if whole patch is inside the image
-	if (a_x < 0 || b_x >= _size_x ||
-		a_y < 0 || b_y >= _size_y ||
-		a_t < 0 || b_t >= _size_t) {
-		return 0;
+	return _frames[t];
+}
+
+
+template<class T>
+ImageFx<T>& SequenceFx<T>::frame(uint t)
+{
+	if (t >= _size.size_t) {
+		throw std::out_of_range("t coordinate is out of range");
 	}
 
-	return get_patch_internal(a_x, a_y, a_t, b_x, b_y, b_t);
-}
-
-
-template <class T>
-Sequence<T>* Sequence<T>::get_patch_around_point(int center_x, int center_y, int center_t, int size)
-{
-	return get_patch_around_point(center_x, center_y, center_t, size, size, size);
-}
-
-
-template <class T>
-Sequence<T>* Sequence<T>::get_patch_around_point(int center_x, int center_y, int center_t, int frame_size, int size_t)
-{
-	return get_patch_around_point(center_x, center_y, center_t, frame_size, frame_size, size_t);
-}
-
-
-template <class T>
-Sequence<T>* Sequence<T>::get_patch_around_point(int center_x, int center_y, int center_t, int size_x, int size_y, int size_t)
-{
-	if (size_x <= 0 || size_y <= 0 || size_t <= 0) {
-		return 0;
-	}
-
-	// force 'x_size', 'y_size' and 't_size' to be odd
-	if (!is_odd_number(size_x)) size_x--;
-	if (!is_odd_number(size_y)) size_y--;
-	if (!is_odd_number(size_t)) size_t--;
-
-	// calculate left-top and bottom-right points of the patch
-	int x_offset = size_x / 2;
-	int y_offset = size_y / 2;
-	int t_offset = size_t / 2;
-	int a_x = center_x - x_offset;
-	int a_y = center_y - y_offset;
-	int b_x = center_x + x_offset;
-	int b_y = center_y + y_offset;
-	int a_t = center_t - t_offset;
-	int b_t = center_t + t_offset;
-
-	// check if whole patch is inside the image
-	if (a_x < 0 || b_x >= _size_x ||
-		a_y < 0 || b_y >= _size_y ||
-		a_t < 0 || b_t >= _size_t) {
-		return 0;
-	}
-
-	return get_patch_internal(a_x, a_y, a_t, b_x, b_y, b_t);
-}
-
-
-/* private */
-template <class T>
-Sequence<T>* Sequence<T>::get_patch_internal(int a_x, int a_y, int a_t, int b_x, int b_y, int b_t)
-{
-	int x_size = b_x - a_x + 1;
-	int y_size = b_y - a_y + 1;
-	int t_size = b_t - a_t + 1;
-
-	Sequence<T>* patch = new Sequence<T>(x_size, y_size, t_size);
-
-	for (int t = 0; t < t_size; t++) {
-		Image<T>* frame = _frames[a_t + t];
-		if (frame != 0) {
-			Image<T>* frame_patch = frame->get_patch_between_points(a_x, a_y, b_x, b_y);
-			patch->set_frame(t, frame_patch);
-		}
-	}
-
-	patch->set_coordinates(Point(a_x, a_y, a_t));
-
-	return patch;
-}
-
-
-template <class T>
-inline bool Sequence<T>::is_odd_number(int number)
-{
-	return number % 2 == 1;
+	return _frames[t];
 }
