@@ -97,6 +97,60 @@ void IOUtility::write_pgm_image(const string &name, Image<float> *image)
 }
 
 
+Image<float>* IOUtility::read_mono_image(const string &name)
+{
+	int width, height;
+
+	float *image_data = iio_read_image_float(name.data(), &width, &height);
+
+	if (!image_data) {
+		fprintf(stderr, "read_mono_image: cannot read %s\n", name.data());
+		return 0;
+	}
+
+	Image<float> *image = new Image<float>(width, height);
+
+	// copy from image_data to Image<float>
+	for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++) {
+			int index = (y * width + x);
+			float value = image_data[index];
+			image->set_value(x, y, value);
+		}
+	}
+
+	free(image_data);
+
+	return image;
+}
+
+
+void IOUtility::write_mono_image(const string &name, Image<float> *image)
+{
+	int width = image->get_size_x();
+	int height = image->get_size_y();
+
+	float *image_data = new float[width * height];
+
+	// copy from Image<float> to image_data
+	for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++) {
+			int index = (y * width + x);
+			image_data[index] = image->get_value(x, y);
+		}
+	}
+
+	iio_save_image_float(const_cast<char* >(name.data()), image_data, width, height);
+	delete[] image_data;
+}
+
+
+void IOUtility::write_float_image(const string &name, Image<float> *image)
+{
+	iio_save_image_float_split(const_cast<char*>(name.data()), image->get_raw_data(), image->get_size_x(), image->get_size_y(), 1);
+}
+
+
 string IOUtility::compose_file_name(const string &name, int index, const string &extension)
 {
 	stringstream stream;

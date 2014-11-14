@@ -22,6 +22,8 @@ public:
 	Image(const Image &source);
 	virtual ~Image();
 
+	Image<T>& operator= (const Image<T> &other);
+
 	int get_size_x() const;
 	int get_size_y() const;
 	Shape get_size() const;
