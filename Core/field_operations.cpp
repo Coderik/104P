@@ -90,7 +90,7 @@ void FieldOperations::forward_gradient(const float *f, float *fx, float *fy, con
 }
 
 
-void FieldOperations::centered_gradient(float *in, float *dx, float *dy, const int nx, const int ny)
+void FieldOperations::centered_gradient(const float *in, float *dx, float *dy, const int nx, const int ny)
 {
 	float filter_der[5] = {-1.0/12.0, 8.0/12.0, 0.0, -8.0/12.0, 1.0/12.0};
 	float filter_id[1]  = {1.0};
