@@ -20,7 +20,7 @@ public:
 	virtual void enable(bool should_enable = true);
 	virtual void disable();
 
-	virtual Sequence<float>* request_sequence();
+	virtual SequenceFx<float> request_sequence();
 
 	virtual LayerManager* request_layer_manager();
 	virtual InteractionManager* request_interaction_manager();

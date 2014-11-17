@@ -29,7 +29,7 @@ public:
 
 	virtual void assign_menu(Gtk::Menu *menu, string title) = 0;
 
-	virtual Sequence<float>* request_sequence() = 0;
+	virtual SequenceFx<float> request_sequence() = 0;
 	virtual string request_sequence_path() = 0;
 	virtual string request_open_dialog_result(string dialog_title, Glib::RefPtr<Gtk::FileFilter> filter = Glib::RefPtr<Gtk::FileFilter>()) = 0;
 	virtual string request_save_dialog_result(string dialog_title, Glib::RefPtr<Gtk::FileFilter> filter = Glib::RefPtr<Gtk::FileFilter>()) = 0;

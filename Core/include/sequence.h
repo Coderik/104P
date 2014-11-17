@@ -37,6 +37,9 @@ public:
 	Sequence(const Sequence<T> &other);		// copy constructor
 	Sequence(const SequenceFx<T> &other);	// copy constructor
 
+	Sequence<T>& operator= (const Sequence<T> &other);
+	Sequence<T>& operator= (const SequenceFx<T> &other);
+
 	bool add(const Image<T> &frame);
 
 	uint size_x() const;
@@ -85,6 +88,7 @@ public:
 	uint size_t() const;
 	Shape size() const;
 
+	operator bool() const;
 	bool is_empty() const;
 
 	/// Returns value without range checking.

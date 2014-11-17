@@ -22,6 +22,7 @@ public:
 	MaskSequence();
 	MaskSequence(Shape size);
 	MaskSequence(uint size_x, uint size_y);
+	MaskSequence(uint size_x, uint size_y, uint size_t);
 	MaskSequence(const Mask &frame, uint size_t = 1);
 	MaskSequence(const MaskFx &frame, uint size_t = 1);
 	~MaskSequence();
@@ -36,12 +37,8 @@ public:
 	uint size_t() const;
 	Shape size() const;
 
+	operator bool() const;
 	bool is_empty() const;
-
-	Mask::iterator begin(uint t) const;
-	Mask::iterator end(uint t) const;
-	Mask::iterator rbegin(uint t) const;
-	Mask::iterator rend(uint t) const;
 
 	/// Returns value without range checking.
 	const Mask& operator[] (uint t) const;
@@ -80,12 +77,8 @@ public:
 	uint size_t() const;
 	Shape size() const;
 
+	operator bool() const;
 	bool is_empty() const;
-
-	Mask::iterator begin(uint t) const;
-	Mask::iterator end(uint t) const;
-	Mask::iterator rbegin(uint t) const;
-	Mask::iterator rend(uint t) const;
 
 	/// Returns value without range checking.
 	const MaskFx& operator[] (uint t) const;

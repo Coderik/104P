@@ -26,9 +26,9 @@ void HullProxy::disable()
 }
 
 
-Sequence<float>* HullProxy::request_sequence()
+SequenceFx<float> HullProxy::request_sequence()
 {
-	return (_is_enabled) ? _proxied_hull->request_sequence() : 0;
+	return (_is_enabled) ? _proxied_hull->request_sequence() : SequenceFx<float>();
 }
 
 

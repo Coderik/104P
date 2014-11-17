@@ -29,7 +29,6 @@ Hull::Hull(string application_id)
 
 	this->signal_key_press_event().connect( sigc::mem_fun(*this, &Hull::key_pressed) );
 
-	_sequence = NULL;
 	_current_fitting = NULL;
 	_sequence_folder = "";
 
@@ -108,7 +107,7 @@ void Hull::open_image()
 
 void Hull::load_image(string filename)
 {
-	Image<float> *image = IOUtility::read_pgm_image(filename);
+	Image<float> image = IOUtility::read_pgm_image(filename);
 
 	if (!image) {
 		return;
@@ -125,9 +124,7 @@ void Hull::load_image(string filename)
 	_current_time = 0;
 
 	// Replace single image with sequence of the only element for computational uniformity.
-	if (_sequence)
-		delete _sequence;
-	_sequence = new Sequence<float>(image);
+	_sequence = SequenceFx<float>(image);
 
 	// Show image
 	update_image_control(_current_time);
@@ -197,19 +194,17 @@ void Hull::load_sequence(string path)
 	// Load first frame, that will define width and height for the sequence.
 	std::string first_frame_path = path;
 	first_frame_path.append(file_names[0]);
-	Image<float> *first_frame = IOUtility::read_pgm_image(first_frame_path);
+	Image<float> first_frame = IOUtility::read_pgm_image(first_frame_path);
 
 	// [Re]create sequence instance
-	if (_sequence)
-		delete _sequence;
-	_sequence = new Sequence<float>(first_frame);
+	_sequence = SequenceFx<float>(first_frame);
 
 	// Load the rest frames.
 	for (unsigned int i = 1; i < file_names.size(); i++) {
 		string frame_path = path;
 		frame_path.append(file_names[i]);
-		Image<float> *frame = IOUtility::read_pgm_image(frame_path);
-		_sequence->add_frame(frame);
+		Image<float> frame = IOUtility::read_pgm_image(frame_path);
+		_sequence.add(frame);
 	}
 
 	// Set default values
@@ -219,7 +214,7 @@ void Hull::load_sequence(string path)
 	// Adjust UI
 	_ui.layer_action_group->set_sensitive(true);
 	_ui.time_slider->set_sensitive(true);
-	_ui.time_slider->set_range(0, _sequence->get_size_t() - 1);
+	_ui.time_slider->set_range(0, _sequence.size_t() - 1);
 	_ui.time_slider->set_digits(0);
 	active_view_changed(_original_image_view);
 
@@ -261,7 +256,7 @@ void Hull::open_recent()
 /*****************
  * IHull members *
  *****************/
-Sequence<float>* Hull::request_sequence()
+SequenceFx<float> Hull::request_sequence()
 {
 	return _sequence;
 }
@@ -595,7 +590,7 @@ bool Hull::key_pressed(GdkEventKey* event)
 
 Glib::RefPtr<Gdk::Pixbuf> Hull::provide_original_image_view(unsigned int time)
 {
-	return wrap_raw_image_data(_sequence->get_frame(time));
+	return wrap_raw_image_data(_sequence.frame(time));
 }
 
 
@@ -698,12 +693,12 @@ int Hull::write_flow(float *u, float *v, int w, int h)
 /**
  * Converts Image into Gdk::Pixbuf
  */
-Glib::RefPtr<Gdk::Pixbuf> Hull::wrap_raw_image_data(Image<float> *image)
+Glib::RefPtr<Gdk::Pixbuf> Hull::wrap_raw_image_data(const ImageFx<float> &image)
 {
 	const int BITS_PER_CHANNEL = 8;
 
-	int x_size = image->get_size_x();
-	int y_size = image->get_size_y();
+	int x_size = image.size_x();
+	int y_size = image.size_y();
 
 	Glib::RefPtr<Gdk::Pixbuf> buffer = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, false, BITS_PER_CHANNEL, x_size, y_size);
 	int rowstride = buffer->get_rowstride();	// get internal row length
@@ -713,7 +708,7 @@ Glib::RefPtr<Gdk::Pixbuf> Hull::wrap_raw_image_data(Image<float> *image)
 	int index;
 	for (int y = 0;y < y_size;y++) {
 		for (int x = 0;x < x_size;x++) {
-			char intensity = (unsigned char)image->get_value(x, y);
+			char intensity = (unsigned char)image(x, y);
 			for (int c = 0; c < number_of_channels; c++) {
 				/// NOTE: 'rowstride' is the length of internal representation of a row
 				/// inside the Pixbuf, and it could differ from x_size*number_of_channels.
@@ -730,14 +725,14 @@ Glib::RefPtr<Gdk::Pixbuf> Hull::wrap_raw_image_data(Image<float> *image)
 void Hull::update_image_control(int current_time)
 {
 	// ?TODO: receive Descriptor as parameter
-	if (_sequence && _view_map.find(_active_view) != _view_map.end()) {
+	if (!_sequence.is_empty() && _view_map.find(_active_view) != _view_map.end()) {
 		View *view = _view_map[_active_view];
 
 		Glib::RefPtr<Gdk::Pixbuf> buffer = view->get_pixbuf(current_time);
 
 		// check buffer and replace it with default one, if needed
-		if (!buffer || buffer->get_width() != _sequence->get_size_x() || buffer->get_height() != _sequence->get_size_y()) {
-			buffer = create_empty_pixbuf(_sequence->get_size_x(), _sequence->get_size_y());
+		if (!buffer || buffer->get_width() != _sequence.size_x() || buffer->get_height() != _sequence.size_y()) {
+			buffer = create_empty_pixbuf(_sequence.size_x(), _sequence.size_y());
 		}
 
 		_ui.image_control->set_pixbuf(buffer);

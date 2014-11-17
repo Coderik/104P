@@ -52,7 +52,7 @@ Sequence<T>::Sequence(uint size_x, uint size_y, uint size_t)
 {
 	_frames.reserve(size_t);
 
-	for (int i = 0; i < size_t; i++) {
+	for (uint i = 0; i < size_t; i++) {
 		_frames.push_back(Image<T>(size));
 	}
 }
@@ -108,8 +108,38 @@ Sequence<T>::Sequence(const SequenceFx<T> &other)	// copy constructor
 	vector<Image<T> > aux(other._frames.begin(), other._frames.end());
 	_frames.swap(aux);
 	_size = other._size;
+}
 
 
+template <class T>
+Sequence<T>& Sequence<T>::operator= (const Sequence<T> &other)
+{
+	// check for self-assignment
+	if(this == &other) {
+		return *this;
+	}
+
+	vector<Image<T> > aux(other._frames.begin(), other._frames.end());
+	_frames.swap(aux);
+	_size = other._size;
+
+	return *this;
+}
+
+
+template <class T>
+Sequence<T>& Sequence<T>::operator= (const SequenceFx<T> &other)
+{
+	// check for self-assignment
+	if(this == &other) {
+		return *this;
+	}
+
+	vector<Image<T> > aux(other._frames.begin(), other._frames.end());
+	_frames.swap(aux);
+	_size = other._size;
+
+	return *this;
 }
 
 
@@ -164,7 +194,7 @@ Shape Sequence<T>::size() const
 template<class T>
 Sequence<T>::operator bool() const
 {
-	return _size.size_t == 0;
+	return _size.size_t != 0;
 }
 
 
@@ -326,6 +356,13 @@ template<class T>
 Shape SequenceFx<T>::size() const
 {
 	return _size;
+}
+
+
+template<class T>
+SequenceFx<T>::operator bool() const
+{
+	return _size.size_t != 0;
 }
 
 

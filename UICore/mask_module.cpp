@@ -10,7 +10,6 @@
 
 MaskModule::MaskModule()
 {
-	_mask = 0;
 	_modulable = 0;
 }
 
@@ -58,10 +57,9 @@ void MaskModule::initialize(IModulable *modulable)
 }
 
 
-SequenceMask* MaskModule::request_mask()
+MaskSequenceFx MaskModule::request_mask()
 {
-	// TODO: use some kind of smart pointer
-	return new SequenceMask(*_mask);
+	return _mask;
 }
 
 
@@ -71,15 +69,15 @@ Glib::RefPtr<Gdk::Pixbuf> MaskModule::provide_mask_view(unsigned int time)
 
 	if (_mask) {
 		// draw mask
-		buffer = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, false, 8, _mask->get_size_x(), _mask->get_size_y());
+		buffer = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, false, 8, _mask.size_x(), _mask.size_y());
 
 		int rowstride = buffer->get_rowstride();	// get internal row length
 		int number_of_channels = buffer->get_n_channels();
 		guint8* data = buffer->get_pixels();
 
-		for (int y = 0; y < _mask->get_size_y(); y++) {
-			for (int x = 0; x < _mask->get_size_x(); x++) {
-				char color = (_mask->get_value(x, y, time)) ? 255 : 0;
+		for (uint y = 0; y < _mask.size_y(); y++) {
+			for (uint x = 0; x < _mask.size_x(); x++) {
+				char color = (_mask[time](x, y)) ? 255 : 0;
 
 				for (int c = 0; c < number_of_channels; c++) {
 					/// NOTE: 'rowstride' is the length of internal representation of a row
@@ -99,9 +97,9 @@ Glib::RefPtr<Gdk::Pixbuf> MaskModule::provide_mask_view(unsigned int time)
 
 void MaskModule::open_mask()
 {
-	Sequence<float> *sequence = _modulable->request_sequence();
+	SequenceFx<float> sequence = _modulable->request_sequence();
 
-	if (!sequence) {
+	if (sequence.is_empty()) {
 		return;
 	}
 
@@ -110,39 +108,35 @@ void MaskModule::open_mask()
 
 	if (!file_name.empty()) {
 		// read mask file
-		Image<float> *mask_image = IOUtility::read_pgm_image(file_name);
+		Image<float> mask_image = IOUtility::read_pgm_image(file_name);
 
 		// ensure mask size matches current sequence
-		if (mask_image->get_size_x() != sequence->get_size_x() || mask_image->get_size_y() != sequence->get_size_y()) {
+		if (mask_image.size_x() != sequence.size_x() || mask_image.size_y() != sequence.size_y()) {
 			// TODO: make some notification
 			return;
 		}
 
 		_mask_file_name = file_name;
 
-		// [re]allocate memory
-		if (_mask) {
-			delete _mask;
-		}
-		_mask = new SequenceMask(mask_image->get_size_x(), mask_image->get_size_y(), sequence->get_size_t());
+		// [re]assign mask
+		_mask = MaskSequence(mask_image.size_x(), mask_image.size_y(), sequence.size_t());
 
 		// enable 'mask actions' menu items
 		_signal_enable_mask_actions_menu_items.emit(true);
 
 		// create sequence mask from the mask image
 		// TODO: add constructor to do this
-		for (int x = 0; x < mask_image->get_size_x(); x++) {
-			for (int y = 0; y < mask_image->get_size_y(); y++) {
-				if (mask_image->get_value(x, y) > 0) {
-					// duplicate mask to all frames
-					for (int t = 0; t < sequence->get_size_t(); t++) {
-						_mask->mask(x, y, t);
+		for (uint t = 0; t < sequence.size_t(); t++) {
+			Mask mask_frame = _mask.frame(t);
+			for (uint x = 0; x < mask_image.size_x(); x++) {
+				for (uint y = 0; y < mask_image.size_y(); y++) {
+					if (mask_image(x, y) > 0) {
+						// duplicate mask to all frames
+						mask_frame.mask(x, y);
 					}
 				}
 			}
 		}
-
-		delete mask_image;
 
 		// add view
 		if (_mask_view.is_empty()) {
@@ -156,7 +150,7 @@ void MaskModule::open_mask()
 		if (mask_aware_rig) {
 			MaskGroup *group = mask_aware_rig->get_mask_group();
 			if (group && group->is_empty()) {
-				group->set_mask(*_mask);
+				group->set_mask(_mask);
 			}
 		}
 	}
@@ -165,7 +159,7 @@ void MaskModule::open_mask()
 
 void MaskModule::save_mask()
 {
-	SequenceMask *mask = 0;
+	MaskSequenceFx mask;
 
 	// request current mask from a rig
 	Request<IRig, IMaskAware> request;
@@ -178,7 +172,7 @@ void MaskModule::save_mask()
 		}
 	}
 
-	if (!mask) {
+	if (mask.is_empty()) {
 		return;
 	}
 
@@ -188,9 +182,6 @@ void MaskModule::save_mask()
 	string file_name = _mask_file_name;
 
 	// set that mask as current
-	if (_mask) {
-		delete _mask;
-	}
 	_mask = mask;
 
 	// enable 'mask actions' menu items
@@ -199,7 +190,7 @@ void MaskModule::save_mask()
 	// write mask
 	// TODO: deal also with 3D masks
 	// TODO: add confirmation dialog
-	IOUtility::write_pgm_image(file_name, Visualization::mask_to_greyscale(*mask->get_mask_frame(0)));
+	IOUtility::write_pgm_image(file_name, Visualization::mask_to_greyscale(mask.frame(0)));
 
 	// add view or request its redrawing
 	if (_mask_view.is_empty()) {
@@ -212,7 +203,7 @@ void MaskModule::save_mask()
 
 void MaskModule::save_mask_as()
 {
-	SequenceMask *mask = 0;
+	MaskSequenceFx mask;
 
 	Request<IRig, IMaskAware> request;
 	_modulable->request_active_rig(request);
@@ -224,7 +215,7 @@ void MaskModule::save_mask_as()
 		}
 	}
 
-	if (!mask) {
+	if (mask.is_empty()) {
 		return;
 	}
 
@@ -233,13 +224,13 @@ void MaskModule::save_mask_as()
 
 	// write mask
 	// TODO: deal also with 3D masks
-	IOUtility::write_pgm_image(file_name, Visualization::mask_to_greyscale(*mask->get_mask_frame(0)));
+	IOUtility::write_pgm_image(file_name, Visualization::mask_to_greyscale(mask.frame(0)));
 }
 
 
 void MaskModule::set_mask()
 {
-	if (!_mask) {
+	if (_mask.is_empty()) {
 		return;
 	}
 
@@ -249,7 +240,7 @@ void MaskModule::set_mask()
 	if (mask_aware_rig) {
 		MaskGroup *group = mask_aware_rig->get_mask_group();
 		if (group) {
-			group->set_mask(*_mask);
+			group->set_mask(_mask);
 		}
 	}
 }
@@ -257,7 +248,7 @@ void MaskModule::set_mask()
 
 void MaskModule::add_mask()
 {
-	if (!_mask) {
+	if (_mask.is_empty()) {
 		return;
 	}
 
@@ -267,7 +258,7 @@ void MaskModule::add_mask()
 	if (mask_aware_rig) {
 		MaskGroup *group = mask_aware_rig->get_mask_group();
 		if (group) {
-			group->add_mask(*_mask);
+			group->add_mask(_mask);
 		}
 	}
 }
@@ -275,7 +266,7 @@ void MaskModule::add_mask()
 
 void MaskModule::subtract_mask()
 {
-	if (!_mask) {
+	if (_mask.is_empty()) {
 		return;
 	}
 
@@ -285,7 +276,7 @@ void MaskModule::subtract_mask()
 	if (mask_aware_rig) {
 		MaskGroup *group = mask_aware_rig->get_mask_group();
 		if (group) {
-			group->subtract_mask(*_mask);
+			group->subtract_mask(_mask);
 		}
 	}
 }
@@ -293,7 +284,7 @@ void MaskModule::subtract_mask()
 
 void MaskModule::intersect_mask()
 {
-	if (!_mask) {
+	if (_mask.is_empty()) {
 		return;
 	}
 
@@ -303,7 +294,7 @@ void MaskModule::intersect_mask()
 	if (mask_aware_rig) {
 		MaskGroup *group = mask_aware_rig->get_mask_group();
 		if (group) {
-			group->intersect_mask(*_mask);
+			group->intersect_mask(_mask);
 		}
 	}
 }
@@ -311,15 +302,14 @@ void MaskModule::intersect_mask()
 
 void MaskModule::sequence_changed()
 {
-	if (!_mask) {
+	if (_mask.is_empty()) {
 		return;
 	}
 
 	// drop mask, if its size does not match newly opened data
-	Sequence<float> *sequence = _modulable->request_sequence();
-	if (!sequence || sequence->get_size() != _mask->get_size()) {
-		delete _mask;
-		_mask = 0;
+	SequenceFx<float> sequence = _modulable->request_sequence();
+	if (sequence.is_empty() || sequence.size() != _mask.size()) {
+		_mask = MaskSequence();
 
 		_modulable->remove_view(_mask_view);
 		_mask_view = Descriptor::empty();

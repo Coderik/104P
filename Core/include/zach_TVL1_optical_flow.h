@@ -41,8 +41,8 @@ public:
 						  int outit, int innit, int median, bool verbose);
 	~Zach_TVL1_OpticalFlow();
 
-	bool calculate(float *I0, float *I1, float *u1, float *u2, const int nx, const int ny);
-	bool calculate_with_multiscale(float *I0, float *I1, float *u1, float *u2, const int nxx, const int nyy);
+	bool calculate(const float *I0, const float *I1, float *u1, float *u2, const int nx, const int ny);
+	bool calculate_with_multiscale(const float *I0, const float *I1, float *u1, float *u2, const int nxx, const int nyy);
 
 	/* getters, setters */
 	float get_tau();

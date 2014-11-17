@@ -8,7 +8,7 @@
 #ifndef I_MASK_PROVIDER_H_
 #define I_MASK_PROVIDER_H_
 
-#include "sequence_mask.h"
+#include "mask_sequence.h"
 #include "i_mask_aware.h"
 
 class IMaskProvider
@@ -16,7 +16,7 @@ class IMaskProvider
 public:
 	virtual ~IMaskProvider() {}
 
-	virtual SequenceMask* request_mask() = 0;
+	virtual MaskSequenceFx request_mask() = 0;
 };
 
 

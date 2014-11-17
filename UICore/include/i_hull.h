@@ -20,7 +20,7 @@ class IHull
 public:
 	virtual ~IHull() {}
 
-	virtual Sequence<float>* request_sequence() = 0;
+	virtual SequenceFx<float> request_sequence() = 0;
 	/* NOTE: NULL pointer is the correct return value,
 	 * which means that requested service is currently unavailable. */
 	virtual LayerManager* request_layer_manager() = 0;

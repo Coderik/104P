@@ -9,7 +9,7 @@
 #define MASK_GROUP_H_
 
 #include <sigc++/sigc++.h>
-#include "sequence_mask.h"
+#include "mask_sequence.h"
 
 // TODO: when will become brave enough for switching to c++11, use shared_ptr for this class. Without doing this there is a possibility of memory leak.
 
@@ -20,11 +20,11 @@ public:
 	~MaskGroup();
 
 	// returns a copy of the internal mask
-	SequenceMask* get_mask();
-	void set_mask(const SequenceMask &mask);
-	void add_mask(const SequenceMask &mask);
-	void subtract_mask(const SequenceMask &mask);
-	void intersect_mask(const SequenceMask &mask);
+	MaskSequenceFx get_mask();
+	void set_mask(const MaskSequenceFx &mask);
+	void add_mask(const MaskSequenceFx &mask);
+	void subtract_mask(const MaskSequenceFx &mask);
+	void intersect_mask(const MaskSequenceFx &mask);
 	bool is_empty();
 
 	typedef sigc::signal<void, MaskGroup*> type_signal_mask_changed;
@@ -34,7 +34,7 @@ public:
 
 private:
 	type_signal_mask_changed _signal_mask_changed;
-	SequenceMask *_mask;
+	MaskSequence _mask;
 };
 
 

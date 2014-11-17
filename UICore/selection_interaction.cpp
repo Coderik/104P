@@ -15,7 +15,7 @@ SelectionInteraction::SelectionInteraction(MaskGroup *group)
 			_group->signal_mask_changed().connect( sigc::mem_fun(*this, &SelectionInteraction::mask_changed) );
 }
 
-SequenceMask* SelectionInteraction::get_mask()
+MaskSequenceFx SelectionInteraction::get_mask()
 {
 	return _group->get_mask();
 }

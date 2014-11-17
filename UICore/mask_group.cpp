@@ -9,81 +9,85 @@
 
 MaskGroup::MaskGroup()
 {
-	_mask = 0;
 }
 
 
 MaskGroup::~MaskGroup()
 {
-	if (_mask) {
-		delete _mask;
-	}
 }
 
 
-SequenceMask* MaskGroup::get_mask()
+MaskSequenceFx MaskGroup::get_mask()
 {
-	return (_mask) ? new SequenceMask(*_mask) : 0;
+	return _mask;
 }
 
 
-void MaskGroup::set_mask(const SequenceMask &mask)
+void MaskGroup::set_mask(const MaskSequenceFx &mask)
 {
-	if (_mask) {
-		delete _mask;
-	}
-	_mask = new SequenceMask(mask);
+	_mask = mask;
 
 	_signal_mask_changed.emit(this);
 }
 
 
-void MaskGroup::add_mask(const SequenceMask &mask)
+void MaskGroup::add_mask(const MaskSequenceFx &mask)
 {
-	if (!_mask) {
+	if (_mask.is_empty()) {
 		set_mask(mask);
-	}
-
-	if (_mask->get_size() != mask.get_size()) {
 		return;
 	}
 
-	SequenceMask::iterator it;
-	for (it = mask.begin(); it != mask.end(); ++it) {
-		_mask->mask(*it);
+	if (_mask.size() != mask.size()) {
+		return;
+	}
+
+	Mask::iterator it;
+	for (uint t = 0; t < mask.size_t(); t++) {
+		Mask mask_frame = _mask.frame(t);
+		for (it = mask[t].begin(); it != mask[t].end(); ++it) {
+			mask_frame.mask(*it);
+		}
 	}
 
 	_signal_mask_changed.emit(this);	// TODO: emit only if mask has changed
 }
 
 
-void MaskGroup::subtract_mask(const SequenceMask &mask)
+void MaskGroup::subtract_mask(const MaskSequenceFx &mask)
 {
-	if (!_mask || _mask->get_size() != mask.get_size()) {
+	if (_mask.is_empty() || _mask.size() != mask.size()) {
 		return;
 	}
 
-	SequenceMask::iterator it;
-	for (it = mask.begin(); it != mask.end(); ++it) {
-		_mask->unmask(*it);
+	Mask::iterator it;
+	for (uint t = 0; t < mask.size_t(); t++) {
+		Mask mask_frame = _mask.frame(t);
+		for (it = mask[t].begin(); it != mask[t].end(); ++it) {
+			mask_frame.unmask(*it);
+		}
 	}
 
 	_signal_mask_changed.emit(this);	// TODO: emit only if mask has changed
 }
 
 
-void MaskGroup::intersect_mask(const SequenceMask &mask)
+void MaskGroup::intersect_mask(const MaskSequenceFx &mask)
 {
-	if (!_mask || _mask->get_size() != mask.get_size()) {
+	if (_mask.is_empty() || _mask.size() != mask.size()) {
 		return;
 	}
 
 	bool has_changed = false;
-	SequenceMask::iterator it;
-	for (it = _mask->begin(); it != _mask->end(); ++it) {
-		if (!mask.get_value(*it)) {
-			_mask->unmask(*it);
-			has_changed = true;
+	Mask::iterator it;
+	for (uint t = 0; t < mask.size_t(); t++) {
+		Mask this_mask_frame = _mask.frame(t);
+		Mask other_mask_frame = mask.frame(t);
+		for (it = _mask[t].begin(); it != _mask[t].end(); ++it) {
+			if (!other_mask_frame(*it)) {
+				this_mask_frame.unmask(*it);
+				has_changed = true;
+			}
 		}
 	}
 
@@ -95,5 +99,15 @@ void MaskGroup::intersect_mask(const SequenceMask &mask)
 
 bool MaskGroup::is_empty()
 {
-	return !_mask || _mask->begin() == _mask->end();
+	if (_mask.is_empty()) {
+		return true;
+	}
+
+	for (uint t = 0; t < _mask.size_t(); t++) {
+		if (_mask[t].begin() != _mask[t].end()) {
+			return false;
+		}
+	}
+
+	return true;
 }

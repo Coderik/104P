@@ -29,6 +29,16 @@ MaskSequence::MaskSequence(uint size_x, uint size_y)
 }
 
 
+MaskSequence::MaskSequence(uint size_x, uint size_y, uint size_t)
+{
+	_frames.reserve(size_t);
+
+	for (uint i = 0; i < size_t; i++) {
+		_frames.push_back(Mask(size));
+	}
+}
+
+
 MaskSequence::MaskSequence(const Mask &frame, uint size_t)
 {
 	_frames.reserve(size_t);
@@ -107,6 +117,12 @@ uint MaskSequence::size_t() const
 Shape MaskSequence::size() const
 {
 	return _size;
+}
+
+
+MaskSequence::operator bool() const
+{
+	return _size.size_t != 0;
 }
 
 
@@ -250,6 +266,12 @@ uint MaskSequenceFx::size_t() const
 Shape MaskSequenceFx::size() const
 {
 	return _size;
+}
+
+
+MaskSequenceFx::operator bool() const
+{
+	return _size.size_t != 0;
 }
 
 

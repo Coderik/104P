@@ -11,7 +11,7 @@
 #include <gtkmm/icontheme.h>
 #include "selection_interaction.h"
 #include "i_hull.h"
-#include "sequence_mask.h"
+#include "mask_sequence.h"
 #include "point.h"
 #include "mouse_event.h"
 #include "rectangular_selection_layer.h"
