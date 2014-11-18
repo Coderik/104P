@@ -205,6 +205,13 @@ bool Sequence<T>::is_empty() const
 }
 
 
+template<class T>
+T& Sequence<T>::operator() (uint x, uint y, uint t)
+{
+	return _frames[t](x, y);
+}
+
+
 /// Returns value without range checking.
 template<class T>
 const Image<T>& Sequence<T>::operator[] (uint t) const
@@ -217,6 +224,19 @@ template<class T>
 Image<T>& Sequence<T>::operator[] (uint t)
 {
 	return _frames[t];
+}
+
+
+template<class T>
+Sequence<T> Sequence<T>::clone() const
+{
+	Sequence<T> cloned(_size.size_x, _size.size_y);
+
+	for (uint t = 0; t < _size.size_t; t++) {
+		cloned.add(_frames[t].clone());
+	}
+
+	return cloned;
 }
 
 
@@ -373,6 +393,13 @@ bool SequenceFx<T>::is_empty() const
 }
 
 
+template<class T>
+const T& SequenceFx<T>::operator() (uint x, uint y, uint t) const
+{
+	return _frames[t](x, y);
+}
+
+
 /// Returns value without range checking.
 template<class T>
 const ImageFx<T>& SequenceFx<T>::operator[] (uint t) const
@@ -385,6 +412,19 @@ template<class T>
 ImageFx<T>& SequenceFx<T>::operator[] (uint t)
 {
 	return _frames[t];
+}
+
+
+template<class T>
+SequenceFx<T> SequenceFx<T>::clone() const
+{
+	SequenceFx<T> cloned(_size.size_x, _size.size_y);
+
+	for (uint t = 0; t < _size.size_t; t++) {
+		cloned.add(_frames[t].clone());
+	}
+
+	return cloned;
 }
 
 

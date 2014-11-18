@@ -51,9 +51,14 @@ public:
 	operator bool() const;
 	bool is_empty() const;
 
+	// NOTE: added for convenience
+	T& operator() (uint x, uint y, uint t);
+
 	/// Returns value without range checking.
 	const Image<T>& operator[] (uint t) const;
 	Image<T>& operator[] (uint t);
+
+	Sequence<T> clone() const;
 
 	/// Returns value with range checking.
 	/// Throws std::out_of_range exception, if out of range.
@@ -91,9 +96,14 @@ public:
 	operator bool() const;
 	bool is_empty() const;
 
+	// NOTE: added for convenience
+	const T& operator() (uint x, uint y, uint t) const;
+
 	/// Returns value without range checking.
 	const ImageFx<T>& operator[] (uint t) const;
 	ImageFx<T>& operator[] (uint t);
+
+	SequenceFx<T> clone() const;
 
 	/// Returns value with range checking.
 	/// Throws std::out_of_range exception, if out of range.

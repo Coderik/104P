@@ -7,6 +7,11 @@
 
 #include "mask.h"
 
+MaskFx::iterator MaskFx::empty_iterator()
+{
+	return iterator(0, Point(-1, -1, -1));
+}
+
 MaskFx::MaskFx()
  : ImageFx<bool>(), _internal(0)
 {

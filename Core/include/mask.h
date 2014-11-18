@@ -35,6 +35,8 @@ friend class Mask;
 public:
 	typedef MaskIterator iterator;
 
+	static iterator empty_iterator();
+
 	MaskFx();
 	MaskFx(uint size_x, uint size_y);
 	MaskFx(uint size_x, uint size_y, bool default_value);

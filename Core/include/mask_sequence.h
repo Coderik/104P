@@ -10,15 +10,18 @@
 
 #include <vector>
 #include "mask.h"
+#include "i_iterable_mask.h"
 
 using namespace std;
 
 class MaskSequenceFx;
 
-class MaskSequence
+class MaskSequence : public IIterableMask
 {
 friend class MaskSequenceFx;
 public:
+	typedef MaskIterator iterator;
+
 	MaskSequence();
 	MaskSequence(Shape size);
 	MaskSequence(uint size_x, uint size_y);
@@ -40,6 +43,9 @@ public:
 	operator bool() const;
 	bool is_empty() const;
 
+	// NOTE: added for convenience
+	bool& operator() (uint x, uint y, uint t);
+
 	/// Returns value without range checking.
 	const Mask& operator[] (uint t) const;
 	Mask& operator[] (uint t);
@@ -49,6 +55,19 @@ public:
 	const Mask& frame(uint t) const;
 	Mask& frame(uint t);
 
+	MaskSequence clone() const;
+
+	iterator begin() const;
+	iterator end() const;
+	iterator rbegin() const;
+	iterator rend() const;
+
+	/// Methods used by MaskIterator
+	virtual Point first() const;
+	virtual Point last() const;
+	virtual Point next(const Point &current) const;
+	virtual Point prev(const Point &current) const;
+
 private:
 	vector<Mask > _frames;
 	Shape _size;
@@ -56,10 +75,14 @@ private:
 
 
 
-class MaskSequenceFx
+class MaskSequenceFx : public IIterableMask
 {
 friend class MaskSequence;
 public:
+	typedef MaskIterator iterator;
+
+	static const MaskSequenceFx empty;
+
 	MaskSequenceFx();
 	MaskSequenceFx(Shape size);
 	MaskSequenceFx(uint size_x, uint size_y);
@@ -80,6 +103,9 @@ public:
 	operator bool() const;
 	bool is_empty() const;
 
+	// NOTE: added for convenience
+	const bool& operator() (uint x, uint y, uint t) const;
+
 	/// Returns value without range checking.
 	const MaskFx& operator[] (uint t) const;
 	MaskFx& operator[] (uint t);
@@ -88,6 +114,19 @@ public:
 	/// Throws std::out_of_range exception, if out of range.
 	const MaskFx& frame(uint t) const;
 	MaskFx& frame(uint t);
+
+	MaskSequenceFx clone() const;
+
+	iterator begin() const;
+	iterator end() const;
+	iterator rbegin() const;
+	iterator rend() const;
+
+	/// Methods used by MaskIterator
+	virtual Point first() const;
+	virtual Point last() const;
+	virtual Point next(const Point &current) const;
+	virtual Point prev(const Point &current) const;
 
 private:
 	vector<MaskFx > _frames;
