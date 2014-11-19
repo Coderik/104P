@@ -53,7 +53,7 @@ Sequence<T>::Sequence(uint size_x, uint size_y, uint size_t)
 	_frames.reserve(size_t);
 
 	for (uint i = 0; i < size_t; i++) {
-		_frames.push_back(Image<T>(size));
+		_frames.push_back(Image<T>(size_x, size_y));
 	}
 }
 
@@ -130,11 +130,6 @@ Sequence<T>& Sequence<T>::operator= (const Sequence<T> &other)
 template <class T>
 Sequence<T>& Sequence<T>::operator= (const SequenceFx<T> &other)
 {
-	// check for self-assignment
-	if(this == &other) {
-		return *this;
-	}
-
 	vector<Image<T> > aux(other._frames.begin(), other._frames.end());
 	_frames.swap(aux);
 	_size = other._size;
@@ -206,9 +201,30 @@ bool Sequence<T>::is_empty() const
 
 
 template<class T>
+const T& Sequence<T>::operator() (uint x, uint y, uint t) const
+{
+	return _frames[t](x, y);
+}
+
+
+template<class T>
+const T& Sequence<T>::operator() (const Point &p) const
+{
+	return _frames[p.t](p);
+}
+
+
+template<class T>
 T& Sequence<T>::operator() (uint x, uint y, uint t)
 {
 	return _frames[t](x, y);
+}
+
+
+template<class T>
+T& Sequence<T>::operator() (const Point &p)
+{
+	return _frames[p.t](p);
 }
 
 
@@ -331,6 +347,33 @@ SequenceFx<T>::SequenceFx(const Sequence<T> &other)	// copy constructor
 }
 
 
+template <class T>
+SequenceFx<T>& SequenceFx<T>::operator= (const SequenceFx<T> &other)
+{
+	// check for self-assignment
+	if(this == &other) {
+		return *this;
+	}
+
+	vector<ImageFx<T> > aux(other._frames.begin(), other._frames.end());
+	_frames.swap(aux);
+	_size = other._size;
+
+	return *this;
+}
+
+
+template <class T>
+SequenceFx<T>& SequenceFx<T>::operator= (const Sequence<T> &other)
+{
+	vector<ImageFx<T> > aux(other._frames.begin(), other._frames.end());
+	_frames.swap(aux);
+	_size = other._size;
+
+	return *this;
+}
+
+
 template<class T>
 SequenceFx<T>::~SequenceFx()
 {
@@ -400,11 +443,18 @@ const T& SequenceFx<T>::operator() (uint x, uint y, uint t) const
 }
 
 
+template<class T>
+const T& SequenceFx<T>::operator() (const Point &p) const
+{
+	return _frames[p.t](p);
+}
+
+
 /// Returns value without range checking.
 template<class T>
 const ImageFx<T>& SequenceFx<T>::operator[] (uint t) const
 {
-	return (const ImageFx<T>)_frames[t];
+	return _frames[t];
 }
 
 

@@ -52,7 +52,10 @@ public:
 	bool is_empty() const;
 
 	// NOTE: added for convenience
+	const T& operator() (uint x, uint y, uint t) const;
+	const T& operator() (const Point &p) const;
 	T& operator() (uint x, uint y, uint t);
+	T& operator() (const Point &p);
 
 	/// Returns value without range checking.
 	const Image<T>& operator[] (uint t) const;
@@ -86,6 +89,9 @@ public:
 	SequenceFx(const SequenceFx<T> &other);	// copy constructor
 	SequenceFx(const Sequence<T> &other);	// copy constructor
 
+	SequenceFx<T>& operator= (const SequenceFx<T> &other);
+	SequenceFx<T>& operator= (const Sequence<T> &other);
+
 	bool add(const ImageFx<T> &frame);	// TODO: remove this eventually
 
 	uint size_x() const;
@@ -98,6 +104,7 @@ public:
 
 	// NOTE: added for convenience
 	const T& operator() (uint x, uint y, uint t) const;
+	const T& operator() (const Point &p) const;
 
 	/// Returns value without range checking.
 	const ImageFx<T>& operator[] (uint t) const;

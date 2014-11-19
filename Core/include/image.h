@@ -61,21 +61,21 @@ public:
 	/// Returns read-only value without range checking.
 	const T& operator() (uint x, uint y) const;
 	const T& operator() (uint x, uint y, uint channel) const;
-	const T& operator() (Point p) const;
-	const T& operator() (Point p, uint channel) const;
+	const T& operator() (const Point &p) const;
+	const T& operator() (const Point &p, uint channel) const;
 
 	/// Returns read-only value with range checking.
 	/// Throws std::out_of_range exception, if out of range.
 	const T& at(uint x, uint y) const;
 	const T& at(uint x, uint y, uint channel) const;
-	const T& at(Point p) const;
-	const T& at(Point p, uint channel) const;
+	const T& at(const Point &p) const;
+	const T& at(const Point &p, uint channel) const;
 
 	/// Checks if all indexes are in range and modifies the value parameter.
 	bool try_get_value(uint x, uint y, T& value) const;
 	bool try_get_value(uint x, uint y, uint channel, T& value) const;
-	bool try_get_value(Point p, T& value) const;
-	bool try_get_value(Point p, uint channel, T& value) const;
+	bool try_get_value(const Point &p, T& value) const;
+	bool try_get_value(const Point &p, uint channel, T& value) const;
 
 	/// Returns pointer to internal data.
 	const T* raw() const;
@@ -139,15 +139,15 @@ public:
 	/// Returns a reference to the element without range checking.
 	T& operator() (uint x, uint y);
 	T& operator() (uint x, uint y, uint channel);
-	T& operator() (Point p);
-	T& operator() (Point p, uint channel);
+	T& operator() (const Point &p);
+	T& operator() (const Point &p, uint channel);
 
 	/// Returns a reference to the element with range checking.
 	/// Throws std::out_of_range exception, if out of range.
 	T& at(uint x, uint y);
 	T& at(uint x, uint y, uint channel);
-	T& at(Point p);
-	T& at(Point p, uint channel);
+	T& at(const Point &p);
+	T& at(const Point &p, uint channel);
 
 	/// Assigns a given value to all elements.
 	void fill(const T &value);

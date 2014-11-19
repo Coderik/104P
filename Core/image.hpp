@@ -236,7 +236,7 @@ const T& ImageFx<T>::operator() (uint x, uint y, uint channel) const
  * Returns read-only value without range checking.
  */
 template <class T>
-const T& ImageFx<T>::operator() (Point p) const
+const T& ImageFx<T>::operator() (const Point &p) const
 {
 	return _data[index(p.x, p.y, 0)];
 }
@@ -246,7 +246,7 @@ const T& ImageFx<T>::operator() (Point p) const
  * Returns read-only value without range checking.
  */
 template <class T>
-const T& ImageFx<T>::operator() (Point p, uint channel) const
+const T& ImageFx<T>::operator() (const Point &p, uint channel) const
 {
 	return _data[index(p.x, p.y, channel)];
 }
@@ -287,7 +287,7 @@ const T& ImageFx<T>::at(uint x, uint y, uint channel) const
  * @note Throws std::out_of_range exception, if out of range.
  */
 template <class T>
-const T& ImageFx<T>::at(Point p) const
+const T& ImageFx<T>::at(const Point &p) const
 {
 	if (p.x >= _size_x || p.y >= _size_y) {
 		throw std::out_of_range("x or y coordinate is out of range");
@@ -302,7 +302,7 @@ const T& ImageFx<T>::at(Point p) const
  * @note Throws std::out_of_range exception, if out of range.
  */
 template <class T>
-const T& ImageFx<T>::at(Point p, uint channel) const
+const T& ImageFx<T>::at(const Point &p, uint channel) const
 {
 	if (p.x >= _size_x || p.y >= _size_y || channel >= _number_of_channels) {
 		throw std::out_of_range("channel, x or y coordinate is out of range");
@@ -354,7 +354,7 @@ bool ImageFx<T>::try_get_value(uint x, uint y, uint channel, T& value) const
  * @return Are given coordinates in range?
  */
 template <class T>
-bool ImageFx<T>::try_get_value(Point p, T& value) const
+bool ImageFx<T>::try_get_value(const Point &p, T& value) const
 {
 	if (p.x >= _size_x || p.y >= _size_y || !_data) {
 		return false;
@@ -372,7 +372,7 @@ bool ImageFx<T>::try_get_value(Point p, T& value) const
  * @return Are given coordinates in range?
  */
 template <class T>
-bool ImageFx<T>::try_get_value(Point p, uint channel, T& value) const
+bool ImageFx<T>::try_get_value(const Point &p, uint channel, T& value) const
 {
 	if (p.x >= _size_x || p.y >= _size_y || channel >= _number_of_channels || !_data) {
 		return false;
@@ -627,7 +627,7 @@ T& Image<T>::operator() (uint x, uint y, uint channel)
  * Returns a reference to the element without range checking.
  */
 template <class T>
-T& Image<T>::operator() (Point p)
+T& Image<T>::operator() (const Point &p)
 {
 	return this->_data[Image<T>::index(p.x, p.y, 0)];
 }
@@ -637,7 +637,7 @@ T& Image<T>::operator() (Point p)
  * Returns a reference to the element without range checking.
  */
 template <class T>
-T& Image<T>::operator() (Point p, uint channel)
+T& Image<T>::operator() (const Point &p, uint channel)
 {
 	return this->_data[Image<T>::index(p.x, p.y, channel)];
 }
@@ -678,7 +678,7 @@ T& Image<T>::at(uint x, uint y, uint channel)
  * @note Throws std::out_of_range exception, if out of range.
  */
 template <class T>
-T& Image<T>::at(Point p)
+T& Image<T>::at(const Point &p)
 {
 	if (p.x < 0 || p.x >= this->_size_x || p.y < 0 || p.y >= this->_size_y) {
 		throw std::out_of_range("x or y coordinate is out of range");
@@ -693,7 +693,7 @@ T& Image<T>::at(Point p)
  * @note Throws std::out_of_range exception, if out of range.
  */
 template <class T>
-T& Image<T>::at(Point p, uint channel)
+T& Image<T>::at(const Point &p, uint channel)
 {
 	if (p.x < 0 || p.x >= this->_size_x || p.y < 0 || p.y >= this->_size_y || channel >= this->_number_of_channels) {
 		throw std::out_of_range("channel, x or y coordinate is out of range");

@@ -39,6 +39,16 @@ MaskSequence::MaskSequence(uint size_x, uint size_y, uint size_t)
 }
 
 
+MaskSequence::MaskSequence(uint size_x, uint size_y, uint size_t, bool default_value)
+{
+	_frames.reserve(size_t);
+
+	for (uint i = 0; i < size_t; i++) {
+		_frames.push_back(Mask(size_x, size_y, default_value));
+	}
+}
+
+
 MaskSequence::MaskSequence(const Mask &frame, uint size_t)
 {
 	_frames.reserve(size_t);
@@ -138,6 +148,12 @@ bool& MaskSequence::operator() (uint x, uint y, uint t)
 }
 
 
+bool& MaskSequence::operator() (const Point &p)
+{
+	return _frames[p.t](p);
+}
+
+
 /// Returns value without range checking.
 const Mask& MaskSequence::operator[] (uint t) const
 {
@@ -211,9 +227,9 @@ MaskSequence::iterator MaskSequence::rend() const
 
 Point MaskSequence::first() const
 {
-	for (int t = 0; t < _size.size_t; t++) {
-		for (int y = 0; y < _size.size_y; y++) {
-			for (int x = 0; x < _size.size_x; x++) {
+	for (uint t = 0; t < _size.size_t; t++) {
+		for (uint y = 0; y < _size.size_y; y++) {
+			for (uint x = 0; x < _size.size_x; x++) {
 				if (_frames[t](x, y)) {
 					return Point(x, y, t);
 				}
@@ -227,9 +243,9 @@ Point MaskSequence::first() const
 
 Point MaskSequence::last() const
 {
-	for (int t = _size.size_t - 1; t >= 0; t--) {
-		for (int y = _size.size_y - 1; y >= 0; y--) {
-			for (int x = _size.size_x - 1; x >= 0; x--) {
+	for (uint t = _size.size_t - 1; t >= 0; t--) {
+		for (uint y = _size.size_y - 1; y >= 0; y--) {
+			for (uint x = _size.size_x - 1; x >= 0; x--) {
 				if (_frames[t](x, y)) {
 					return Point(x, y, t);
 				}
@@ -401,6 +417,12 @@ const bool& MaskSequenceFx::operator() (uint x, uint y, uint t) const
 }
 
 
+const bool& MaskSequenceFx::operator() (const Point &p) const
+{
+	return _frames[p.t](p);
+}
+
+
 /// Returns value without range checking.
 const MaskFx& MaskSequenceFx::operator[] (uint t) const
 {
@@ -474,9 +496,9 @@ MaskSequenceFx::iterator MaskSequenceFx::rend() const
 
 Point MaskSequenceFx::first() const
 {
-	for (int t = 0; t < _size.size_t; t++) {
-		for (int y = 0; y < _size.size_y; y++) {
-			for (int x = 0; x < _size.size_x; x++) {
+	for (uint t = 0; t < _size.size_t; t++) {
+		for (uint y = 0; y < _size.size_y; y++) {
+			for (uint x = 0; x < _size.size_x; x++) {
 				if (_frames[t](x, y)) {
 					return Point(x, y, t);
 				}
@@ -490,9 +512,9 @@ Point MaskSequenceFx::first() const
 
 Point MaskSequenceFx::last() const
 {
-	for (int t = _size.size_t - 1; t >= 0; t--) {
-		for (int y = _size.size_y - 1; y >= 0; y--) {
-			for (int x = _size.size_x - 1; x >= 0; x--) {
+	for (uint t = _size.size_t - 1; t >= 0; t--) {
+		for (uint y = _size.size_y - 1; y >= 0; y--) {
+			for (uint x = _size.size_x - 1; x >= 0; x--) {
 				if (_frames[t](x, y)) {
 					return Point(x, y, t);
 				}
@@ -508,9 +530,9 @@ Point MaskSequenceFx::next(const Point &current) const
 {
 	int from_x = current.x + 1;
 	int from_y = current.y;
-	for (int t = current.t; t < _size.size_t; t++) {
-		for (int y = from_y; y < _size.size_y; y++) {
-			for (int x = from_x; x < _size.size_x; x++) {
+	for (uint t = current.t; t < _size.size_t; t++) {
+		for (uint y = from_y; y < _size.size_y; y++) {
+			for (uint x = from_x; x < _size.size_x; x++) {
 				if (_frames[t](x, y)) {
 					return Point(x, y, t);
 				}

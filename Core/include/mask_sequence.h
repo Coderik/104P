@@ -26,6 +26,7 @@ public:
 	MaskSequence(Shape size);
 	MaskSequence(uint size_x, uint size_y);
 	MaskSequence(uint size_x, uint size_y, uint size_t);
+	MaskSequence(uint size_x, uint size_y, uint size_t, bool default_value);
 	MaskSequence(const Mask &frame, uint size_t = 1);
 	MaskSequence(const MaskFx &frame, uint size_t = 1);
 	~MaskSequence();
@@ -45,6 +46,7 @@ public:
 
 	// NOTE: added for convenience
 	bool& operator() (uint x, uint y, uint t);
+	bool& operator() (const Point &p);
 
 	/// Returns value without range checking.
 	const Mask& operator[] (uint t) const;
@@ -105,6 +107,7 @@ public:
 
 	// NOTE: added for convenience
 	const bool& operator() (uint x, uint y, uint t) const;
+	const bool& operator() (const Point &p) const;
 
 	/// Returns value without range checking.
 	const MaskFx& operator[] (uint t) const;
