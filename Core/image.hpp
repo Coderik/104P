@@ -390,7 +390,14 @@ bool ImageFx<T>::try_get_value(const Point &p, uint channel, T& value) const
 template <class T>
 const T* ImageFx<T>::raw() const
 {
-	return this->_data;
+	return _data;
+}
+
+
+template <class T>
+const uint ImageFx<T>::raw_length() const
+{
+	return _size_x * _size_y;
 }
 
 
