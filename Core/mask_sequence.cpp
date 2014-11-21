@@ -201,6 +201,14 @@ MaskSequence MaskSequence::clone() const
 }
 
 
+void MaskSequence::invert()
+{
+	for (uint t = 0; t < _size.size_t; t++) {
+		_frames[t].invert();
+	}
+}
+
+
 MaskSequence::iterator MaskSequence::begin() const
 {
 	return iterator(this, first());

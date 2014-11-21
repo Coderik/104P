@@ -228,6 +228,28 @@ T& Sequence<T>::operator() (const Point &p)
 }
 
 
+template<class T>
+bool Sequence<T>::try_get_value(uint x, uint y, uint t, T& value) const
+{
+	if (t >= _frames.size()) {
+		return false;
+	}
+
+	return _frames[t].try_get_value(x, y, value);
+}
+
+
+template<class T>
+bool Sequence<T>::try_get_value(const Point &p, T& value) const
+{
+	if (p.t >= _frames.size()) {
+		return false;
+	}
+
+	return _frames[p.t].try_get_value(p, value);
+}
+
+
 /// Returns value without range checking.
 template<class T>
 const Image<T>& Sequence<T>::operator[] (uint t) const
@@ -447,6 +469,28 @@ template<class T>
 const T& SequenceFx<T>::operator() (const Point &p) const
 {
 	return _frames[p.t](p);
+}
+
+
+template<class T>
+bool SequenceFx<T>::try_get_value(uint x, uint y, uint t, T& value) const
+{
+	if (t >= _frames.size()) {
+		return false;
+	}
+
+	return _frames[t].try_get_value(x, y, value);
+}
+
+
+template<class T>
+bool SequenceFx<T>::try_get_value(const Point &p, T& value) const
+{
+	if (p.t >= _frames.size()) {
+		return false;
+	}
+
+	return _frames[p.t].try_get_value(p, value);
 }
 
 

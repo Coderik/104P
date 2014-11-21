@@ -59,6 +59,9 @@ public:
 
 	MaskSequence clone() const;
 
+	/// Invert current mask.
+    void invert();
+
 	iterator begin() const;
 	iterator end() const;
 	iterator rbegin() const;

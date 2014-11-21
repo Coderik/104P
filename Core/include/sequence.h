@@ -57,6 +57,9 @@ public:
 	T& operator() (uint x, uint y, uint t);
 	T& operator() (const Point &p);
 
+	bool try_get_value(uint x, uint y, uint t, T& value) const;
+	bool try_get_value(const Point &p, T& value) const;
+
 	/// Returns value without range checking.
 	const Image<T>& operator[] (uint t) const;
 	Image<T>& operator[] (uint t);
@@ -105,6 +108,9 @@ public:
 	// NOTE: added for convenience
 	const T& operator() (uint x, uint y, uint t) const;
 	const T& operator() (const Point &p) const;
+
+	bool try_get_value(uint x, uint y, uint t, T& value) const;
+	bool try_get_value(const Point &p, T& value) const;
 
 	/// Returns value without range checking.
 	const ImageFx<T>& operator[] (uint t) const;
