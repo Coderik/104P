@@ -27,11 +27,11 @@ typedef BoundaryCondition::Enum BoundaryConditionEnum;
 class Interpolation
 {
 public:
-	static float bilinear(const Image<float> &input, float x, float y,
+	static float bilinear(const ImageFx<float> &input, float x, float y,
 			BoundaryConditionEnum boundary_condition = BoundaryCondition::neumann);
 	static float bilinear(const float *input, int size_x, int size_y, float x, float y,
 			BoundaryConditionEnum boundary_condition = BoundaryCondition::neumann);
-	static float bicubic(const Image<float> &input, float x, float y,
+	static float bicubic(const ImageFx<float> &input, float x, float y,
 			BoundaryConditionEnum boundary_condition = BoundaryCondition::neumann);
 	static float bicubic(const float *input, int size_x, int size_y, float x, float y,
 			BoundaryConditionEnum boundary_condition = BoundaryCondition::neumann);

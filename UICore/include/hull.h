@@ -59,7 +59,7 @@ public:
 	virtual void initialize_rigs();
 
 	// IHull members:
-	virtual Sequence<float>* request_sequence();
+	virtual SequenceFx<float> request_sequence();
 	virtual LayerManager* request_layer_manager();
 	virtual InteractionManager* request_interaction_manager();
 	virtual Gtk::Box* request_ui_placeholder();
@@ -108,7 +108,7 @@ private:
 	vector<IModule* > _modules;
 	vector<Fitting* > _fittings;
 	Fitting *_current_fitting;
-	Sequence<float> *_sequence;
+	SequenceFx<float> _sequence;
 	std::map<Descriptor, View* > _view_map;
 	Descriptor _active_view;
 	Descriptor _original_image_view;
@@ -126,7 +126,7 @@ private:
 
 	void refresh_view_menu();
 
-	Glib::RefPtr<Gdk::Pixbuf> wrap_raw_image_data(Image<float> *image);
+	Glib::RefPtr<Gdk::Pixbuf> wrap_raw_image_data(const ImageFx<float> &image);
 	void update_image_control(int current_time);
 	Glib::RefPtr<Gdk::Pixbuf> create_empty_pixbuf(int width, int height);
 	void show_status_message(std::string message);

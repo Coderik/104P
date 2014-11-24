@@ -68,7 +68,7 @@ Zach_TVL1_OpticalFlow::~Zach_TVL1_OpticalFlow()
 }
 
 
-bool Zach_TVL1_OpticalFlow::calculate(float *I0, float *I1, float *u1, float *u2, const int nx, const int ny)
+bool Zach_TVL1_OpticalFlow::calculate(const float *I0, const float *I1, float *u1, float *u2, const int nx, const int ny)
 {
 	const int   size = nx * ny;
 	const float l_t = _lambda * _tita;
@@ -220,7 +220,7 @@ bool Zach_TVL1_OpticalFlow::calculate(float *I0, float *I1, float *u1, float *u2
 }
 
 
-bool Zach_TVL1_OpticalFlow::calculate_with_multiscale(float *I0, float *I1, float *u1, float *u2, const int nxx, const int nyy)
+bool Zach_TVL1_OpticalFlow::calculate_with_multiscale(const float *I0, const float *I1, float *u1, float *u2, const int nxx, const int nyy)
 {
 	int size = nxx * nyy;
 

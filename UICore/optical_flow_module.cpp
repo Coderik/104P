@@ -65,13 +65,13 @@ void OpticalFlowModule::sequence_changed()
 	reset_vector_of_pointers(_backward_optical_flow_list, 0);
 	_has_optical_flow_data = false;
 
-	Sequence<float> *sequence = _modulable->request_sequence();
+	SequenceFx<float> sequence = _modulable->request_sequence();
 
-	if (!sequence) {
+	if (sequence.is_empty()) {
 		return;
 	}
 
-	_frames_amount = sequence->get_size_t();
+	_frames_amount = sequence.size_t();
 
 	if (_frames_amount > 1) {
 		_menu->set_sensitive(true);
@@ -81,13 +81,13 @@ void OpticalFlowModule::sequence_changed()
 		std::string optical_flow_file_name = _modulable->request_sequence_path();
 		optical_flow_file_name.append("optical_flow_data");
 
-		OFStatus status = check_optical_flow(optical_flow_file_name, sequence->get_size_x(), sequence->get_size_y(), 2 * (sequence->get_size_t() - 1));
+		OFStatus status = check_optical_flow(optical_flow_file_name, sequence.size_x(), sequence.size_y(), 2 * (sequence.size_t() - 1));
 		bool is_optical_flow_calculated = false;
 		_optical_flow_legacy_format = false;
 		if (status == STATUS_OK) {
 			is_optical_flow_calculated = true;
 		} else if (status == STATUS_NOT_VALID) {
-			status = check_optical_flow_legacy(optical_flow_file_name, sequence->get_size_x(), sequence->get_size_y(), sequence->get_size_t());
+			status = check_optical_flow_legacy(optical_flow_file_name, sequence.size_x(), sequence.size_y(), sequence.size_t());
 			if (status == STATUS_LEGACY_FORMAT) {
 				_optical_flow_legacy_format = true;
 				is_optical_flow_calculated = true;
@@ -99,8 +99,8 @@ void OpticalFlowModule::sequence_changed()
 		_proceed_menu_item->set_sensitive(false);
 
 		// [Re]set optical flow
-		reset_vector_of_pointers(_forward_optical_flow_list, sequence->get_size_t() - 1);
-		reset_vector_of_pointers(_backward_optical_flow_list, sequence->get_size_t() - 1);
+		reset_vector_of_pointers(_forward_optical_flow_list, sequence.size_t() - 1);
+		reset_vector_of_pointers(_backward_optical_flow_list, sequence.size_t() - 1);
 	} else {
 		_menu->set_sensitive(false);
 	}
@@ -297,7 +297,7 @@ void OpticalFlowModule::begin_optical_flow_calculation_internal(std::vector<int>
  */
 void OpticalFlowModule::calculate_optical_flow(IBackgroundInsider *insider, std::vector<int> task_list)
 {
-	Sequence<float> *sequence = _modulable->request_sequence();	// ?TODO: is this thread-safe?
+	SequenceFx<float> sequence = _modulable->request_sequence();	// ?TODO: is this thread-safe?
 
 	if (!sequence)
 		return;
@@ -309,9 +309,9 @@ void OpticalFlowModule::calculate_optical_flow(IBackgroundInsider *insider, std:
 	Zach_TVL1_OpticalFlow* opticalFlow = new Zach_TVL1_OpticalFlow(false);
 	opticalFlow->set_watchdog(watchdog);
 
-	int size_x = sequence->get_size_x();
-	int size_y = sequence->get_size_y();
-	int frame_count = sequence->get_size_t();
+	int size_x = sequence.size_x();
+	int size_y = sequence.size_y();
+	int frame_count = sequence.size_t();
 
 	// Fill task list, if empty
 	if (task_list.size() == 0) {
@@ -329,8 +329,8 @@ void OpticalFlowModule::calculate_optical_flow(IBackgroundInsider *insider, std:
 		// Get frames data
 		int first_index = std::abs(*it);
 		int second_index = (*it >= 0)? first_index + 1 : first_index - 1;
-		float* first_frame_data = sequence->get_frame(first_index)->get_raw_data();
-		float* second_frame_data = sequence->get_frame(second_index)->get_raw_data();
+		const float* first_frame_data = sequence.frame(first_index).raw();
+		const float* second_frame_data = sequence.frame(second_index).raw();
 
 		// Allocate memory for the flow
 		float *u1 = new float[size_x * size_y];

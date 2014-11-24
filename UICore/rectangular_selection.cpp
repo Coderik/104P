@@ -59,15 +59,16 @@ void RectangularSelection::left_button_released(MouseEvent event)
 		_end.x = event.x;
 		_end.y = event.y;
 
-		Sequence<float> *sequence = _hull->request_sequence();
+		SequenceFx<float> sequence = _hull->request_sequence();
 
 		if (sequence) {
-			SequenceMask mask = SequenceMask(sequence->get_size());
+			MaskSequence mask = MaskSequence(sequence.size());
 
 			int time = _hull->request_current_time();
+			Mask mask_frame = mask.frame(time);
 			for (int y = std::min(_begin.y, _end.y); y < std::max(_begin.y, _end.y); y++) {
 				for (int x = std::min(_begin.x, _end.x); x < std::max(_begin.x, _end.x); x++) {
-					mask.mask(x, y, time);
+					mask_frame.mask(x, y);
 				}
 			}
 

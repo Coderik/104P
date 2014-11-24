@@ -11,7 +11,7 @@
 #include "image_mask.h"
 
 // TODO: should components ne const?
-class CompositeImageMask : public ImageMask
+/*class CompositeImageMask : public ImageMask
 {
 public:
 	enum TypeOfOperation {
@@ -42,7 +42,7 @@ private:
 	TypeOfOperation _operation;
 
 	bool set_component(ImageMask *&new_ref, ImageMask *&existing_ref, bool &new_inverse_ref, ImageMask *component, bool inverse);
-};
+};*/
 
 
 #endif /* COMPOSITE_IMAGE_MASK_H_ */

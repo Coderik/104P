@@ -17,15 +17,15 @@ Shape::Shape()
 }
 
 
-Shape::Shape(unsigned int size_x, unsigned int size_y)
+Shape::Shape(uint size_x, uint size_y)
 {
 	this->size_x = size_x;
 	this->size_y = size_y;
-	size_t = 1;
+	this->size_t = 1;
 }
 
 
-Shape::Shape(unsigned int size_x, unsigned int size_y, unsigned int size_t)
+Shape::Shape(uint size_x, uint size_y, uint size_t)
 {
 	this->size_x = size_x;
 	this->size_y = size_y;
@@ -55,7 +55,7 @@ bool Shape::operator!= (const Shape &other) const
 
 bool Shape::is_empty() const
 {
-	return size_x == 0 || size_y == 0 || size_t == 0;
+	return size_x <= 0 || size_y <= 0 || size_t <= 0;
 }
 
 
@@ -69,12 +69,18 @@ bool Shape::contains(const Point &p) const
 
 
 /**
+ * True if point lies inside the shape (relative to the top left point).
+ */
+bool Shape::contains(int x, int y, int t) const
+{
+	return x >= 0 && y >= 0 && t >= 0 && (unsigned)x < size_x && (unsigned)y < size_y && (unsigned)t < size_t;
+}
+
+
+/**
  * True if point lies inside the shape (relative to the center point).
  */
 bool Shape::abs_contains(const Point &p) const
 {
-	return std::abs(p.x) * 2 < size_x && std::abs(p.y) * 2 < size_y && std::abs(p.t) * 2 < size_t;
+	return std::abs((float) p.x) * 2 < size_x && std::abs((float) p.y) * 2 < size_y;
 }
-
-
-

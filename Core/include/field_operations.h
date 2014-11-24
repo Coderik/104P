@@ -24,7 +24,7 @@ class FieldOperations
 public:
 	static void divergence(const float *v1, const float *v2, float *div, const int nx, const int ny);
 	static void forward_gradient(const float *f, float *fx, float *fy, const int nx, const int ny);
-	static void centered_gradient(float *in, float *dx, float *dy, const int nx, const int ny);
+	static void centered_gradient(const float *in,float *dx, float *dy, const int nx, const int ny);
 };
 
 #endif /* FIELD_OPERATIONS_H_ */

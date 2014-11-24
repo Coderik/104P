@@ -14,7 +14,7 @@
 #include <vector>
 
 #include "image.h"
-#include "image_mask.h"
+#include "mask.h"
 
 using namespace std;
 
@@ -27,7 +27,6 @@ namespace Distance {
 }
 typedef Distance::Enum DistanceEnum;
 
-// TODO: handle bool* as a mask and float* as an output
 class DistanceTransform
 {
 public:
@@ -36,16 +35,16 @@ public:
 	 * For each point assigns the distance to the nearest point NOT belonging to the mask
 	 * (masked points receive non-zero distances).
 	 */
-	static Image<float>* calculate(const ImageMask &mask, DistanceEnum distance_type = Distance::Euclidean);
+	static Image<float> calculate(const MaskFx &mask, DistanceEnum distance_type = Distance::Euclidean);
 
 	/**
 	 * For each point assigns the distance to the nearest point belonging to the mask
 	 * (unmasked points receive non-zero distances).
 	 */
-	static Image<float>* calculate_inverse(const ImageMask &mask, DistanceEnum distance_type = Distance::Euclidean);
+	static Image<float> calculate_inverse(const MaskFx &mask, DistanceEnum distance_type = Distance::Euclidean);
 
 private:
-	static Image<float>* calculate_internal(const ImageMask &mask, DistanceEnum distance_type, bool direct);
+	static Image<float> calculate_internal(const MaskFx &mask, DistanceEnum distance_type, bool direct);
 	static inline float f(int x, int x_i, float g_i, DistanceEnum distance_type);
 	static inline int sep(int i, int u, float g_i, float g_u, int inf, DistanceEnum distance_type);
 };

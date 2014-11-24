@@ -17,12 +17,12 @@ public:
 	SelectionInteraction(MaskGroup *group);
 	virtual ~SelectionInteraction() {}
 
-	SequenceMask* get_mask();
+	MaskSequenceFx get_mask();
 	MaskGroup* get_group();
 	void set_group(MaskGroup *group);
 
 	// ?TODO: not sure if this signal is helpful or it just introduces more confusion
-	typedef sigc::signal<void, SequenceMask* > type_signal_mask_changed;
+	typedef sigc::signal<void, MaskSequenceFx > type_signal_mask_changed;
 	type_signal_mask_changed signal_mask_changed() {
 		return _signal_mask_changed;
 	}

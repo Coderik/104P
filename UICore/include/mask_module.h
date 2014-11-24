@@ -28,13 +28,13 @@ public:
 	virtual void initialize(IModulable *modulable);
 
 	// IMaskProvider members
-	virtual SequenceMask* request_mask();
+	virtual MaskSequenceFx request_mask();
 
 	Glib::RefPtr<Gdk::Pixbuf> provide_mask_view(unsigned int time);
 
 private:
 	IModulable *_modulable;
-	SequenceMask *_mask;
+	MaskSequence _mask;
 	Descriptor _mask_view;
 	string _mask_file_name;
 	sigc::signal<void, bool> _signal_enable_mask_actions_menu_items;

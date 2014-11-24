@@ -19,7 +19,7 @@ Sequence<float> calculate_anisotropic_3d(unsigned int size_x, unsigned int size_
 
 	vector<float*> values = vector<float*>(size_z);
 	for (unsigned int i = 0; i < size_z; i++) {
-		values[i] = weights.get_frame(i)->get_raw_data();
+		values[i] = weights.frame(i).raw();
 	}
 
 	double x_a = - (float)size_x / 2;
@@ -121,8 +121,8 @@ Sequence<float> calculate_isotropic_3d(unsigned int size, float sigma)
 
 Image<float> calculate_anisotropic_2d(unsigned int size_x, unsigned int size_y, float sigma_x, float sigma_y)
 {
-	Image<float> weights(size_x, size_y, 0.0);
-	float *values = weights.get_raw_data();
+	Image<float> weights(size_x, size_y, 0.0f);
+	float *values = weights.raw();
 
 	double x_a = - (float)size_x / 2;
 	double y_a = - (float)size_y / 2;

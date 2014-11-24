@@ -8,6 +8,8 @@
 
 #include "point.h"
 
+Point Point::empty = Point(-1, -1);
+
 
 Point::Point()
 {
@@ -21,7 +23,7 @@ Point::Point(int x, int y)
 {
 	this->x = x;
 	this->y = y;
-	t = 0;
+	this->t = 0;
 }
 
 
@@ -112,6 +114,3 @@ const Point Point::spatial_subtract (const Point &p) const
 	result.y -= p.y;
 	return result;
 }
-
-
-

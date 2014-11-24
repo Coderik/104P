@@ -7,7 +7,7 @@
 
 #include "composite_image_mask.h"
 
-CompositeImageMask::CompositeImageMask()
+/*CompositeImageMask::CompositeImageMask()
 {
 	_points = 0;
 	_size_x = 0;
@@ -92,11 +92,11 @@ bool CompositeImageMask::set_second(ImageMask *component, bool inverse)
 void CompositeImageMask::set_type_of_operation(TypeOfOperation value)
 {
 	_operation = value;
-}
+}*/
 
 /* Private */
 
-bool CompositeImageMask::set_component(ImageMask *&new_ref,
+/*bool CompositeImageMask::set_component(ImageMask *&new_ref,
 										ImageMask *&existing_ref,
 										bool &new_inverse_ref,
 										ImageMask *component,
@@ -125,7 +125,7 @@ bool CompositeImageMask::set_component(ImageMask *&new_ref,
 	new_inverse_ref = inverse;
 
 	return true;
-}
+}*/
 
 
 
