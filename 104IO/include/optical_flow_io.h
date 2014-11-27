@@ -15,36 +15,42 @@
 #include <fstream>
 #include <vector>
 
-#include "optical_flow_container.h"
+#include "image.h"
 
+using namespace std;
 
-struct OFHeader
+class OpticalFlowIO
 {
-	char signature[2];
-	int version, size_x, size_y, chunks_count;
-};
+public:
+	enum OFStatus
+	{
+		STATUS_OK,
+		STATUS_NO_FILE,
+		STATUS_NOT_VALID,
+		STATUS_LEGACY_FORMAT
+	};
 
-enum OFStatus
-{
-	STATUS_OK,
-	STATUS_NO_FILE,
-	STATUS_NOT_VALID,
-	STATUS_LEGACY_FORMAT
-};
+	static OFStatus check_optical_flow(const string &file_name, int size_x, int size_y, int chunks_count);
+	static void update_or_overwrite_flow(const string &file_name, const float *flow, int size_x, int size_y, int chunk_id, int chunks_count);
+	static void update_or_overwrite_flow(const string &file_name, const ImageFx<float> &flow, int chunk_id, int chunks_count);
+	static bool read_flow(const string &file_name, float *&flow, int &size_x, int &size_y, int chunk_id);
+	static Image<float> read_flow(const string &file_name, int chunk_id);
+	// TODO: add method for reading all chunks at a time. To do so, it might be necessary
+	// to move OpticalFlow class inside the library and use vector<OpticalFlow> to return all flows.
+	// In that case it could be a good idea to inherit from the OpticalFlow in UI project and
+	// put all methods for drawing views of optical flow in that child class.
+	static vector<Image<float> > read_whole_direction_data(const string &file_name, bool forward_direction);
+private:
+	struct OFHeader
+	{
+		char signature[2];
+		int version, size_x, size_y, chunks_count;
+	};
 
-extern OFStatus check_optical_flow(const std::string &file_name, int size_x, int size_y, int chunks_count);
-extern void update_or_overwrite_flow(const std::string &file_name, const float *flow_x, const float *flow_y, int size_x, int size_y, int chunk_id, int chunks_count);
-extern void update_or_overwrite_flow(const std::string &file_name, OpticalFlowContainer &flow, int chunk_id, int chunks_count);
-extern bool read_flow(const std::string &file_name, float *&flow_x, float *&flow_y, int &size_x, int &size_y, int chunk_id);
-// TODO: add method for reading all chunks at a time. To do so, it might be necessary
-// to move OpticalFlow class inside the library and use vector<OpticalFlow> to return all flows.
-// In that case it could be a good idea to inherit from the OpticalFlow in UI project and
-// put all methods for drawing views of optical flow in that child class.
-extern bool read_whole_direction_data(const std::string &file_name, bool forward_direction, std::vector<OpticalFlowContainer*> &out_optical_flow_list);
-/* private */
-extern bool check_header(OFHeader header);
-extern void update_flow(std::fstream &file, const float *flow_x, const float *flow_y, int size_x, int size_y, int chunk_id, int chunks_count);
-extern void overwrite_flow(const std::string &file_name, const float *flow_x, const float *flow_y, int size_x, int size_y, int chunk_id, int chunks_count);
+	static bool check_header(OFHeader header);
+	static void update_flow(fstream &file, const float *flow, int size_x, int size_y, int chunk_id, int chunks_count);
+	static void overwrite_flow(const string &file_name, const float *flow, int size_x, int size_y, int chunk_id, int chunks_count);
+};
 
 
 #endif /* OPTICAL_FLOW_IO_H_ */

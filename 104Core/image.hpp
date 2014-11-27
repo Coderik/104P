@@ -180,7 +180,7 @@ ImageFx<T>::operator bool() const
 template <class T>
 bool ImageFx<T>::is_empty() const
 {
-	return _ref != 0;
+	return _ref == 0;
 }
 
 

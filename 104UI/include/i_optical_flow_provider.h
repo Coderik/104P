@@ -9,7 +9,7 @@
 #define I_OPTICAL_FLOW_PROVIDER_H_
 
 #include <vector>
-#include "optical_flow_container.h"
+#include "image.h"
 
 using namespace std;
 
@@ -18,8 +18,8 @@ class IOpticalFlowProvider
 public:
 	virtual ~IOpticalFlowProvider() {}
 
-	virtual vector<OpticalFlowContainer*> request_forward_optical_flow() = 0;
-	virtual vector<OpticalFlowContainer*> request_backward_optical_flow() = 0;
+	virtual vector<Image<float> > request_forward_optical_flow() = 0;
+	virtual vector<Image<float> > request_backward_optical_flow() = 0;
 	virtual bool request_has_optical_flow_data() = 0;
 };
 
