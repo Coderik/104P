@@ -71,6 +71,15 @@ bool Shape::contains(const Point &p) const
 /**
  * True if point lies inside the shape (relative to the top left point).
  */
+bool Shape::contains(int x, int y) const
+{
+	return x >= 0 && y >= 0 && (unsigned)x < size_x && (unsigned)y < size_y;
+}
+
+
+/**
+ * True if point lies inside the shape (relative to the top left point).
+ */
 bool Shape::contains(int x, int y, int t) const
 {
 	return x >= 0 && y >= 0 && t >= 0 && (unsigned)x < size_x && (unsigned)y < size_y && (unsigned)t < size_t;

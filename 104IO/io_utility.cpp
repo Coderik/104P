@@ -145,16 +145,74 @@ void IOUtility::write_mono_image(const string &name, const ImageFx<float> &image
 }
 
 
+Image<float> IOUtility::read_rgb_image(const string &name)
+{
+	int width, height;
+
+	float *image_data = iio_read_image_float_rgb(name.data(), &width, &height);
+
+   if (! image_data) {
+      fprintf(stderr, "read_rgb_image: cannot read %s\n", name.data());
+      exit(1);
+   }
+
+	Image<float> image(width, height, (uint)3);
+
+	// copy from image_data to Image<float>
+	for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++) {
+			int index = 3 * (y * width + x);
+			image(x, y, 0) = image_data[index];
+			image(x, y, 1) = image_data[index + 1];
+			image(x, y, 2) = image_data[index + 2];
+		}
+	}
+
+	free(image_data);
+
+	return image;
+}
+
+
+void IOUtility::write_rgb_image(const string &name, const ImageFx<float> &image)
+{
+	int width = image.size_x();
+	int height = image.size_y();
+
+	float *image_data = new float[width * height * 3];
+
+	// copy from Image<float> to image_data
+	for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++) {
+			int index = 3 * (y * width + x);
+			image_data[index + 0] = image(x, y, 0);
+			image_data[index + 1] = image(x, y, 1);
+			image_data[index + 2] = image(x, y, 2);
+		}
+	}
+
+	iio_save_image_float_vec(const_cast<char* >(name.data()), image_data, width, height, 3);
+
+   delete[] image_data;
+}
+
+
 void IOUtility::write_float_image(const string &name, const ImageFx<float> &image)
 {
 	iio_save_image_float_split(const_cast<char*>(name.data()), const_cast<float*>(image.raw()), image.size_x(), image.size_y(), 1);
 }
 
 
+string IOUtility::compose_file_name(const string &name)
+{
+	return _prefix + name;
+}
+
+
 string IOUtility::compose_file_name(const string &name, int index, const string &extension)
 {
 	stringstream stream;
-	stream << name << "_" << setfill('0') << setw(3) << index << "." << extension;
+	stream << _prefix << name << "_" << setfill('0') << setw(3) << index << "." << extension;
 	string file_name = stream.str();
 	return file_name;
 }
@@ -163,9 +221,15 @@ string IOUtility::compose_file_name(const string &name, int index, const string 
 string IOUtility::compose_file_name(const string &name, int index, int index2, const string &extension)
 {
 	stringstream stream;
-	stream << name << "_" << index << "_" << setw(3) << setfill('0') << index2 << "." << extension;
+	stream << _prefix << name << "_" << index << "_" << setw(3) << setfill('0') << index2 << "." << extension;
 	string file_name = stream.str();
 	return file_name;
+}
+
+
+void IOUtility::set_prefix(const string &prefix)
+{
+	_prefix = prefix;
 }
 
 /* Private */

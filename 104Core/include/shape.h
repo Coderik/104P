@@ -35,6 +35,7 @@ struct Shape
 
 	bool is_empty() const;
 	bool contains(const Point &p) const;
+	bool contains(int x, int y) const;
 	bool contains(int x, int y, int t) const;
 	bool abs_contains(const Point &p) const;
 
