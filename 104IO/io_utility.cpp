@@ -7,6 +7,8 @@
 
 #include "io_utility.h"
 
+string IOUtility::_prefix = "";
+
 /**
  * Reads image in PGM format from file with provided path\name
  * to the object of 'Image' class
