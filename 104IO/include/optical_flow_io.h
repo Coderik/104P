@@ -19,6 +19,9 @@
 
 using namespace std;
 
+/**
+ * Contains methods for reading and writings [optical] flow.
+ */
 class OpticalFlowIO
 {
 public:

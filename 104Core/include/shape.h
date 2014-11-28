@@ -13,6 +13,9 @@
 
 typedef unsigned int uint;
 
+/**
+ * Container for 2d shape (size_x is width, size_y is height) plus duration size_t.
+ */
 struct Shape
 {
 	uint size_x, size_y, size_t;

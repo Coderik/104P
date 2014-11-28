@@ -27,6 +27,10 @@ namespace Distance {
 }
 typedef Distance::Enum DistanceEnum;
 
+/**
+ * Implementation of "A General Algorithm for Computing
+ * Distance Transforms in Linear Time" by Meijster et al.
+ */
 class DistanceTransform
 {
 public:
