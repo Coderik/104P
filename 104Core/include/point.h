@@ -8,6 +8,9 @@
 #ifndef POINT_H_
 #define POINT_H_
 
+/**
+ * Container for 2d coordinates (x, y) plus time t.
+ */
 struct Point
 {
 	int x, y, t;

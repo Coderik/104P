@@ -14,6 +14,7 @@
 
 using namespace std;
 
+// forward declaration
 class MaskSequenceFx;
 
 class MaskSequence : public IIterableMask

@@ -51,6 +51,7 @@ public:
 	MaskFx& operator= (const Mask &other);			// without data copying, ref++
 	MaskFx& operator= (const MaskFx &other);		// without data copying, ref++
 
+	/// Return iterators to the begin/end of the masked region
 	iterator begin() const;
 	iterator end() const;
 	iterator rbegin() const;

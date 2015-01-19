@@ -14,6 +14,9 @@
 
 using namespace std;
 
+/**
+ * Contains methods for calculating discrete Gaussian kernel.
+ */
 namespace GaussianWeights {
 
 static const unsigned int SEGMENTS = 1;	// NOTE: 1 means no integration

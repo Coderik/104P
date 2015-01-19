@@ -22,10 +22,14 @@ extern "C" {
 
 using namespace std;
 
-// TODO: add iio support
+/**
+ * Contains methods for reading and writings images as well as
+ * some auxiliary methods. Acts as a proxy for IIO library.
+ */
 class IOUtility
 {
 public:
+	/// Reading and writing of a grayscale image without IIO.
 	static Image<float> read_pgm_image(const string &name);
 	static void write_pgm_image(const string &name, const ImageFx<float> &image);
 
@@ -33,12 +37,20 @@ public:
 	static Image<float> read_mono_image(const string &name);
 	static void write_mono_image(const string &name, const ImageFx<float> &image);
 
+	/// Reading and writing for a colored image using IIO.
+	static Image<float> read_rgb_image(const string &name);
+	static void write_rgb_image(const string &name, const ImageFx<float> &image);
+
 	static void write_float_image(const string &name, const ImageFx<float> &image);
 
+	static string compose_file_name(const string &name);
 	static string compose_file_name(const string &name, int index, const string &extension);
 	static string compose_file_name(const string &name, int index, int index2, const string &extension);
+	static void set_prefix(const string &prefix);
 
 private:
+	static string _prefix;
+
 	static void skip_spaces_and_comments(FILE * f);
 	static int get_number(FILE * f);
 };

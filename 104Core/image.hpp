@@ -180,7 +180,7 @@ ImageFx<T>::operator bool() const
 template <class T>
 bool ImageFx<T>::is_empty() const
 {
-	return _ref != 0;
+	return _ref == 0;
 }
 
 
@@ -626,7 +626,7 @@ T& Image<T>::operator() (uint x, uint y)
 template <class T>
 T& Image<T>::operator() (uint x, uint y, uint channel)
 {
-	return this->_data[Image<T>::get_index(x, y, channel)];
+	return this->_data[Image<T>::index(x, y, channel)];
 }
 
 

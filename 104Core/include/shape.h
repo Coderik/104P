@@ -13,6 +13,9 @@
 
 typedef unsigned int uint;
 
+/**
+ * Container for 2d shape (size_x is width, size_y is height) plus duration size_t.
+ */
 struct Shape
 {
 	uint size_x, size_y, size_t;
@@ -32,6 +35,7 @@ struct Shape
 
 	bool is_empty() const;
 	bool contains(const Point &p) const;
+	bool contains(int x, int y) const;
 	bool contains(int x, int y, int t) const;
 	bool abs_contains(const Point &p) const;
 
