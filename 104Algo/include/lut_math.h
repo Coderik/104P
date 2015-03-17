@@ -5,13 +5,16 @@
  *      Author: Vadim Fedorov
  */
 
-#ifndef FAST_MATH_H_
-#define FAST_MATH_H_
+#ifndef LUT_MATH_H_
+#define LUT_MATH_H_
 
-class FastMath
+/**
+ * @brief Look-Up Table math
+ */
+class LUT
 {
 public:
-	static double lut_exp(double x);
+	static double exp(double x);
 
 private:
 	union float_long {
@@ -23,4 +26,4 @@ private:
 
 
 
-#endif /* FAST_MATH_H_ */
+#endif /* LUT_MATH_H_ */

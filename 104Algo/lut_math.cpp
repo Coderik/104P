@@ -5,12 +5,12 @@
  *      Author: Vadim Fedorov
  */
 
-#include "fast_math.h"
+#include "lut_math.h"
 
 /**
  * @brief Look-up table implementation of exponent
  */
-double FastMath::lut_exp(double x)
+double LUT::exp(double x)
 {
 	float_long tmp;
 	tmp.l = 1512775 * x + 1072632447;
@@ -21,7 +21,7 @@ double FastMath::lut_exp(double x)
 
 /* Private */
 
-double FastMath::ExpAdjustment[256]= {
+double LUT::ExpAdjustment[256]= {
 			1.040389835,
 			1.039159306,
 			1.037945888,
