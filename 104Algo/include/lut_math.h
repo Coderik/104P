@@ -8,13 +8,29 @@
 #ifndef LUT_MATH_H_
 #define LUT_MATH_H_
 
+#include <limits>
+
 /**
  * @brief Look-Up Table math
  */
 class LUT
 {
 public:
+	/// @brief Look-up table implementation of exponent
+	/// @note: make sure to use this method only for the range (-709; 709).
+	///        For automatic range check use LUT::exp_rc version.
 	static double exp(double x);
+
+
+
+	/// @brief Look-up table implementation of exponent with range check.
+	static double exp_rc(double x);
+
+	/// @brief Look-up table implementation of exponent with negative boundary of the range check.
+	static double exp_rcn(double x);
+
+	/// @brief Look-up table implementation of exponent with positive boundary of the range check.
+	static double exp_rcp(double x);
 
 private:
 	union float_long {

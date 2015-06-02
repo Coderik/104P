@@ -9,9 +9,66 @@
 
 /**
  * @brief Look-up table implementation of exponent
+ * @note: make sure to use this method only for the range (-709; 709).
+ *        For automatic range check use LUT::exp_rc version.
  */
 double LUT::exp(double x)
 {
+	float_long tmp;
+	tmp.l = 1512775 * x + 1072632447;
+	int index = (int)(tmp.l >> 12) & 0xFF;
+	tmp.l = tmp.l << 32;
+	return tmp.f * ExpAdjustment[index];
+}
+
+
+/**
+ * @brief Look-up table implementation of exponent with range check.
+ */
+double LUT::exp_rc(double x)
+{
+	if (x > 709.0) {
+		return std::numeric_limits<double>::infinity();
+	}
+	if (x < -709.0) {
+		return 0.0;
+	}
+
+	float_long tmp;
+	tmp.l = 1512775 * x + 1072632447;
+	int index = (int)(tmp.l >> 12) & 0xFF;
+	tmp.l = tmp.l << 32;
+	return tmp.f * ExpAdjustment[index];
+}
+
+
+
+/**
+ * @brief Look-up table implementation of exponent with negative boundary of the range check.
+ */
+double LUT::exp_rcn(double x)
+{
+	if (x < -709.0) {
+		return 0.0;
+	}
+
+	float_long tmp;
+	tmp.l = 1512775 * x + 1072632447;
+	int index = (int)(tmp.l >> 12) & 0xFF;
+	tmp.l = tmp.l << 32;
+	return tmp.f * ExpAdjustment[index];
+}
+
+
+/**
+ * @brief Look-up table implementation of exponent with positive boundary of the range check.
+ */
+double LUT::exp_rcp(double x)
+{
+	if (x > 709.0) {
+		return std::numeric_limits<double>::infinity();
+	}
+
 	float_long tmp;
 	tmp.l = 1512775 * x + 1072632447;
 	int index = (int)(tmp.l >> 12) & 0xFF;
