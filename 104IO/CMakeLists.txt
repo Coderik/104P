@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 2.8)
 project(104IO)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
@@ -70,11 +70,11 @@ SET(LIBS ${DEPENDENCIES}
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/build)     # location for the target
 add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES})                 # static library
 target_link_libraries(${PROJECT_NAME} ${LIBS})
-target_include_directories(${PROJECT_NAME} INTERFACE ${PROJECT_SOURCE_DIR}/inlude)
+get_filename_component(ABSOLUTE_INCLUDE_PATH ${PROJECT_SOURCE_DIR}/include ABSOLUTE)
+set(${PROJECT_NAME}_INCLUDE_DIRS ${ABSOLUTE_INCLUDE_PATH} CACHE INTERNAL "${PROJECT_NAME}: Include Directories" FORCE)
 
 # Add dependencies themself and include directories from the dependencies.
 foreach(DEP ${DEPENDENCIES})
-    get_target_property(DEP_INCLUDE ${DEP} INCLUDE_DIRECTORIES)
     add_dependencies(${PROJECT_NAME} ${DEP})
-    include_directories(${DEP_INCLUDE})
+    include_directories(${${DEP}_INCLUDE_DIRS})
 endforeach(DEP)
