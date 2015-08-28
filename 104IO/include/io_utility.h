@@ -43,6 +43,10 @@ public:
 
 	static void write_float_image(const string &name, const ImageFx<float> &image);
 
+	static Image<float> rgb_to_lab(ImageFx<float> image);
+	static Image<float> lab_to_rgb(ImageFx<float> image);
+	static Image<float> rgb_to_gray(ImageFx<float> image);
+
 	static string compose_file_name(const string &name);
 	static string compose_file_name(const string &name, int index, const string &extension);
 	static string compose_file_name(const string &name, int index, int index2, const string &extension);
@@ -53,6 +57,11 @@ private:
 
 	static void skip_spaces_and_comments(FILE * f);
 	static int get_number(FILE * f);
+
+	static void rgb_to_xyz(const float *rgb, float *xyz);
+	static void xyz_to_lab(const float *xyz, float *lab);
+	static void lab_to_xyz(const float *lab, float *xyz);
+	static void xyz_to_rgb(const float *xyz, float *rgb);
 };
 
 

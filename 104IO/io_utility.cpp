@@ -205,6 +205,73 @@ void IOUtility::write_float_image(const string &name, const ImageFx<float> &imag
 }
 
 
+Image<float> IOUtility::rgb_to_lab(ImageFx<float> image)
+{
+	if (image.number_of_channels() != 3) {
+		return image;
+	}
+
+	Image<float> image_lab(image.size(), 3, 0.0f);
+	const float* data_rgb = image.raw();
+	float* data_lab = image_lab.raw();
+	long number_of_pixels = image.size_x() * image.size_y();
+	float *xyz_buffer = new float[3];
+
+	//#pragma omp parallel for
+	for (int i = 0; i < number_of_pixels; i++) {
+		rgb_to_xyz(data_rgb + i * 3, xyz_buffer);
+		xyz_to_lab(xyz_buffer, data_lab + i * 3);
+	}
+
+	delete[] xyz_buffer;
+
+	return image_lab;
+}
+
+
+Image<float> IOUtility::lab_to_rgb(ImageFx<float> image)
+{
+	if (image.number_of_channels() != 3) {
+		return image;
+	}
+
+	Image<float> image_rgb(image.size(), 3, 0.0f);
+	const float* data_lab = image.raw();
+	float* data_rgb = image_rgb.raw();
+	long number_of_pixels = image.size_x() * image.size_y();
+	float *xyz_buffer = new float[3];
+
+	//#pragma omp parallel for
+	for (int i = 0; i < number_of_pixels; i++) {
+		lab_to_xyz(data_lab + i * 3, xyz_buffer);
+		xyz_to_rgb(xyz_buffer, data_rgb + i * 3);
+	}
+
+	delete[] xyz_buffer;
+
+	return image_rgb;
+}
+
+
+Image<float> IOUtility::rgb_to_gray(ImageFx<float> image)
+{
+	if (image.number_of_channels() != 3) {
+		return image;
+	}
+
+	Image<float> image_gray(image.size(), 1, 0.0f);
+	float* data_gray = image_gray.raw();
+	const float *data_rgb = image.raw();
+	long number_of_pixels = image.size_x() * image.size_y();
+
+	for (int i = 0; i < number_of_pixels; i++) {
+		data_gray[i] = 0.2989f * data_rgb[3 * i] + 0.5870f * data_rgb[3 * i + 1] + 0.1140f * data_rgb[3 * i + 2];
+	}
+
+	return image_gray;
+}
+
+
 string IOUtility::compose_file_name(const string &name)
 {
 	return _prefix + name;
@@ -262,6 +329,79 @@ int IOUtility::get_number(FILE * f)
 	while( isdigit(c=fgetc(f)) ) num = 10 * num + c - '0';
 
 	return num;
+}
+
+
+void IOUtility::rgb_to_xyz(const float *rgb, float *xyz)
+{
+	float aux_r = rgb[0] / 255.0f;
+	float aux_g = rgb[1] / 255.0f;
+	float aux_b = rgb[2] / 255.0f;
+
+	aux_r = (aux_r > 0.04045f) ? pow((aux_r + 0.055f) / 1.055f , 2.4f) : aux_r / 12.92f;
+	aux_g = (aux_g > 0.04045f) ? pow((aux_g + 0.055f) / 1.055f , 2.4f) : aux_g / 12.92f;
+	aux_b = (aux_b > 0.04045f) ? pow((aux_b + 0.055f) / 1.055f , 2.4f) : aux_b / 12.92f;
+
+	aux_r *= 100.0f;
+	aux_g *= 100.0f;
+	aux_b *= 100.0f;
+
+	xyz[0] = aux_r * 0.412453f + aux_g * 0.357580f + aux_b * 0.180423f;
+	xyz[1] = aux_r * 0.212671f + aux_g * 0.715160f + aux_b * 0.072169f;
+	xyz[2] = aux_r * 0.019334f + aux_g * 0.119193f + aux_b * 0.950227f;
+}
+
+
+void IOUtility::xyz_to_lab(const float *xyz, float *lab)
+{
+	// normalize by the reference white
+	float aux_x = xyz[0] / 95.047f;
+	float aux_y = xyz[1] / 100.000f;
+	float aux_z = xyz[2] / 108.883f;
+
+	aux_x = (aux_x > 0.008856f) ? pow(aux_x, 1.0f / 3.0f) : (7.787f * aux_x) + (16.0f / 116.0f);
+	aux_y = (aux_y > 0.008856f) ? pow(aux_y, 1.0f / 3.0f) : (7.787f * aux_y) + (16.0f / 116.0f);
+	aux_z = (aux_z > 0.008856f) ? pow(aux_z, 1.0f / 3.0f) : (7.787f * aux_z) + (16.0f / 116.0f);
+
+	lab[0] = (116.0f * aux_y) - 16.0f;
+	lab[1] = 500.0f * (aux_x - aux_y);
+	lab[2] = 200.0f * (aux_y - aux_z);
+}
+
+
+void IOUtility::lab_to_xyz(const float *lab, float *xyz)
+{
+	float aux_y = (lab[0] + 16.0f) / 116.0f;
+	float aux_x = lab[1] / 500.0f + aux_y;
+	float aux_z = aux_y - lab[2] / 200.0f;
+
+	aux_x = (pow(aux_x, 3.0f) > 0.008856f) ? pow(aux_x, 3.0f) : (aux_x - 16.0f / 116.0f) / 7.787f;
+	aux_y = (pow(aux_y, 3.0f) > 0.008856f) ? pow(aux_y, 3.0f) : (aux_y - 16.0f / 116.0f) / 7.787f;
+	aux_z = (pow(aux_z, 3.0f) > 0.008856f) ? pow(aux_z, 3.0f) : (aux_z - 16.0f / 116.0f) / 7.787f;
+
+	xyz[0] = aux_x * 95.047f;
+	xyz[1] = aux_y * 100.000f;
+	xyz[2] = aux_z * 108.883f;
+}
+
+
+void IOUtility::xyz_to_rgb(const float *xyz, float *rgb)
+{
+	float aux_x = xyz[0] / 100.0f;
+	float aux_y = xyz[1] / 100.0f;
+	float aux_z = xyz[2] / 100.0f;
+
+	float aux_r = aux_x *  3.240479f + aux_y * -1.537150f + aux_z * -0.498535f;
+	float aux_g = aux_x * -0.969256f + aux_y *  1.875992f + aux_z *  0.041556f;
+	float aux_b = aux_x *  0.055648f + aux_y * -0.204043f + aux_z *  1.057311f;
+
+	aux_r = (aux_r > 0.0031308f) ? 1.055f * pow(aux_r, 1.0f / 2.4f) - 0.055f : 12.92f * aux_r;
+	aux_g = (aux_g > 0.0031308f) ? 1.055f * pow(aux_g, 1.0f / 2.4f) - 0.055f : 12.92f * aux_g;
+	aux_b = (aux_b > 0.0031308f) ? 1.055f * pow(aux_b, 1.0f / 2.4f) - 0.055f : 12.92f * aux_b;
+
+	rgb[0] = aux_r * 255.0f;
+	rgb[1] = aux_g * 255.0f;
+	rgb[2] = aux_b * 255.0f;
 }
 
 
