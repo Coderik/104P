@@ -7,7 +7,8 @@
 
 #include "numerical_entry.h"
 
-const int NumericalEntry::MIN_WIDTH;
+const int NumericalEntry::MIN_WIDTH = 20;
+const float NumericalEntry::EPS = FLT_EPSILON * 6;
 
 NumericalEntry::NumericalEntry(unsigned int digits)
 : Gtk::Entry()

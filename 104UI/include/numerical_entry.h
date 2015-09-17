@@ -36,8 +36,8 @@ public:
 	double get_value();
 
 private:
-	static const float EPS = FLT_EPSILON * 6;
-	static const int MIN_WIDTH = 20;
+	static const float EPS;
+	static const int MIN_WIDTH;
 	Glib::RefPtr<Gtk::Adjustment> _adjustment;
 	unsigned int _digits;
 	sigc::connection _connection_adjustment_signal_value_changed;

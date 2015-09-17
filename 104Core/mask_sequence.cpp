@@ -16,9 +16,13 @@ MaskSequence::MaskSequence()
 
 
 MaskSequence::MaskSequence(Shape size)
-: _size(size.size_x, size.size_y, 0)
+: _size(size.size_x, size.size_y, size.size_t)
 {
 	_frames.reserve(size.size_t);
+
+    for (uint i = 0; i < size.size_t; i++) {
+        _frames.push_back(Mask(size));
+    }
 }
 
 
