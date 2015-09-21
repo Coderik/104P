@@ -20,12 +20,14 @@
 #include "i_list_parameter.h"
 #include "numerical_entry.h"
 
-using namespace std;
+using std::vector;
 
 class ParametersUIBuilder
 {
 public:
-	ParametersUIBuilder(IParameterizable *parameterizable);
+	ParametersUIBuilder(IParameterizable *parameterizable = 0); // TODO: eventually remove IParameterizable from params
+
+    void add_parameter(IParameter *parameter);
 
 	Gtk::VBox* get_ui();
 
@@ -37,7 +39,7 @@ public:
 
 private:
 	type_signal_changed _signal_changed;
-	IParameterizable *_parameterizable;
+    vector<IParameter*> _parameters;
 	Gtk::VBox *_ui;
 
 	Gtk::VBox* build_ui();

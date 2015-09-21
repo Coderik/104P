@@ -11,9 +11,17 @@
 ParametersUIBuilder::ParametersUIBuilder(IParameterizable *parameterizable)
 {
 	_ui = 0;
-	_parameterizable = parameterizable;
+
+	if (parameterizable) {
+        _parameters = parameterizable->get_parameters();
+    }
 }
 
+
+void ParametersUIBuilder::add_parameter(IParameter *parameter)
+{
+    _parameters.push_back(parameter);
+}
 
 Gtk::VBox* ParametersUIBuilder::get_ui()
 {
@@ -24,21 +32,20 @@ Gtk::VBox* ParametersUIBuilder::get_ui()
 	return _ui;
 }
 
+
 /* Private */
 
 Gtk::VBox* ParametersUIBuilder::build_ui()
 {
 	Gtk::VBox *parameters_box = new Gtk::VBox();
-	vector<IParameter*> parameters = _parameterizable->get_parameters();
 
-	if (parameters.size() == 0) {
+	if (_parameters.size() == 0) {
 		Gtk::Label *no_parameters_label = new Gtk::Label("No parameters to configure");
 		parameters_box->pack_start(*no_parameters_label, Gtk::PACK_SHRINK);
 		return parameters_box;
 	}
 
-	vector<IParameter*>::iterator it;
-	for (it = parameters.begin(); it != parameters.end(); ++it) {
+	for (auto it = _parameters.begin(); it != _parameters.end(); ++it) {
 		if (IRangeParameter *parameter = dynamic_cast<IRangeParameter*>(*it)) {
 			// create new slider for range parameter
 			Gtk::Frame *frame = new Gtk::Frame(parameter->get_display_name());
@@ -94,11 +101,9 @@ void ParametersUIBuilder::set_range_parameter(Gtk::Scale *slider, IRangeParamete
 	_signal_changed.emit();
 }
 
-
 void ParametersUIBuilder::set_list_parameter(Gtk::ComboBoxText *combo_box, IListParameter *parameter)
 {
 	int id = combo_box->get_active_row_number();
 	parameter->set(id);
 	_signal_changed.emit();
 }
-
