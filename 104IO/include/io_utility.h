@@ -9,6 +9,7 @@
 #define IO_UTILITY_H_
 
 #include <string>
+#include <iostream>
 #include <sstream>
 #include <iomanip>
 #include <stdio.h>

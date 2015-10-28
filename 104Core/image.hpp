@@ -12,7 +12,7 @@
 
 template <class T>
 ImageFx<T>::ImageFx()
- : _size_x(0), _size_y(0), _number_of_channels(0), _data(0), _ref(0)
+ : _size_x(0), _size_y(0), _number_of_channels(0), _color_space(ColorSpaces::unknown), _data(0), _ref(0)
 {
 
 }
@@ -20,7 +20,7 @@ ImageFx<T>::ImageFx()
 
 template <class T>
 ImageFx<T>::ImageFx(uint size_x, uint size_y)
- : _size_x(size_x), _size_y(size_y), _number_of_channels(1)
+ : _size_x(size_x), _size_y(size_y), _number_of_channels(1), _color_space(ColorSpaces::unknown)
 {
 	init(size_x, size_y, 1);
 }
@@ -28,7 +28,7 @@ ImageFx<T>::ImageFx(uint size_x, uint size_y)
 
 template <class T>
 ImageFx<T>::ImageFx(uint size_x, uint size_y, uint number_of_channels)
- : _size_x(size_x), _size_y(size_y), _number_of_channels(number_of_channels)
+ : _size_x(size_x), _size_y(size_y), _number_of_channels(number_of_channels), _color_space(ColorSpaces::unknown)
 {
 	init(size_x, size_y, number_of_channels);
 }
@@ -36,7 +36,7 @@ ImageFx<T>::ImageFx(uint size_x, uint size_y, uint number_of_channels)
 
 template <class T>
 ImageFx<T>::ImageFx(uint size_x, uint size_y, T default_value)
- : _size_x(size_x), _size_y(size_y), _number_of_channels(1)
+ : _size_x(size_x), _size_y(size_y), _number_of_channels(1), _color_space(ColorSpaces::unknown)
 {
 	init(size_x, size_y, 1);
 	fill_internal(default_value);
@@ -45,7 +45,7 @@ ImageFx<T>::ImageFx(uint size_x, uint size_y, T default_value)
 
 template <class T>
 ImageFx<T>::ImageFx(uint size_x, uint size_y, uint number_of_channels, T default_value)
- : _size_x(size_x), _size_y(size_y), _number_of_channels(number_of_channels)
+ : _size_x(size_x), _size_y(size_y), _number_of_channels(number_of_channels), _color_space(ColorSpaces::unknown)
 {
 	init(size_x, size_y, number_of_channels);
 	fill_internal(default_value);
@@ -54,7 +54,7 @@ ImageFx<T>::ImageFx(uint size_x, uint size_y, uint number_of_channels, T default
 
 template <class T>
 ImageFx<T>::ImageFx(Shape size)
- : _size_x(size.size_x), _size_y(size.size_y), _number_of_channels(1)
+ : _size_x(size.size_x), _size_y(size.size_y), _number_of_channels(1), _color_space(ColorSpaces::unknown)
 {
 	init(size.size_x, size.size_y, 1);
 }
@@ -62,7 +62,7 @@ ImageFx<T>::ImageFx(Shape size)
 
 template <class T>
 ImageFx<T>::ImageFx(Shape size, uint number_of_channels)
- : _size_x(size.size_x), _size_y(size.size_y), _number_of_channels(number_of_channels)
+ : _size_x(size.size_x), _size_y(size.size_y), _number_of_channels(number_of_channels), _color_space(ColorSpaces::unknown)
 {
 	init(size.size_x, size.size_y, number_of_channels);
 }
@@ -70,7 +70,7 @@ ImageFx<T>::ImageFx(Shape size, uint number_of_channels)
 
 template <class T>
 ImageFx<T>::ImageFx(Shape size, T default_value)
- : _size_x(size.size_x), _size_y(size.size_y), _number_of_channels(1)
+ : _size_x(size.size_x), _size_y(size.size_y), _number_of_channels(1), _color_space(ColorSpaces::unknown)
 {
 	init(size.size_x, size.size_y, 1);
 	fill_internal(default_value);
@@ -79,7 +79,7 @@ ImageFx<T>::ImageFx(Shape size, T default_value)
 
 template <class T>
 ImageFx<T>::ImageFx(Shape size, uint number_of_channels, T default_value)
- : _size_x(size.size_x), _size_y(size.size_y), _number_of_channels(number_of_channels)
+ : _size_x(size.size_x), _size_y(size.size_y), _number_of_channels(number_of_channels), _color_space(ColorSpaces::unknown)
 {
 	init(size.size_x, size.size_y, number_of_channels);
 	fill_internal(default_value);
@@ -88,7 +88,8 @@ ImageFx<T>::ImageFx(Shape size, uint number_of_channels, T default_value)
 
 template <class T>
 ImageFx<T>::ImageFx(const ImageFx<T> &source)
- : _size_x(source._size_x), _size_y(source._size_y), _number_of_channels(source._number_of_channels), _data(source._data), _ref(source._ref)
+ : _size_x(source._size_x), _size_y(source._size_y), _number_of_channels(source._number_of_channels),
+   _color_space(source._color_space), _data(source._data), _ref(source._ref)
 {
 	if (_ref) {
 		#pragma omp critical
@@ -99,7 +100,8 @@ ImageFx<T>::ImageFx(const ImageFx<T> &source)
 
 template <class T>
 ImageFx<T>::ImageFx(const Image<T> &source)
- : _size_x(source._size_x), _size_y(source._size_y), _number_of_channels(source._number_of_channels), _data(source._data), _ref(source._ref)
+ : _size_x(source._size_x), _size_y(source._size_y), _number_of_channels(source._number_of_channels),
+   _color_space(source._color_space), _data(source._data), _ref(source._ref)
 {
 	if (_ref) {
 		#pragma omp critical
@@ -137,6 +139,7 @@ ImageFx<T>& ImageFx<T>::operator= (const ImageFx<T> &other)
 	this->_size_x = other._size_x;
 	this->_size_y = other._size_y;
 	this->_number_of_channels = other._number_of_channels;
+    this->_color_space = other._color_space;
 	this->_data = other._data;
 
 	return *this;
@@ -160,6 +163,7 @@ ImageFx<T>& ImageFx<T>::operator= (const Image<T> &other)
 	this->_size_x = other._size_x;
 	this->_size_y = other._size_y;
 	this->_number_of_channels = other._number_of_channels;
+    this->_color_space = other._color_space;
 	this->_data = other._data;
 
 	return *this;
@@ -209,6 +213,13 @@ template <class T>
 uint ImageFx<T>::number_of_channels() const
 {
 	return _number_of_channels;
+}
+
+
+template <class T>
+ColorSpaces::ColorSpace ImageFx<T>::color_space() const
+{
+    return _color_space;
 }
 
 
@@ -414,6 +425,7 @@ ImageFx<T> ImageFx<T>::clone() const
 
 	if (this->_ref) {
 		clone.init(this->_size_x, this->_size_y, this->_number_of_channels);
+        clone._color_space = this->_color_space;
 		memcpy(clone._data, this->_data,  this->_number_of_channels * this->_size_y * this->_size_x * sizeof(T));
 	}
 
@@ -559,12 +571,14 @@ Image<T>::Image(const ImageFx<T> &source)
 		this->_size_x = source._size_x;
 		this->_size_y = source._size_y;
 		this->_number_of_channels = source._number_of_channels;
+        this->_color_space = source._color_space;
 		ImageFx<T>::init(source._size_x, source._size_y, source._number_of_channels);
 		memcpy(this->_data, source._data,  source._number_of_channels * source._size_y * source._size_x * sizeof(T));
 	} else {
 		this->_size_x = 0;
 		this->_size_y = 0;
 		this->_number_of_channels = 0;
+        this->_color_space = ColorSpaces::unknown;
 		this->_ref = 0;
 		this->_data = 0;
 	}
@@ -599,6 +613,7 @@ Image<T>& Image<T>::operator= (const Image<T> &other)
 	this->_size_x = other._size_x;
 	this->_size_y = other._size_y;
 	this->_number_of_channels = other._number_of_channels;
+    this->_color_space = other._color_space;
 	this->_data = other._data;
 
 	return *this;
@@ -615,17 +630,26 @@ Image<T>& Image<T>::operator= (const ImageFx<T> &other)
 		this->_size_x = other._size_x;
 		this->_size_y = other._size_y;
 		this->_number_of_channels = other._number_of_channels;
+        this->_color_space = other._color_space;
 		Image<T>::init(other._size_x, other._size_y, other._number_of_channels);
 		memcpy(this->_data, other._data,  other._number_of_channels * other._size_y * other._size_x * sizeof(T));
 	} else {
 		this->_size_x = 0;
 		this->_size_y = 0;
 		this->_number_of_channels = 0;
+        this->_color_space = ColorSpaces::unknown;
 		this->_ref = 0;
 		this->_data = 0;
 	}
 
 	return *this;
+}
+
+
+template <class T>
+void Image<T>::set_color_space(ColorSpaces::ColorSpace value)
+{
+    this->_color_space = value;
 }
 
 
@@ -762,6 +786,7 @@ Image<T> Image<T>::clone() const
 
 	if (this->_ref) {
 		clone.init(this->_size_x, this->_size_y, this->_number_of_channels);
+        clone._color_space = this->_color_space;
 		memcpy(clone._data, this->_data,  this->_number_of_channels * this->_size_y * this->_size_x * sizeof(T));
 	}
 

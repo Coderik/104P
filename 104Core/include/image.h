@@ -16,6 +16,11 @@
 
 using namespace std;
 
+namespace ColorSpaces
+{
+    enum ColorSpace {mono, RGB, Lab, HSV, YUV, unknown};
+}
+
 template <class T>
 class Image;	// forward declaration
 
@@ -57,6 +62,7 @@ public:
 	uint size_y() const;
 	Shape size() const;
 	uint number_of_channels() const;
+    ColorSpaces::ColorSpace color_space() const;
 
 	/// Returns read-only value without range checking.
 	const T& operator() (uint x, uint y) const;
@@ -91,6 +97,7 @@ protected:
 
 	uint _size_x, _size_y;
 	uint _number_of_channels;
+    ColorSpaces::ColorSpace _color_space;
 	T* _data;
 	__Ref *_ref;
 
@@ -131,6 +138,8 @@ public:
 
 	Image<T>& operator= (const Image<T> &other);			// without data copying, ref++
 	Image<T>& operator= (const ImageFx<T> &other);			// deep copy
+
+    void set_color_space(ColorSpaces::ColorSpace value);
 
 	// prevent hiding of const versions of these methods
 	using ImageFx<T>::operator();

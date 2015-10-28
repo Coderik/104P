@@ -51,6 +51,7 @@ Image<float> IOUtility::read_pgm_image(const string &name)
 
 	/* get memory */
 	Image<float> image(x_size, y_size);
+    image.set_color_space(ColorSpaces::mono);
 
 	/* read data */
 	skip_spaces_and_comments(f);
@@ -113,6 +114,7 @@ Image<float> IOUtility::read_mono_image(const string &name)
 	}
 
 	Image<float> image(width, height);
+    image.set_color_space(ColorSpaces::mono);
 
 	// copy from image_data to Image<float>
 	for (int y = 0; y < height; y++) {
@@ -161,6 +163,7 @@ Image<float> IOUtility::read_rgb_image(const string &name)
    }
 
 	Image<float> image(width, height, (uint)3);
+    image.set_color_space(ColorSpaces::RGB);
 
 	// copy from image_data to Image<float>
 	for (int y = 0; y < height; y++) {
@@ -213,7 +216,12 @@ Image<float> IOUtility::rgb_to_lab(ImageFx<float> image)
 		return image;
 	}
 
+    if (image.color_space() != ColorSpaces::RGB) {
+        std::cerr << "WARNING! Original image is not in RGB color space [IOUtility::rgb_to_lab]." << std::endl;
+    }
+
 	Image<float> image_lab(image.size(), 3, 0.0f);
+    image_lab.set_color_space(ColorSpaces::Lab);
 	const float* data_rgb = image.raw();
 	float* data_lab = image_lab.raw();
 	long number_of_pixels = image.size_x() * image.size_y();
@@ -237,7 +245,12 @@ Image<float> IOUtility::lab_to_rgb(ImageFx<float> image)
 		return image;
 	}
 
+    if (image.color_space() != ColorSpaces::Lab) {
+        std::cerr << "WARNING! Original image is not in Lab color space [IOUtility::lab_to_rgb]." << std::endl;
+    }
+
 	Image<float> image_rgb(image.size(), 3, 0.0f);
+    image_rgb.set_color_space(ColorSpaces::RGB);
 	const float* data_lab = image.raw();
 	float* data_rgb = image_rgb.raw();
 	long number_of_pixels = image.size_x() * image.size_y();
@@ -261,7 +274,12 @@ Image<float> IOUtility::rgb_to_gray(ImageFx<float> image)
 		return image;
 	}
 
+    if (image.color_space() != ColorSpaces::RGB) {
+        std::cerr << "WARNING! Original image is not in RGB color space [IOUtility::rgb_to_gray]." << std::endl;
+    }
+
 	Image<float> image_gray(image.size(), 1, 0.0f);
+    image_gray.set_color_space(ColorSpaces::mono);
 	float* data_gray = image_gray.raw();
 	const float *data_rgb = image.raw();
 	long number_of_pixels = image.size_x() * image.size_y();
@@ -280,7 +298,12 @@ Image<float> IOUtility::rgb_to_hsv(ImageFx<float> image)
         return image;
     }
 
+    if (image.color_space() != ColorSpaces::RGB) {
+        std::cerr << "WARNING! Original image is not in RGB color space [IOUtility::rgb_to_hsv]." << std::endl;
+    }
+
     Image<float> image_hsv(image.size(), 3, 0.0f);
+    image_hsv.set_color_space(ColorSpaces::HSV);
     const float* data_rgb = image.raw();
     float* data_hsv = image_hsv.raw();
     long number_of_pixels = image.size_x() * image.size_y();
@@ -300,7 +323,12 @@ Image<float> IOUtility::hsv_to_rgb(ImageFx<float> image)
         return image;
     }
 
+    if (image.color_space() != ColorSpaces::HSV) {
+        std::cerr << "WARNING! Original image is not in HSV color space [IOUtility::hsv_to_rgb]." << std::endl;
+    }
+
     Image<float> image_rgb(image.size(), 3, 0.0f);
+    image_rgb.set_color_space(ColorSpaces::RGB);
     const float* data_hsv = image.raw();
     float* data_rgb = image_rgb.raw();
     long number_of_pixels = image.size_x() * image.size_y();
@@ -320,7 +348,12 @@ Image<float> IOUtility::rgb_to_yuv(ImageFx<float> image)
         return image;
     }
 
+    if (image.color_space() != ColorSpaces::RGB) {
+        std::cerr << "WARNING! Original image is not in RGB color space [IOUtility::rgb_to_yuv]." << std::endl;
+    }
+
     Image<float> image_yuv(image.size(), 3, 0.0f);
+    image_yuv.set_color_space(ColorSpaces::YUV);
     const float* data_rgb = image.raw();
     float* data_yuv = image_yuv.raw();
     long number_of_pixels = image.size_x() * image.size_y();
@@ -340,7 +373,12 @@ Image<float> IOUtility::yuv_to_rgb(ImageFx<float> image)
         return image;
     }
 
+    if (image.color_space() != ColorSpaces::YUV) {
+        std::cerr << "WARNING! Original image is not in YUV color space [IOUtility::yuv_to_rgb]." << std::endl;
+    }
+
     Image<float> image_rgb(image.size(), 3, 0.0f);
+    image_rgb.set_color_space(ColorSpaces::RGB);
     const float* data_yuv = image.raw();
     float* data_rgb = image_rgb.raw();
     long number_of_pixels = image.size_x() * image.size_y();
