@@ -46,6 +46,10 @@ public:
 	static Image<float> rgb_to_lab(ImageFx<float> image);
 	static Image<float> lab_to_rgb(ImageFx<float> image);
 	static Image<float> rgb_to_gray(ImageFx<float> image);
+    static Image<float> rgb_to_hsv(ImageFx<float> image);
+    static Image<float> hsv_to_rgb(ImageFx<float> image);
+    static Image<float> rgb_to_yuv(ImageFx<float> image);
+    static Image<float> yuv_to_rgb(ImageFx<float> image);
 
 	static string compose_file_name(const string &name);
 	static string compose_file_name(const string &name, int index, const string &extension);
@@ -53,6 +57,7 @@ public:
 	static void set_prefix(const string &prefix);
 
 private:
+    static const float EPS;
 	static string _prefix;
 
 	static void skip_spaces_and_comments(FILE * f);
@@ -62,6 +67,10 @@ private:
 	static void xyz_to_lab(const float *xyz, float *lab);
 	static void lab_to_xyz(const float *lab, float *xyz);
 	static void xyz_to_rgb(const float *xyz, float *rgb);
+    static void rgb_to_hsv(const float *rgb, float *hsv);
+    static void hsv_to_rgb(const float *hsv, float *rgb);
+    static void rgb_to_yuv(const float *rgb, float *yuv);
+    static void yuv_to_rgb(const float *yuv, float *rgb);
 };
 
 
