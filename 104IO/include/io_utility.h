@@ -51,6 +51,10 @@ public:
     static Image<float> hsv_to_rgb(ImageFx<float> image);
     static Image<float> rgb_to_yuv(ImageFx<float> image);
     static Image<float> yuv_to_rgb(ImageFx<float> image);
+	static Image<float> to_mono(ImageFx<float> image);
+
+	static Image<float> take_channel(ImageFx<float> image, unsigned int channel_id);
+	static Image<float> average_channels(ImageFx<float> image);
 
 	static string compose_file_name(const string &name);
 	static string compose_file_name(const string &name, int index, const string &extension);
