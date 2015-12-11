@@ -630,7 +630,6 @@ void IOUtility::rgb_to_hsv(const float *rgb, float *hsv)
     } else { // r = g = b = 0
         hsv[0] = 0.0f;	// h is undefined
         hsv[1] = 0.0f;
-        hsv[2] = 0.0f;	// v is undefined
         return;
     }
 
@@ -653,9 +652,9 @@ void IOUtility::hsv_to_rgb(const float *hsv, float *rgb)
 {
     // If achromatic (grey)
     if(hsv[1] < EPS) {
-        rgb[0] = hsv[2];
-        rgb[1] = hsv[2];
-        rgb[2] = hsv[2];
+        rgb[0] = hsv[2] * 255.0f;
+        rgb[1] = hsv[2] * 255.0f;
+        rgb[2] = hsv[2] * 255.0f;
         return;
     }
 
