@@ -408,6 +408,13 @@ const T* ImageFx<T>::raw() const
 template <class T>
 const uint ImageFx<T>::raw_length() const
 {
+	return _size_x * _size_y * _number_of_channels;
+}
+
+
+template <class T>
+const uint ImageFx<T>::number_of_pixels() const
+{
 	return _size_x * _size_y;
 }
 

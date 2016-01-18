@@ -86,6 +86,7 @@ public:
 	/// Returns pointer to internal data.
 	const T* raw() const;
 	const uint raw_length() const;
+	const uint number_of_pixels() const;
 
 	/// Invokes deep copy.
 	ImageFx<T> clone() const;
