@@ -21,23 +21,23 @@ include_directories(include)
 
 # Specify all the source files.
 set(SOURCE_FILES
-    include/i_iterable_mask.h
-    include/i_watchdog.h
-    include/image.h
-    include/mask.h
-    include/mask_iterator.h
-    include/mask_sequence.h
-    include/patch.h
-    include/point.h
-    include/sequence.h
-    include/shape.h
-    mask.cpp
-    mask_iterator.cpp
-    mask_sequence.cpp
-    patch.cpp
-    point.cpp
-    sequence.hpp
-    shape.cpp)
+        include/i_iterable_mask.h
+        include/i_watchdog.h
+        include/image.h
+        include/mask.h
+        include/mask_iterator.h
+        include/mask_sequence.h
+        include/patch.h
+        include/point.h
+        include/sequence.h
+        include/shape.h
+        mask.cpp
+        mask_iterator.cpp
+        mask_sequence.cpp
+        patch.cpp
+        point.cpp
+        sequence.hpp
+        shape.cpp)
 
 # Configure the target.
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/build)
