@@ -36,7 +36,8 @@ set(SOURCE_FILES
     interpolation.cpp
     lut_math.cpp
     sampling.cpp
-    warping.cpp)
+    warping.cpp
+    zach_TVL1_optical_flow.cpp)
 
 # Specify all the targets, this target depends on.
 set(DEPENDENCIES

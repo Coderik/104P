@@ -325,7 +325,6 @@ void Hull::request_module(RequestBase<IModule> &request)
 
 void Hull::add_module(IModule *module)
 {
-	// TODO: implement
 	_modules.push_back(module);
 	module->initialize(this);
 }

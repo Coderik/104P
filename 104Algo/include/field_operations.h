@@ -25,6 +25,11 @@ public:
 	static void divergence(const float *v1, const float *v2, float *div, const int nx, const int ny);
 	static void forward_gradient(const float *f, float *fx, float *fy, const int nx, const int ny);
 	static void centered_gradient(const float *in,float *dx, float *dy, const int nx, const int ny);
+	static void centered_temporal_gradient(const float *prev_frame, const float *next_frame, float *dt, const int length);
+	static void centered_convective_derivative(const float *prev_frame, const float *next_frame,
+											   const float *bwd_flow, const float *fwd_flow,
+											   float *result,
+											   const int nx, const int ny);
 };
 
 #endif /* FIELD_OPERATIONS_H_ */
