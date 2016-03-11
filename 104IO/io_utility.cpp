@@ -8,6 +8,8 @@
 #include "io_utility.h"
 
 const float IOUtility::EPS = 0.00001f;
+const float IOUtility::TAG_FLOAT = 202021.25f;
+const string IOUtility::TAG_STRING = "PIEH";
 
 string IOUtility::_prefix = "";
 
@@ -207,6 +209,100 @@ void IOUtility::write_rgb_image(const string &name, const ImageFx<float> &image)
 void IOUtility::write_float_image(const string &name, const ImageFx<float> &image)
 {
 	iio_save_image_float_split(const_cast<char*>(name.data()), const_cast<float*>(image.raw()), image.size_x(), image.size_y(), 1);
+}
+
+
+Image<float> IOUtility::read_optical_flow(const string &name)
+{
+	if (name.empty()) {
+		return Image<float>();
+	}
+
+	if (name.find_last_of(".flo") == string::npos) {
+		// .flo extension is expected
+		return Image<float>();
+	}
+
+	// Try to open the flo file
+	fstream flo_file(name, ios_base::in | ios_base::binary);
+	if (!flo_file.is_open()) {
+		return Image<float>();
+	}
+
+	// Read tag, width and height
+	float tag;
+	int width, height;
+	flo_file.read((char*)&tag, sizeof(float));
+	flo_file.read((char*)&width, sizeof(int32_t));
+	flo_file.read((char*)&height, sizeof(int32_t));
+
+	if (!flo_file.good()) {
+		return Image<float>();
+	}
+
+	// Simple test for correct endian-ness
+	if (tag != TAG_FLOAT) {
+		return Image<float>();
+	}
+
+	// Allocate memory for the flow
+	Image<float> flow(width, height, 2, 0.0f);
+	float *flow_ptr = flow.raw();
+
+	// Read flow row by row
+	for (int y = 0; y < height; ++y) {
+		flo_file.read((char*)flow_ptr, sizeof(float) * 2 * width);
+		if (flo_file.fail()) {
+			return Image<float>();	// file is too short
+		}
+
+		flow_ptr += 2 * width;
+	}
+
+	return flow;
+}
+
+
+void IOUtility::write_optical_flow(const string &name, Image<float> flow)
+{
+	if (name.empty() || flow.number_of_channels() != 2) {
+		return;
+	}
+
+	if (name.find_last_of(".flo") == string::npos) {
+		// .flo extension is expected
+		return;
+	}
+
+	fstream flo_file(name, ios_base::out | ios_base::binary);
+	if (!flo_file.is_open()) {
+		return;
+	}
+
+	int width = flow.size_x();
+	int height = flow.size_y();
+
+	// Write the header
+	flo_file.write(TAG_STRING.c_str(), 4);
+	flo_file.write((char*)&width, sizeof(width));
+	flo_file.write((char*)&height, sizeof(height));
+//	flo_file << TAG_STRING;
+//	flo_file << width << height;
+
+	if (!flo_file.good()) {
+		return;
+	}
+
+	float *flow_ptr = flow.raw();
+
+	// Write the rows
+	for (int y = 0; y < height; ++y) {
+		flo_file.write((char*)flow_ptr, sizeof(float) * 2 * width);
+		flow_ptr += 2 * width;
+		if (!flo_file.good()) {
+			return;
+		}
+	}
 }
 
 

@@ -10,6 +10,7 @@
 
 #include <string>
 #include <iostream>
+#include <fstream>
 #include <sstream>
 #include <iomanip>
 #include <stdio.h>
@@ -21,7 +22,8 @@ extern "C" {
 #include "../iio/iio.h"
 }
 
-using namespace std;
+using std::string;
+using std::fstream;
 
 /**
  * Contains methods for reading and writings images as well as
@@ -44,6 +46,9 @@ public:
 
 	static void write_float_image(const string &name, const ImageFx<float> &image);
 
+	static Image<float> read_optical_flow(const string &name);
+	static void write_optical_flow(const string &name, Image<float> flow);
+
 	static Image<float> rgb_to_lab(ImageFx<float> image);
 	static Image<float> lab_to_rgb(ImageFx<float> image);
 	static Image<float> rgb_to_gray(ImageFx<float> image);
@@ -63,6 +68,8 @@ public:
 
 private:
     static const float EPS;
+	static const float TAG_FLOAT;
+	static const string TAG_STRING;
 	static string _prefix;
 
 	static void skip_spaces_and_comments(FILE * f);
