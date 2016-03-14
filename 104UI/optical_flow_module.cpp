@@ -7,6 +7,11 @@
 
 #include "optical_flow_module.h"
 
+OpticalFlowModule::OpticalFlowModule()
+: _frames_amount(0), _max_motion(-1.0f)
+{ }
+
+
 void OpticalFlowModule::initialize(IModulable *modulable)
 {
 	_modulable = modulable;
@@ -19,6 +24,9 @@ void OpticalFlowModule::initialize(IModulable *modulable)
 	_restore_menu_item = Gtk::manage(new Gtk::MenuItem("Restore Optical Flow"));
 	_restore_menu_item->signal_activate().connect( sigc::mem_fun(*this, &OpticalFlowModule::restore_optical_flow) );
 	_menu->append(*_restore_menu_item);
+	_open_menu_item = Gtk::manage(new Gtk::MenuItem("Load Optical Flow"));
+	_open_menu_item->signal_activate().connect(sigc::mem_fun(*this, &OpticalFlowModule::load_optical_flow) );
+	_menu->append(*_open_menu_item);
 	Gtk::MenuItem *separator = Gtk::manage(new Gtk::SeparatorMenuItem());
 	_menu->append(*separator);
 	_calculate_menu_item = Gtk::manage(new Gtk::MenuItem("Calculate Optical Flow"));
@@ -64,6 +72,7 @@ void OpticalFlowModule::sequence_changed()
 	_forward_optical_flow_list.clear();
 	_backward_optical_flow_list.clear();
 	_has_optical_flow_data = false;
+	_max_motion = -1.0f;
 
 	SequenceFx<float> sequence = _modulable->request_sequence();
 
@@ -112,6 +121,7 @@ void OpticalFlowModule::restore_optical_flow()
 
 	_forward_optical_flow_list = OpticalFlowIO::read_whole_direction_data(file_name, true);
 	_backward_optical_flow_list = OpticalFlowIO::read_whole_direction_data(file_name, false);
+	_max_motion = -1.0f;
 	bool has_some_data = _forward_optical_flow_list.size() > 0 || _backward_optical_flow_list.size() > 0;
 
 	if (has_some_data != _has_optical_flow_data) {
@@ -130,6 +140,50 @@ void OpticalFlowModule::restore_optical_flow()
 	} else {
 		_restore_menu_item->set_sensitive(false);
 	}
+}
+
+
+void OpticalFlowModule::load_optical_flow()
+{
+	if (_frames_amount < 2) {
+		return;
+	}
+
+	string flow_folder = _modulable->request_open_dialog_result("Load Optical Flows", true);
+
+	vector<Image<float> > fwd_flows = IOUtility::read_all_flows(flow_folder, "fwd");
+	if (fwd_flows.size() != _frames_amount && fwd_flows.size() != _frames_amount - 1) {
+		return;
+	}
+
+	vector<Image<float> > bwd_flows = IOUtility::read_all_flows(flow_folder, "bwd");
+	if (bwd_flows.size() != _frames_amount && bwd_flows.size() != _frames_amount - 1) {
+		return;
+	}
+
+	_forward_optical_flow_list.swap(fwd_flows);
+	if (_forward_optical_flow_list.size() == _frames_amount - 1) {
+		_forward_optical_flow_list.push_back(Image<float>(_forward_optical_flow_list[0].size(), 2, 0.0f));
+	}
+
+	if (bwd_flows.size() == _frames_amount - 1) {
+		_backward_optical_flow_list.clear();
+		_backward_optical_flow_list.reserve(_frames_amount);
+		_backward_optical_flow_list.push_back(Image<float>(bwd_flows[0].size(), 2, 0.0f));
+		_backward_optical_flow_list.insert(_backward_optical_flow_list.end(), bwd_flows.begin(), bwd_flows.end());
+	} else {
+		_backward_optical_flow_list.swap(bwd_flows);
+	}
+
+	if (!_has_optical_flow_data) {
+		add_optical_flow_views();
+		_has_optical_flow_data = true;
+		notify_changes();
+	}
+
+	_max_motion = -1.0f;
+	_task_list.clear();
+	_restore_menu_item->set_sensitive(false);
 }
 
 
@@ -164,7 +218,8 @@ Glib::RefPtr<Gdk::Pixbuf> OpticalFlowModule::provide_forward_optical_flow_vector
 
 	if (time < _forward_optical_flow_list.size() &&
 			!_forward_optical_flow_list[time].is_empty()) {
-		buffer = FlowColorCoding::get_color_code_view(_forward_optical_flow_list[time]);
+		update_max_motion();
+		buffer = FlowColorCoding::get_color_code_view(_forward_optical_flow_list[time], _max_motion);
 	}
 
 	return buffer;
@@ -177,7 +232,8 @@ Glib::RefPtr<Gdk::Pixbuf> OpticalFlowModule::provide_forward_optical_flow_magnit
 
 	if (time < _forward_optical_flow_list.size() &&
 			!_forward_optical_flow_list[time].is_empty()) {
-		buffer = FlowColorCoding::get_magnitudes_view(_forward_optical_flow_list[time]);
+		update_max_motion();
+		buffer = FlowColorCoding::get_magnitudes_view(_forward_optical_flow_list[time], _max_motion);
 	}
 
 	return buffer;
@@ -191,7 +247,8 @@ Glib::RefPtr<Gdk::Pixbuf> OpticalFlowModule::provide_backward_optical_flow_vecto
 	if (time > 0 &&
 			(time - 1) < _backward_optical_flow_list.size() &&
 			!_backward_optical_flow_list[time - 1].is_empty()) {
-		buffer = FlowColorCoding::get_color_code_view(_backward_optical_flow_list[time - 1]);
+		update_max_motion();
+		buffer = FlowColorCoding::get_color_code_view(_backward_optical_flow_list[time - 1], _max_motion);
 	}
 
 	return buffer;
@@ -205,7 +262,8 @@ Glib::RefPtr<Gdk::Pixbuf> OpticalFlowModule::provide_backward_optical_flow_magni
 	if (time > 0 &&
 			(time - 1) < _backward_optical_flow_list.size() &&
 			!_backward_optical_flow_list[time - 1].is_empty()) {
-		buffer = FlowColorCoding::get_magnitudes_view(_backward_optical_flow_list[time - 1]);
+		update_max_motion();
+		buffer = FlowColorCoding::get_magnitudes_view(_backward_optical_flow_list[time - 1], _max_motion);
 	}
 
 	return buffer;
@@ -338,6 +396,7 @@ void OpticalFlowModule::take_optical_flow_frame(IData *data)
 	}
 
 	_has_optical_flow_data = true;
+	_max_motion = -1.0f;
 	notify_changes();
 
 	store_optical_flow(flow, index);
@@ -438,4 +497,33 @@ void OpticalFlowModule::remove_optical_flow_views()
 	_modulable->remove_view(_forward_optical_flow_magnitude_view);
 	_modulable->remove_view(_backward_optical_flow_vector_view);
 	_modulable->remove_view(_backward_optical_flow_magnitude_view);
+}
+
+
+/**
+ * @brief Calculate maximum motion across all the frames
+ */
+void OpticalFlowModule::update_max_motion()
+{
+	if (_max_motion > 0.0f) {
+		return;
+	}
+
+	for (auto it = _forward_optical_flow_list.begin(); it != _forward_optical_flow_list.end(); ++it) {
+		const float *flow_data = it->raw();
+		for (uint i = 0; i < it->size_x() * it->size_y(); i++) {
+			float len = flow_data[2 * i] * flow_data[2 * i] + flow_data[2 * i + 1] * flow_data[2 * i + 1];
+			_max_motion = std::max(_max_motion, len);
+		}
+	}
+
+	for (auto it = _backward_optical_flow_list.begin(); it != _backward_optical_flow_list.end(); ++it) {
+		const float *flow_data = it->raw();
+		for (uint i = 0; i < it->size_x() * it->size_y(); i++) {
+			float len = flow_data[2 * i] * flow_data[2 * i] + flow_data[2 * i + 1] * flow_data[2 * i + 1];
+			_max_motion = std::max(_max_motion, len);
+		}
+	}
+
+	_max_motion = std::sqrt(_max_motion);
 }

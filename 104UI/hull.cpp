@@ -183,7 +183,9 @@ void Hull::load_sequence(string path)
 	{
 		std::string file_mime_type = file_info->get_content_type();
 		// COMPATIBILITY: first for unix, second for win
-		if (file_mime_type.compare("image/x-portable-graymap") == 0 || file_mime_type.compare(".pgm") == 0) {
+		if (file_mime_type.compare("image/x-portable-graymap") == 0 ||
+				file_mime_type.compare(".pgm") == 0 ||
+				file_mime_type.compare("image/png") == 0) {
 			std::string file_name = file_info->get_name();
 			file_names.push_back(file_name);
 		}
@@ -348,9 +350,9 @@ string Hull::request_sequence_path()
 }
 
 
-string Hull::request_open_dialog_result(string dialog_title, Glib::RefPtr<Gtk::FileFilter> filter)
+string Hull::request_open_dialog_result(string dialog_title, bool folder, Glib::RefPtr<Gtk::FileFilter> filter)
 {
-	Gtk::FileChooserDialog dialog(dialog_title, Gtk::FILE_CHOOSER_ACTION_OPEN);
+	Gtk::FileChooserDialog dialog(dialog_title, (folder) ? Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER : Gtk::FILE_CHOOSER_ACTION_OPEN);
 	dialog.set_transient_for(*this);
 	dialog.set_current_folder(Glib::get_current_dir());
 

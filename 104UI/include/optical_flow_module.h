@@ -19,12 +19,14 @@
 #include "optical_flow_data.h"
 #include "background_worker.h"
 #include "zach_TVL1_optical_flow.h"
+#include "io_utility.h"
 
 using namespace std;
 
 class OpticalFlowModule : public IModule, public IOpticalFlowProvider
 {
 public:
+	OpticalFlowModule();
 	virtual ~OpticalFlowModule() {}
 
 	virtual void initialize(IModulable *modulable);
@@ -37,6 +39,7 @@ private:
 	IModulable *_modulable;
 	Gtk::Menu *_menu;
 	Gtk::MenuItem *_restore_menu_item;
+	Gtk::MenuItem *_open_menu_item;
 	Gtk::MenuItem *_calculate_menu_item;
 	Gtk::MenuItem *_proceed_menu_item;
 	vector<Image<float> > _forward_optical_flow_list;
@@ -46,6 +49,7 @@ private:
 	int _frames_amount;
 	int _progress_counter, _progress_total;
 	bool _has_optical_flow_data;
+	float _max_motion;
 	Descriptor _forward_optical_flow_vector_view;
 	Descriptor _forward_optical_flow_magnitude_view;
 	Descriptor _backward_optical_flow_vector_view;
@@ -55,6 +59,7 @@ private:
 	// Slots
 	void sequence_changed();
 	void restore_optical_flow();
+	void load_optical_flow();
 	void begin_full_optical_flow_calculation();
 	void begin_missing_optical_flow_calculation();
 	Glib::RefPtr<Gdk::Pixbuf> provide_forward_optical_flow_vector_view(unsigned int time);
@@ -72,6 +77,7 @@ private:
 	void notify_changes();
 	void add_optical_flow_views();
 	void remove_optical_flow_views();
+	void update_max_motion();
 
 };
 
