@@ -47,6 +47,7 @@ set(SOURCE_FILES
     include/tclap/Visitor.h
     include/tclap/XorHandler.h
     include/tclap/ZshCompletionOutput.h
+    include/tinydir.h
     include/color_code.h
     include/console_utility.h
     include/i_optical_flow_code.h

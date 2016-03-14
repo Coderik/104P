@@ -14,6 +14,7 @@
 #include <sstream>
 #include <iomanip>
 #include <stdio.h>
+#include "tinydir.h"
 #include "image.h"
 #include "mask.h"
 #include "shape.h"
@@ -23,6 +24,7 @@ extern "C" {
 }
 
 using std::string;
+using std::vector;
 using std::fstream;
 
 /**
@@ -48,6 +50,8 @@ public:
 
 	static Image<float> read_optical_flow(const string &name);
 	static void write_optical_flow(const string &name, Image<float> flow);
+
+	static vector<Image<float> > read_all_flows(const string &folder, const string &prefix = string());
 
 	static Image<float> rgb_to_lab(ImageFx<float> image);
 	static Image<float> lab_to_rgb(ImageFx<float> image);

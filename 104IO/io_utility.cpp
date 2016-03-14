@@ -5,6 +5,7 @@
  *      Author: Vadim Fedorov
  */
 
+#include <tinydir.h>
 #include "io_utility.h"
 
 const float IOUtility::EPS = 0.00001f;
@@ -286,8 +287,6 @@ void IOUtility::write_optical_flow(const string &name, Image<float> flow)
 	flo_file.write(TAG_STRING.c_str(), 4);
 	flo_file.write((char*)&width, sizeof(width));
 	flo_file.write((char*)&height, sizeof(height));
-//	flo_file << TAG_STRING;
-//	flo_file << width << height;
 
 	if (!flo_file.good()) {
 		return;
@@ -303,6 +302,44 @@ void IOUtility::write_optical_flow(const string &name, Image<float> flow)
 			return;
 		}
 	}
+}
+
+
+vector<Image<float> > IOUtility::read_all_flows(const string &folder, const string &prefix)
+{
+	tinydir_dir dir;
+	tinydir_open(&dir, folder.c_str());
+
+	// Get all file names beginning with prefix
+	vector<string> filenames;
+	filenames.reserve(dir.n_files);
+	while (dir.has_next) {
+		tinydir_file file;
+		tinydir_readfile(&dir, &file);
+
+		if (file.is_dir == 0 && (prefix.empty() || strncmp(file.name, prefix.c_str(), prefix.length()) == 0)) {
+			filenames.push_back(string(file.name));
+		}
+
+		tinydir_next(&dir);
+	}
+
+	tinydir_close(&dir);
+
+	// Make sure file names are in alphabetic order
+	std::sort(filenames.begin(), filenames.end());
+
+	// Read flows
+	vector<Image<float> > flows;
+	flows.reserve(filenames.size());
+	for (auto it = filenames.begin(); it != filenames.end(); ++it) {
+		Image<float> flow = read_optical_flow(folder + '/' + *it);
+		if (!flow.is_empty()) {
+			flows.push_back(flow);
+		}
+	}
+
+	return flows;
 }
 
 
