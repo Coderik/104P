@@ -354,7 +354,7 @@ string Hull::request_open_dialog_result(string dialog_title, bool folder, Glib::
 {
 	Gtk::FileChooserDialog dialog(dialog_title, (folder) ? Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER : Gtk::FILE_CHOOSER_ACTION_OPEN);
 	dialog.set_transient_for(*this);
-	dialog.set_current_folder(Glib::get_current_dir());
+	dialog.set_current_folder((!_sequence_folder.empty()) ? _sequence_folder : Glib::get_current_dir());
 
 	// add response buttons the the dialog:
 	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
