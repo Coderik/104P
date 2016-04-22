@@ -56,6 +56,10 @@ public:
 	const T& operator() (const Point &p) const;
 	T& operator() (uint x, uint y, uint t);
 	T& operator() (const Point &p);
+	const T& operator() (uint x, uint y, uint t, uint channel) const;
+	const T& operator() (const Point &p, uint channel) const;
+	T& operator() (uint x, uint y, uint t, uint channel);
+	T& operator() (const Point &p, uint channel);
 
 	bool try_get_value(uint x, uint y, uint t, T& value) const;
 	bool try_get_value(const Point &p, T& value) const;

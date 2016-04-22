@@ -229,6 +229,34 @@ T& Sequence<T>::operator() (const Point &p)
 
 
 template<class T>
+const T& Sequence<T>::operator() (uint x, uint y, uint t, uint channel) const
+{
+	return _frames[t](x, y, channel);
+}
+
+
+template<class T>
+const T& Sequence<T>::operator() (const Point &p, uint channel) const
+{
+	return _frames[p.t](p, channel);
+}
+
+
+template<class T>
+T& Sequence<T>::operator() (uint x, uint y, uint t, uint channel)
+{
+	return _frames[t](x, y, channel);
+}
+
+
+template<class T>
+T& Sequence<T>::operator() (const Point &p, uint channel)
+{
+	return _frames[p.t](p, channel);
+}
+
+
+template<class T>
 bool Sequence<T>::try_get_value(uint x, uint y, uint t, T& value) const
 {
 	if (t >= _frames.size()) {
