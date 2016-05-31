@@ -189,15 +189,17 @@ void IOUtility::write_rgb_image(const string &name, const ImageFx<float> &image)
 	int width = image.size_x();
 	int height = image.size_y();
 
+	ImageFx<float> rgb_image = to_rgb(image);
+
 	float *image_data = new float[width * height * 3];
 
 	// copy from Image<float> to image_data
 	for (int y = 0; y < height; y++) {
 		for (int x = 0; x < width; x++) {
 			int index = 3 * (y * width + x);
-			image_data[index + 0] = image(x, y, 0);
-			image_data[index + 1] = image(x, y, 1);
-			image_data[index + 2] = image(x, y, 2);
+			image_data[index + 0] = rgb_image(x, y, 0);
+			image_data[index + 1] = rgb_image(x, y, 1);
+			image_data[index + 2] = rgb_image(x, y, 2);
 		}
 	}
 
@@ -545,6 +547,28 @@ Image<float> IOUtility::to_mono(ImageFx<float> image)
 	} else {
 		return average_channels(image);
 	}
+}
+
+
+/**
+ * @brief Convert an image into a RGB image
+ */
+Image<float> IOUtility::to_rgb(ImageFx<float> image)
+{
+	if (image.color_space() == ColorSpaces::RGB) {
+		return image;
+	} else if (image.color_space() == ColorSpaces::Lab) {
+		return IOUtility::lab_to_rgb(image);
+	} else if (image.color_space() == ColorSpaces::HSV) {
+		return IOUtility::hsv_to_rgb(image);
+	} else if (image.color_space() == ColorSpaces::YUV) {
+		return IOUtility::yuv_to_rgb(image);
+	} else if (image.color_space() == ColorSpaces::mono || image.number_of_channels() == 1) {
+		// TODO: repeat channels
+		return image;
+	}
+
+	return Image<float>();
 }
 
 
