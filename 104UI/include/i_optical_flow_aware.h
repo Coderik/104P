@@ -1,9 +1,14 @@
-/*
- * i_optical_flow_aware.h
+/**
+ * Copyright (C) 2016, Vadim Fedorov <coderiks@gmail.com>
  *
- *  Created on: Feb 17, 2014
- *      Author: Vadim Fedorov
+ * This program is free software: you can use, modify and/or
+ * redistribute it under the terms of the simplified BSD
+ * License. You should have received a copy of this license along
+ * this program. If not, see
+ * <http://www.opensource.org/licenses/bsd-license.html>.
  */
+
+/// Created on: Feb 17, 2014
 
 #ifndef I_OPTICAL_FLOW_AWARE_H_
 #define I_OPTICAL_FLOW_AWARE_H_
