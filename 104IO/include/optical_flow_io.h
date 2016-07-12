@@ -1,9 +1,14 @@
-/*
- * optical_flow_io.h
+/**
+ * Copyright (C) 2016, Vadim Fedorov <coderiks@gmail.com>
  *
- *  Created on: Jan 25, 2013
- *      Author: upf
+ * This program is free software: you can use, modify and/or
+ * redistribute it under the terms of the simplified BSD
+ * License. You should have received a copy of this license along
+ * this program. If not, see
+ * <http://www.opensource.org/licenses/bsd-license.html>.
  */
+
+/// Created on: Jan 25, 2013
 
 #ifndef OPTICAL_FLOW_IO_H_
 #define OPTICAL_FLOW_IO_H_

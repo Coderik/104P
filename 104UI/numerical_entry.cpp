@@ -1,13 +1,19 @@
-/*
- * numerical_entry.cpp
+/**
+ * Copyright (C) 2016, Vadim Fedorov <coderiks@gmail.com>
  *
- *  Created on: Jan 23, 2014
- *      Author: Vadim Fedorov
+ * This program is free software: you can use, modify and/or
+ * redistribute it under the terms of the simplified BSD
+ * License. You should have received a copy of this license along
+ * this program. If not, see
+ * <http://www.opensource.org/licenses/bsd-license.html>.
  */
+
+/// Created on: Jan 23, 2014
 
 #include "numerical_entry.h"
 
-const int NumericalEntry::MIN_WIDTH;
+const int NumericalEntry::MIN_WIDTH = 20;
+const float NumericalEntry::EPS = FLT_EPSILON * 6;
 
 NumericalEntry::NumericalEntry(unsigned int digits)
 : Gtk::Entry()

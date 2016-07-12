@@ -1,9 +1,14 @@
-/*
- * hull.h
+/**
+ * Copyright (C) 2016, Vadim Fedorov <coderiks@gmail.com>
  *
- *  Created on: Jan 9, 2013
- *      Author: Vadim Fedorov
+ * This program is free software: you can use, modify and/or
+ * redistribute it under the terms of the simplified BSD
+ * License. You should have received a copy of this license along
+ * this program. If not, see
+ * <http://www.opensource.org/licenses/bsd-license.html>.
  */
+
+/// Created on: Jan 9, 2013
 
 #ifndef HULL_H_
 #define HULL_H_
@@ -73,7 +78,7 @@ public:
 	virtual sigc::signal<void> signal_sequence_changed();
 	virtual void assign_menu(Gtk::Menu *menu, string title);
 	virtual string request_sequence_path();
-	virtual string request_open_dialog_result(string dialog_title, Glib::RefPtr<Gtk::FileFilter> filter = Glib::RefPtr<Gtk::FileFilter>());
+	virtual string request_open_dialog_result(string dialog_title, bool folder = false, Glib::RefPtr<Gtk::FileFilter> filter = Glib::RefPtr<Gtk::FileFilter>());
 	virtual string request_save_dialog_result(string dialog_title, Glib::RefPtr<Gtk::FileFilter> filter = Glib::RefPtr<Gtk::FileFilter>());
 	virtual void request_active_rig(RequestBase<IRig> &request);
 	virtual Descriptor add_view(string title, sigc::slot1<Glib::RefPtr<Gdk::Pixbuf>, int> provider);

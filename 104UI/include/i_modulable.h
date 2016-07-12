@@ -1,9 +1,14 @@
-/*
- * i_modulable.h
+/**
+ * Copyright (C) 2016, Vadim Fedorov <coderiks@gmail.com>
  *
- *  Created on: Feb 4, 2014
- *      Author: Vadim Fedorov
+ * This program is free software: you can use, modify and/or
+ * redistribute it under the terms of the simplified BSD
+ * License. You should have received a copy of this license along
+ * this program. If not, see
+ * <http://www.opensource.org/licenses/bsd-license.html>.
  */
+
+/// Created on: Feb 4, 2014
 
 #ifndef I_MODULABLE_H_
 #define I_MODULABLE_H_
@@ -31,7 +36,7 @@ public:
 
 	virtual SequenceFx<float> request_sequence() = 0;
 	virtual string request_sequence_path() = 0;
-	virtual string request_open_dialog_result(string dialog_title, Glib::RefPtr<Gtk::FileFilter> filter = Glib::RefPtr<Gtk::FileFilter>()) = 0;
+	virtual string request_open_dialog_result(string dialog_title, bool folder = false, Glib::RefPtr<Gtk::FileFilter> filter = Glib::RefPtr<Gtk::FileFilter>()) = 0;
 	virtual string request_save_dialog_result(string dialog_title, Glib::RefPtr<Gtk::FileFilter> filter = Glib::RefPtr<Gtk::FileFilter>()) = 0;
 
 	// NOTE: This is one possible way to notify an active rig about something from a module. Rig should implement some interface which is known by a module.

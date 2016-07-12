@@ -1,9 +1,14 @@
-/*
- * mask_sequence.cpp
+/**
+ * Copyright (C) 2016, Vadim Fedorov <coderiks@gmail.com>
  *
- *  Created on: Nov 13, 2014
- *      Author: upf
+ * This program is free software: you can use, modify and/or
+ * redistribute it under the terms of the simplified BSD
+ * License. You should have received a copy of this license along
+ * this program. If not, see
+ * <http://www.opensource.org/licenses/bsd-license.html>.
  */
+
+/// Created on: Nov 13, 2014
 
 #include "mask_sequence.h"
 
@@ -16,9 +21,13 @@ MaskSequence::MaskSequence()
 
 
 MaskSequence::MaskSequence(Shape size)
-: _size(size.size_x, size.size_y, 0)
+: _size(size.size_x, size.size_y, size.size_t)
 {
 	_frames.reserve(size.size_t);
+
+    for (uint i = 0; i < size.size_t; i++) {
+        _frames.push_back(Mask(size));
+    }
 }
 
 

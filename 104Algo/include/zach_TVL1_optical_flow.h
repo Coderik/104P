@@ -1,9 +1,25 @@
-/*
- * zach_TVL1_optical_flow.h
+/**
+ * Copyright (C) 2016, Vadim Fedorov <coderiks@gmail.com>
  *
- *  Created on: Jan 23, 2013
- *      Author: upf
+ * This program is free software: you can use, modify and/or
+ * redistribute it under the terms of the simplified BSD
+ * License. You should have received a copy of this license along
+ * this program. If not, see
+ * <http://www.opensource.org/licenses/bsd-license.html>.
  */
+
+/// Created on: Jan 23, 2013
+/// Implementation of the Zach, Pock and Bischof dual TV-L1 optic flow method
+///
+/// see reference:
+///  [1] C. Zach, T. Pock and H. Bischof, "A Duality Based Approach for Realtime
+///      TV-L1 Optical Flow", In Proceedings of Pattern Recognition (DAGM),
+///      Heidelberg, Germany, pp. 214-223, 2007
+///
+///
+/// Details on the total variation minimization scheme can be found in:
+///  [2] A. Chambolle, "An Algorithm for Total Variation Minimization and
+///      Applications", Journal of Mathematical Imaging and Vision, 20: 89-97, 2004
 
 #ifndef ZACH_TVL1_OPTICAL_FLOW_H_
 #define ZACH_TVL1_OPTICAL_FLOW_H_
@@ -16,20 +32,6 @@
 #include "sampling.h"
 #include "warping.h"
 #include "i_watchdog.h"
-
-/**
-  * Implementation of the Zach, Pock and Bischof dual TV-L1 optic flow method
-  *
-  * see reference:
-  *  [1] C. Zach, T. Pock and H. Bischof, "A Duality Based Approach for Realtime
-  *      TV-L1 Optical Flow", In Proceedings of Pattern Recognition (DAGM),
-  *      Heidelberg, Germany, pp. 214-223, 2007
-  *
-  *
-  * Details on the total variation minimization scheme can be found in:
-  *  [2] A. Chambolle, "An Algorithm for Total Variation Minimization and
-  *      Applications", Journal of Mathematical Imaging and Vision, 20: 89-97, 2004
-**/
 
 class Zach_TVL1_OpticalFlow
 {

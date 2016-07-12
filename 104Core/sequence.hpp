@@ -1,9 +1,14 @@
-/*
- * sequence.hpp
+/**
+ * Copyright (C) 2016, Vadim Fedorov <coderiks@gmail.com>
  *
- *  Created on: Nov 11, 2014
- *      Author: upf
+ * This program is free software: you can use, modify and/or
+ * redistribute it under the terms of the simplified BSD
+ * License. You should have received a copy of this license along
+ * this program. If not, see
+ * <http://www.opensource.org/licenses/bsd-license.html>.
  */
+
+/// Created on: Nov 11, 2014
 
 /* Sequence */
 
@@ -225,6 +230,34 @@ template<class T>
 T& Sequence<T>::operator() (const Point &p)
 {
 	return _frames[p.t](p);
+}
+
+
+template<class T>
+const T& Sequence<T>::operator() (uint x, uint y, uint t, uint channel) const
+{
+	return _frames[t](x, y, channel);
+}
+
+
+template<class T>
+const T& Sequence<T>::operator() (const Point &p, uint channel) const
+{
+	return _frames[p.t](p, channel);
+}
+
+
+template<class T>
+T& Sequence<T>::operator() (uint x, uint y, uint t, uint channel)
+{
+	return _frames[t](x, y, channel);
+}
+
+
+template<class T>
+T& Sequence<T>::operator() (const Point &p, uint channel)
+{
+	return _frames[p.t](p, channel);
 }
 
 

@@ -1,9 +1,14 @@
-/*
- * hull.cpp
+/**
+ * Copyright (C) 2016, Vadim Fedorov <coderiks@gmail.com>
  *
- *  Created on: Jan 9, 2013
- *      Author: Vadim Fedorov
+ * This program is free software: you can use, modify and/or
+ * redistribute it under the terms of the simplified BSD
+ * License. You should have received a copy of this license along
+ * this program. If not, see
+ * <http://www.opensource.org/licenses/bsd-license.html>.
  */
+
+/// Created on: Jan 9, 2013
 
 #include "hull.h"
 
@@ -93,6 +98,10 @@ void Hull::open_image()
 	filter_pgm->set_name("PGM image files (*.pgm)");
 	filter_pgm->add_pattern("*.pgm");
 	dialog.add_filter(filter_pgm);
+    Glib::RefPtr<Gtk::FileFilter> filter_png = Gtk::FileFilter::create();
+    filter_png->set_name("PNG image files (*.png)");
+    filter_png->add_pattern("*.png");
+    dialog.add_filter(filter_png);
 
 	//Show the dialog and wait for a user response:
 	int result = dialog.run();
@@ -107,7 +116,7 @@ void Hull::open_image()
 
 void Hull::load_image(string filename)
 {
-	Image<float> image = IOUtility::read_pgm_image(filename);
+	Image<float> image = IOUtility::read_rgb_image(filename);   // TODO: deduce the number of channels from format
 
 	if (!image) {
 		return;
@@ -179,7 +188,9 @@ void Hull::load_sequence(string path)
 	{
 		std::string file_mime_type = file_info->get_content_type();
 		// COMPATIBILITY: first for unix, second for win
-		if (file_mime_type.compare("image/x-portable-graymap") == 0 || file_mime_type.compare(".pgm") == 0) {
+		if (file_mime_type.compare("image/x-portable-graymap") == 0 ||
+				file_mime_type.compare(".pgm") == 0 ||
+				file_mime_type.compare("image/png") == 0) {
 			std::string file_name = file_info->get_name();
 			file_names.push_back(file_name);
 		}
@@ -194,7 +205,7 @@ void Hull::load_sequence(string path)
 	// Load first frame, that will define width and height for the sequence.
 	std::string first_frame_path = path;
 	first_frame_path.append(file_names[0]);
-	Image<float> first_frame = IOUtility::read_pgm_image(first_frame_path);
+	Image<float> first_frame = IOUtility::read_rgb_image(first_frame_path);
 
 	// [Re]create sequence instance
 	_sequence = SequenceFx<float>(first_frame);
@@ -203,7 +214,7 @@ void Hull::load_sequence(string path)
 	for (unsigned int i = 1; i < file_names.size(); i++) {
 		string frame_path = path;
 		frame_path.append(file_names[i]);
-		Image<float> frame = IOUtility::read_pgm_image(frame_path);
+		Image<float> frame = IOUtility::read_rgb_image(frame_path);
 		_sequence.add(frame);
 	}
 
@@ -245,7 +256,9 @@ void Hull::open_recent()
 	string uri = current->get_uri();
 	string path = Glib::filename_from_uri(uri);
 
-	if (mime_type.compare("application/x-ext-pgm") == 0 || mime_type.compare("image/x-portable-graymap") == 0) {	
+	if (mime_type.compare("application/x-ext-pgm") == 0 ||
+        mime_type.compare("image/x-portable-graymap") == 0 ||
+        mime_type.compare("image/png") == 0) {
 		load_image(path);		// WIN: "application/x-ext-pgm"; Linux: "image/x-portable-graymap"
 	} else {
 		load_sequence(path);	// WIN: "application/octet-stream"; Linux: "inode/directory"
@@ -319,7 +332,6 @@ void Hull::request_module(RequestBase<IModule> &request)
 
 void Hull::add_module(IModule *module)
 {
-	// TODO: implement
 	_modules.push_back(module);
 	module->initialize(this);
 }
@@ -343,11 +355,11 @@ string Hull::request_sequence_path()
 }
 
 
-string Hull::request_open_dialog_result(string dialog_title, Glib::RefPtr<Gtk::FileFilter> filter)
+string Hull::request_open_dialog_result(string dialog_title, bool folder, Glib::RefPtr<Gtk::FileFilter> filter)
 {
-	Gtk::FileChooserDialog dialog(dialog_title, Gtk::FILE_CHOOSER_ACTION_OPEN);
+	Gtk::FileChooserDialog dialog(dialog_title, (folder) ? Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER : Gtk::FILE_CHOOSER_ACTION_OPEN);
 	dialog.set_transient_for(*this);
-	dialog.set_current_folder(Glib::get_current_dir());
+	dialog.set_current_folder((!_sequence_folder.empty()) ? _sequence_folder : Glib::get_current_dir());
 
 	// add response buttons the the dialog:
 	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
@@ -697,26 +709,40 @@ Glib::RefPtr<Gdk::Pixbuf> Hull::wrap_raw_image_data(const ImageFx<float> &image)
 {
 	const int BITS_PER_CHANNEL = 8;
 
-	int x_size = image.size_x();
-	int y_size = image.size_y();
+	int size_x = image.size_x();
+	int size_y = image.size_y();
+    const float *image_data = image.raw();
 
-	Glib::RefPtr<Gdk::Pixbuf> buffer = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, false, BITS_PER_CHANNEL, x_size, y_size);
+	Glib::RefPtr<Gdk::Pixbuf> buffer = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, false, BITS_PER_CHANNEL, size_x, size_y);
+    /// NOTE: 'rowstride' is the length of internal representation of a row
+    /// inside the Pixbuf, and it could differ from size_x*number_of_channels.
 	int rowstride = buffer->get_rowstride();	// get internal row length
 	int number_of_channels = buffer->get_n_channels();
-	guint8* data = buffer->get_pixels();
+	guint8* buffer_data = buffer->get_pixels();
 
-	int index;
-	for (int y = 0;y < y_size;y++) {
-		for (int x = 0;x < x_size;x++) {
-			char intensity = (unsigned char)image(x, y);
-			for (int c = 0; c < number_of_channels; c++) {
-				/// NOTE: 'rowstride' is the length of internal representation of a row
-				/// inside the Pixbuf, and it could differ from x_size*number_of_channels.
-				index = y*rowstride + x*number_of_channels + c;
-				data[index] = intensity;
-			}
-		}
-	}
+    if (image.number_of_channels() == number_of_channels) {
+        for (int y = 0; y < size_y; y++) {
+            for (int x = 0; x < size_x; x++) {
+                for (int c = 0; c < number_of_channels; c++) {
+                    int image_index = number_of_channels * (size_x * y + x) + c;
+                    char intensity = (unsigned char) image_data[image_index];
+                    int data_index = y * rowstride + x * number_of_channels + c;
+                    buffer_data[data_index] = intensity;
+                }
+            }
+        }
+    } else {    // NOTE: also handles the case of mono-channeled image
+        for (int y = 0; y < size_y; y++) {
+            for (int x = 0; x < size_x; x++) {
+                int image_index = image.number_of_channels() * (size_x * y + x);    // take first channel
+                char intensity = (unsigned char) image_data[image_index];
+                for (int c = 0; c < number_of_channels; c++) {
+                    int data_index = y * rowstride + x * number_of_channels + c;
+                    buffer_data[data_index] = intensity;
+                }
+            }
+        }
+    }
 
 	return buffer;
 }

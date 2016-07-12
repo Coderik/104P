@@ -9,6 +9,12 @@ if (NOT CMAKE_BUILD_TYPE)
    set(CMAKE_BUILD_TYPE "Release")
 endif()
 
+# Increase optimization level for RelWithDebInfo build type
+if (CMAKE_C_FLAGS_RELWITHDEBINFO)
+    string(REPLACE "-O2" "-O3" CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO}")
+    string(REPLACE "-O2" "-O3" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+endif()
+
 # Specify target's our own include directories.
 include_directories(include)
 
@@ -30,7 +36,8 @@ set(SOURCE_FILES
     interpolation.cpp
     lut_math.cpp
     sampling.cpp
-    warping.cpp)
+    warping.cpp
+    zach_TVL1_optical_flow.cpp)
 
 # Specify all the targets, this target depends on.
 set(DEPENDENCIES

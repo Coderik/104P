@@ -1,9 +1,14 @@
-/*
- * numerical_entry.h
+/**
+ * Copyright (C) 2016, Vadim Fedorov <coderiks@gmail.com>
  *
- *  Created on: Jan 23, 2014
- *      Author: Vadim Fedorov
+ * This program is free software: you can use, modify and/or
+ * redistribute it under the terms of the simplified BSD
+ * License. You should have received a copy of this license along
+ * this program. If not, see
+ * <http://www.opensource.org/licenses/bsd-license.html>.
  */
+
+/// Created on: Jan 23, 2014
 
 #ifndef NUMERICAL_ENTRY_H_
 #define NUMERICAL_ENTRY_H_
@@ -36,8 +41,8 @@ public:
 	double get_value();
 
 private:
-	static const float EPS = FLT_EPSILON * 6;
-	static const int MIN_WIDTH = 20;
+	static const float EPS;
+	static const int MIN_WIDTH;
 	Glib::RefPtr<Gtk::Adjustment> _adjustment;
 	unsigned int _digits;
 	sigc::connection _connection_adjustment_signal_value_changed;

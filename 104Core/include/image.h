@@ -1,9 +1,14 @@
-/*
- * image.h
+/**
+ * Copyright (C) 2016, Vadim Fedorov <coderiks@gmail.com>
  *
- *  Created on: March 26, 2014
- *      Author: Vadim Fedorov
+ * This program is free software: you can use, modify and/or
+ * redistribute it under the terms of the simplified BSD
+ * License. You should have received a copy of this license along
+ * this program. If not, see
+ * <http://www.opensource.org/licenses/bsd-license.html>.
  */
+
+/// Created on: March 26, 2014
 
 #ifndef IMAGE_H_
 #define IMAGE_H_
@@ -15,6 +20,11 @@
 #include "shape.h"
 
 using namespace std;
+
+namespace ColorSpaces
+{
+    enum ColorSpace {mono, RGB, Lab, HSV, YUV, unknown};
+}
 
 template <class T>
 class Image;	// forward declaration
@@ -57,6 +67,7 @@ public:
 	uint size_y() const;
 	Shape size() const;
 	uint number_of_channels() const;
+    ColorSpaces::ColorSpace color_space() const;
 
 	/// Returns read-only value without range checking.
 	const T& operator() (uint x, uint y) const;
@@ -80,6 +91,7 @@ public:
 	/// Returns pointer to internal data.
 	const T* raw() const;
 	const uint raw_length() const;
+	const uint number_of_pixels() const;
 
 	/// Invokes deep copy.
 	ImageFx<T> clone() const;
@@ -91,6 +103,7 @@ protected:
 
 	uint _size_x, _size_y;
 	uint _number_of_channels;
+    ColorSpaces::ColorSpace _color_space;
 	T* _data;
 	__Ref *_ref;
 
@@ -131,6 +144,8 @@ public:
 
 	Image<T>& operator= (const Image<T> &other);			// without data copying, ref++
 	Image<T>& operator= (const ImageFx<T> &other);			// deep copy
+
+    void set_color_space(ColorSpaces::ColorSpace value);
 
 	// prevent hiding of const versions of these methods
 	using ImageFx<T>::operator();

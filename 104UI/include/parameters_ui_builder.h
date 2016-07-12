@@ -1,9 +1,14 @@
-/*
- * parameters_ui_builder.h
+/**
+ * Copyright (C) 2016, Vadim Fedorov <coderiks@gmail.com>
  *
- *  Created on: Sep 11, 2013
- *      Author: Vadim Fedorov
+ * This program is free software: you can use, modify and/or
+ * redistribute it under the terms of the simplified BSD
+ * License. You should have received a copy of this license along
+ * this program. If not, see
+ * <http://www.opensource.org/licenses/bsd-license.html>.
  */
+
+/// Created on: Sep 11, 2013
 
 #ifndef PARAMETERS_UI_BUILDER_H_
 #define PARAMETERS_UI_BUILDER_H_
@@ -20,12 +25,14 @@
 #include "i_list_parameter.h"
 #include "numerical_entry.h"
 
-using namespace std;
+using std::vector;
 
 class ParametersUIBuilder
 {
 public:
-	ParametersUIBuilder(IParameterizable *parameterizable);
+	ParametersUIBuilder(IParameterizable *parameterizable = 0); // TODO: eventually remove IParameterizable from params
+
+    void add_parameter(IParameter *parameter);
 
 	Gtk::VBox* get_ui();
 
@@ -37,7 +44,7 @@ public:
 
 private:
 	type_signal_changed _signal_changed;
-	IParameterizable *_parameterizable;
+    vector<IParameter*> _parameters;
 	Gtk::VBox *_ui;
 
 	Gtk::VBox* build_ui();

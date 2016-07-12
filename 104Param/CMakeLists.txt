@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project(104Core)
+project(104Param)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
@@ -16,28 +16,33 @@ if (CMAKE_C_FLAGS_RELWITHDEBINFO)
 endif()
 
 
+# Look for include paths for dependencies
+set(CMAKE_MODULE_PATH  ${PROJECT_SOURCE_DIR}/cmake-extensions/ )
+find_package(PkgConfig)
+pkg_check_modules(SIGC sigc++-2.0)
+
 # Specify target's our own include directories.
-include_directories(include)
+include_directories(
+    include
+    ${SIGC_INCLUDE_DIRS})
 
 # Specify all the source files.
 set(SOURCE_FILES
-        include/i_iterable_mask.h
-        include/i_watchdog.h
-        include/image.h
-        include/mask.h
-        include/mask_iterator.h
-        include/mask_sequence.h
-        include/patch.h
-        include/point.h
-        include/sequence.h
-        include/shape.h
-        mask.cpp
-        mask_iterator.cpp
-        mask_sequence.cpp
-        patch.cpp
-        point.cpp
-        sequence.hpp
-        shape.cpp)
+    include/i_list_parameter.h
+    include/i_parameter.h
+    include/i_parameterizable.h
+    include/i_range_parameter.h
+    include/list_parameter.h
+    include/range_parameter.h
+    range_parameter.cpp)
+
+# Specify all the targets, this target depends on.
+set(DEPENDENCIES
+    )   # NOTE: these are other project to be built, NOT all the libs this target depends on.
+
+# Specify other libs this target depends on.
+SET(LIBS ${DEPENDENCIES}
+    )
 
 # Configure the target.
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/build)

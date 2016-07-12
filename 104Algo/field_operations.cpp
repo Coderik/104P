@@ -1,9 +1,14 @@
-/*
- * field_operations.cpp
+/**
+ * Copyright (C) 2016, Vadim Fedorov <coderiks@gmail.com>
  *
- *  Created on: Jan 23, 2013
- *      Author: upf
+ * This program is free software: you can use, modify and/or
+ * redistribute it under the terms of the simplified BSD
+ * License. You should have received a copy of this license along
+ * this program. If not, see
+ * <http://www.opensource.org/licenses/bsd-license.html>.
  */
+
+/// Created on: Jan 23, 2013
 
 #include <omp.h>
 
@@ -97,6 +102,82 @@ void FieldOperations::centered_gradient(const float *in, float *dx, float *dy, c
 
 	Filtering::separate_convolution(in, dx, nx, ny, filter_der, filter_id, 5, 1);
 	Filtering::separate_convolution(in, dy, nx, ny, filter_id, filter_der, 1, 5);
+}
+
+
+void FieldOperations::centered_temporal_gradient(const float *prev_frame, const float *next_frame, float *dt, const int length)
+{
+	for (int i = 0; i < length; ++i) {
+		dt[i] = next_frame[i] - prev_frame[i];
+	}
+}
+
+
+void FieldOperations::centered_convective_derivative(const float *prev_frame, const float *next_frame,
+													 const float *bwd_flow, const float *fwd_flow,
+													 float *result, const int nx, const int ny)
+{
+	if (bwd_flow && fwd_flow) {
+		for (int y = 0; y < ny; ++y) {
+			for (int x = 0; x < nx; ++x) {
+				int index = y * nx + x;
+
+				float bwd_x = (float) x + bwd_flow[index * 2];
+				float bwd_y = (float) y + bwd_flow[index * 2 + 1];
+				float fwd_x = (float) x + fwd_flow[index * 2];
+				float fwd_y = (float) y + fwd_flow[index * 2 + 1];
+				bwd_x = std::max(std::min(bwd_x, (float)nx - 1), 0.0f);
+				bwd_y = std::max(std::min(bwd_y, (float)ny - 1), 0.0f);
+				fwd_x = std::max(std::min(fwd_x, (float)nx - 1), 0.0f);
+				fwd_y = std::max(std::min(fwd_y, (float)ny - 1), 0.0f);
+
+				// TODO: use bilinear instead of nearest interpolation here
+				int bwd_index = ((int)(bwd_y + 0.5f)) * nx + (int)(bwd_x + 0.5f);
+				int fwd_index = ((int)(fwd_y + 0.5f)) * nx + (int)(fwd_x + 0.5f);
+				float bwd_color = prev_frame[bwd_index];
+				float fwd_color = next_frame[fwd_index];
+				result[index] = fwd_color - bwd_color;
+			}
+		}
+	} else if (bwd_flow) {
+		for (int y = 0; y < ny; ++y) {
+			for (int x = 0; x < nx; ++x) {
+				int index = y * nx + x;
+
+				float bwd_x = (float) x + bwd_flow[index * 2];
+				float bwd_y = (float) y + bwd_flow[index * 2 + 1];
+				bwd_x = std::max(std::min(bwd_x, (float)nx - 1), 0.0f);
+				bwd_y = std::max(std::min(bwd_y, (float)ny - 1), 0.0f);
+
+				// TODO: use bilinear instead of nearest interpolation here
+				int bwd_index = ((int)(bwd_y + 0.5f)) * nx + (int)(bwd_x + 0.5f);
+				float bwd_color = prev_frame[bwd_index];
+				float fwd_color = next_frame[index];
+				result[index] = fwd_color - bwd_color;
+			}
+		}
+	} else if (fwd_flow) {
+		for (int y = 0; y < ny; ++y) {
+			for (int x = 0; x < nx; ++x) {
+				int index = y * nx + x;
+
+				float fwd_x = (float) x + fwd_flow[index * 2];
+				float fwd_y = (float) y + fwd_flow[index * 2 + 1];
+				fwd_x = std::max(std::min(fwd_x, (float)nx - 1), 0.0f);
+				fwd_y = std::max(std::min(fwd_y, (float)ny - 1), 0.0f);
+
+				// TODO: use bilinear instead of nearest interpolation here
+				int fwd_index = ((int)(fwd_y + 0.5f)) * nx + (int)(fwd_x + 0.5f);
+				float bwd_color = prev_frame[index];
+				float fwd_color = next_frame[fwd_index];
+				result[index] = fwd_color - bwd_color;
+			}
+		}
+	} else {
+		for (int i = 0; i < nx * ny; ++i) {
+			result[i] = 0.0f;
+		}
+	}
 }
 
 

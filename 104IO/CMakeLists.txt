@@ -9,6 +9,12 @@ if (NOT CMAKE_BUILD_TYPE)
    set(CMAKE_BUILD_TYPE "Release")
 endif()
 
+# Increase optimization level for RelWithDebInfo build type
+if (CMAKE_C_FLAGS_RELWITHDEBINFO)
+    string(REPLACE "-O2" "-O3" CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO}")
+    string(REPLACE "-O2" "-O3" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+endif()
+
 # Specify target's our own include directories.
 include_directories(iio)
 include_directories(include)
@@ -41,6 +47,7 @@ set(SOURCE_FILES
     include/tclap/Visitor.h
     include/tclap/XorHandler.h
     include/tclap/ZshCompletionOutput.h
+    include/tinydir.h
     include/color_code.h
     include/console_utility.h
     include/i_optical_flow_code.h
