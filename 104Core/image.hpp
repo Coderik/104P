@@ -411,8 +411,11 @@ ImageFx<T> ImageFx<T>::clone() const
 	clone._size_x = this->_size_x;
 	clone._size_y = this->_size_y;
 	clone._number_of_channels = this->_number_of_channels;
-	clone.init(this->_size_x, this->_size_y, this->_number_of_channels);
-	memcpy(clone._data, this->_data,  this->_number_of_channels * this->_size_y * this->_size_x * sizeof(T));
+
+	if (this->_ref) {
+		clone.init(this->_size_x, this->_size_y, this->_number_of_channels);
+		memcpy(clone._data, this->_data,  this->_number_of_channels * this->_size_y * this->_size_x * sizeof(T));
+	}
 
 	return clone;
 }
@@ -552,11 +555,19 @@ Image<T>::Image(const Image<T> &source)
 template <class T>
 Image<T>::Image(const ImageFx<T> &source)
 {
-	this->_size_x = source._size_x;
-	this->_size_y = source._size_y;
-	this->_number_of_channels = source._number_of_channels;
-	ImageFx<T>::init(source._size_x, source._size_y, source._number_of_channels);
-	memcpy(this->_data, source._data,  source._number_of_channels * source._size_y * source._size_x * sizeof(T));
+	if (source._ref) {
+		this->_size_x = source._size_x;
+		this->_size_y = source._size_y;
+		this->_number_of_channels = source._number_of_channels;
+		ImageFx<T>::init(source._size_x, source._size_y, source._number_of_channels);
+		memcpy(this->_data, source._data,  source._number_of_channels * source._size_y * source._size_x * sizeof(T));
+	} else {
+		this->_size_x = 0;
+		this->_size_y = 0;
+		this->_number_of_channels = 0;
+		this->_ref = 0;
+		this->_data = 0;
+	}
 }
 
 
@@ -600,11 +611,19 @@ Image<T>& Image<T>::operator= (const ImageFx<T> &other)
 	// finish all deals with the previous data
 	Image<T>::release();
 
-	this->_size_x = other._size_x;
-	this->_size_y = other._size_y;
-	this->_number_of_channels = other._number_of_channels;
-	Image<T>::init(other._size_x, other._size_y, other._number_of_channels);
-	memcpy(this->_data, other._data,  other._number_of_channels * other._size_y * other._size_x * sizeof(T));
+	if (other._ref) {
+		this->_size_x = other._size_x;
+		this->_size_y = other._size_y;
+		this->_number_of_channels = other._number_of_channels;
+		Image<T>::init(other._size_x, other._size_y, other._number_of_channels);
+		memcpy(this->_data, other._data,  other._number_of_channels * other._size_y * other._size_x * sizeof(T));
+	} else {
+		this->_size_x = 0;
+		this->_size_y = 0;
+		this->_number_of_channels = 0;
+		this->_ref = 0;
+		this->_data = 0;
+	}
 
 	return *this;
 }
@@ -740,8 +759,11 @@ Image<T> Image<T>::clone() const
 	clone._size_x = this->_size_x;
 	clone._size_y = this->_size_y;
 	clone._number_of_channels = this->_number_of_channels;
-	clone.init(this->_size_x, this->_size_y, this->_number_of_channels);
-	memcpy(clone._data, this->_data,  this->_number_of_channels * this->_size_y * this->_size_x * sizeof(T));
+
+	if (this->_ref) {
+		clone.init(this->_size_x, this->_size_y, this->_number_of_channels);
+		memcpy(clone._data, this->_data,  this->_number_of_channels * this->_size_y * this->_size_x * sizeof(T));
+	}
 
 	return clone;
 }

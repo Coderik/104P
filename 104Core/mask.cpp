@@ -283,10 +283,12 @@ MaskFx MaskFx::clone() const
 	clone._size_x = this->_size_x;
 	clone._size_y = this->_size_y;
 	clone._number_of_channels = this->_number_of_channels;
-	clone.init(this->_size_x, this->_size_y, this->_number_of_channels);
-	memcpy(clone._data, this->_data,  this->_number_of_channels * this->_size_y * this->_size_x * sizeof(bool));
 
-	clone.init_internal(_internal->first, _internal->last, _internal->is_first_last_valid);
+	if (this->_ref) {
+		clone.init(this->_size_x, this->_size_y, this->_number_of_channels);
+		memcpy(clone._data, this->_data,  this->_number_of_channels * this->_size_y * this->_size_x * sizeof(bool));
+		clone.init_internal(_internal->first, _internal->last, _internal->is_first_last_valid);
+	}
 
 	return clone;
 }
@@ -301,12 +303,15 @@ MaskFx MaskFx::clone_invert() const
 	clone._size_x = this->_size_x;
 	clone._size_y = this->_size_y;
 	clone._number_of_channels = this->_number_of_channels;
-	clone.init(this->_size_x, this->_size_y, this->_number_of_channels);
-	for (uint i = 0; i < _size_x * _size_y * _number_of_channels; i++) {
-		clone._data[i] = !this->_data[i];
-	}
 
-	clone.init_internal(_internal->first, _internal->last, false);
+	if (this->_ref) {
+		clone.init(this->_size_x, this->_size_y, this->_number_of_channels);
+		for (uint i = 0; i < _size_x * _size_y * _number_of_channels; i++) {
+			clone._data[i] = !this->_data[i];
+		}
+
+		clone.init_internal(_internal->first, _internal->last, false);
+	}
 
 	return clone;
 }
@@ -474,7 +479,7 @@ Mask::Mask(Shape size, bool default_value)
  * Deep copy
  */
 Mask::Mask(const Image<bool> &source)
-	: MaskFx(source)	// Image to FixedMask cast leads to deep copying
+	: MaskFx(source)	// Image to MaskFx cast leads to deep copying
 {
 
 }
@@ -484,7 +489,7 @@ Mask::Mask(const Image<bool> &source)
  * Deep copy
  */
 Mask::Mask(const ImageFx<bool> &source)
-	: MaskFx(source)	// FixedImage to FixedMask cast leads to deep copying
+	: MaskFx(source)	// ImageFx to MaskFx cast leads to deep copying
 {
 
 }
@@ -525,7 +530,6 @@ Mask& Mask::operator= (const Mask &other)
 
 	// finish all deals with the previous data
 	release();
-	delete _internal;
 
 	// increase counter
 	if (other._ref) {
@@ -553,14 +557,22 @@ Mask& Mask::operator= (const MaskFx &other)
 
 	// finish all deals with the previous data
 	release();
-	delete _internal;
 
-	this->_size_x = other._size_x;
-	this->_size_y = other._size_y;
-	this->_number_of_channels = other._number_of_channels;
-	init(other._size_x, other._size_y, other._number_of_channels);
-	memcpy(this->_data, other._data,  other._number_of_channels * other._size_y * other._size_x * sizeof(bool));
-	init_internal(other._internal->first, other._internal->last, other._internal->is_first_last_valid);
+	if (other._ref) {
+		this->_size_x = other._size_x;
+		this->_size_y = other._size_y;
+		this->_number_of_channels = other._number_of_channels;
+		init(other._size_x, other._size_y, other._number_of_channels);
+		memcpy(this->_data, other._data,  other._number_of_channels * other._size_y * other._size_x * sizeof(bool));
+		init_internal(other._internal->first, other._internal->last, other._internal->is_first_last_valid);
+	} else {
+		this->_size_x = 0;
+		this->_size_y = 0;
+		this->_number_of_channels = 0;
+		this->_ref = 0;
+		this->_data = 0;
+		this->_internal = 0;
+	}
 
 	return *this;
 }
@@ -827,10 +839,12 @@ Mask Mask::clone() const
 	clone._size_x = this->_size_x;
 	clone._size_y = this->_size_y;
 	clone._number_of_channels = this->_number_of_channels;
-	clone.init(this->_size_x, this->_size_y, this->_number_of_channels);
-	memcpy(clone._data, this->_data,  this->_number_of_channels * this->_size_y * this->_size_x * sizeof(bool));
 
-	clone.init_internal(_internal->first, _internal->last, _internal->is_first_last_valid);
+	if (this->_ref) {
+		clone.init(this->_size_x, this->_size_y, this->_number_of_channels);
+		memcpy(clone._data, this->_data,  this->_number_of_channels * this->_size_y * this->_size_x * sizeof(bool));
+		clone.init_internal(_internal->first, _internal->last, _internal->is_first_last_valid);
+	}
 
 	return clone;
 }
@@ -846,12 +860,15 @@ Mask Mask::clone_invert() const
 	clone._size_x = this->_size_x;
 	clone._size_y = this->_size_y;
 	clone._number_of_channels = this->_number_of_channels;
-	clone.init(this->_size_x, this->_size_y, this->_number_of_channels);
-	for (uint i = 0; i < _size_x * _size_y * _number_of_channels; i++) {
-		clone._data[i] = !this->_data[i];
-	}
 
-	clone.init_internal(_internal->first, _internal->last, false);
+	if (this->_ref) {
+		clone.init(this->_size_x, this->_size_y, this->_number_of_channels);
+		for (uint i = 0; i < _size_x * _size_y * _number_of_channels; i++) {
+			clone._data[i] = !this->_data[i];
+		}
+
+		clone.init_internal(_internal->first, _internal->last, false);
+	}
 
 	return clone;
 }
