@@ -449,7 +449,7 @@ ImageFx<T> ImageFx<T>::clone() const
 template <class T>
 inline void ImageFx<T>::init(uint size_x, uint size_y, uint number_of_channels)
 {
-	_data = new T[size_x * size_y * number_of_channels];
+	_data = new T[size_x * size_y * number_of_channels]();
 	_ref = new __Ref();
 	_ref->counter = 1;
 }
