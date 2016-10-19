@@ -5,10 +5,7 @@
 #include "gtest/gtest.h"
 #include "image.h"
 
-// TODO: test access methods for Image
-
-TEST(Image, ImageFx_ctors)
-{
+TEST(Image, ImageFx_ctors) {
 	const float init_val = 1.0f;
 	const int w = 5;
 	const int h = 4;
@@ -176,8 +173,7 @@ TEST(Image, ImageFx_ctors)
 }
 
 
-TEST(Image, Image_ctors)
-{
+TEST(Image, Image_ctors) {
 	const float init_val = 1.0f;
 	const int w = 5;
 	const int h = 4;
@@ -346,8 +342,7 @@ TEST(Image, Image_ctors)
 
 
 // Image -> ImageFx : data sharing
-TEST(Image, Image_to_ImageFx)
-{
+TEST(Image, Image_to_ImageFx) {
 
 	// First test copy ctor
 	{
@@ -403,8 +398,7 @@ TEST(Image, Image_to_ImageFx)
 
 
 // Image -> Image : data sharing
-TEST(Image, Image_to_Image)
-{
+TEST(Image, Image_to_Image) {
 
 	// First test copy ctor
 	{
@@ -460,8 +454,7 @@ TEST(Image, Image_to_Image)
 
 
 // ImageFx -> ImageFx : data sharing
-TEST(Image, ImageFx_to_ImageFx)
-{
+TEST(Image, ImageFx_to_ImageFx) {
 
 	// First test copy ctor
 	{
@@ -509,8 +502,7 @@ TEST(Image, ImageFx_to_ImageFx)
 
 
 // ImageFx -> Image : data copying
-TEST(Image, ImageFx_to_Image)
-{
+TEST(Image, ImageFx_to_Image) {
 
 	// First test copy ctor
 	{
@@ -566,8 +558,7 @@ TEST(Image, ImageFx_to_Image)
 
 
 // ImageFx.clone() : data copying
-TEST(Image, ImageFx_clone)
-{
+TEST(Image, ImageFx_clone) {
 
 	{
 		const float init_val = 1.0f;
@@ -592,8 +583,7 @@ TEST(Image, ImageFx_clone)
 
 
 // Image.clone() : data copying
-TEST(Image, Image_clone)
-{
+TEST(Image, Image_clone) {
 
 	{
 		const float init_val = 1.0f;
@@ -675,3 +665,148 @@ TEST(Image, ImageFx_access) {
 		EXPECT_FALSE(imfx.try_get_value(Point(w, h), c, val));
 	}
 }
+
+
+TEST(Image, Image_const_access) {
+	const int w = 4;
+	const int h = 2;
+	const int c = 3;
+	Image<int> im(w, h, c, 0);
+
+	int *data = im.raw();
+	for (int i = 0; i < im.raw_length(); ++i) {
+		data[i] = i;
+	}
+
+	const Image<int> im2(im);
+
+	// const T& operator() (...)
+	{
+		EXPECT_EQ(im2(1, 0), 3);
+		EXPECT_EQ(im2(1, 0, 2), 5);
+		EXPECT_EQ(im2(Point(2, 1)), 18);
+		EXPECT_EQ(im2(Point(2, 1), 1), 19);
+		EXPECT_NO_THROW(im2(w, h));
+		EXPECT_NO_THROW(im2(w, h, c));
+		EXPECT_NO_THROW(im2(Point(w, h)));
+		EXPECT_NO_THROW(im2(Point(w, h), c));
+	}
+
+	// const T& at(...)
+	{
+		EXPECT_EQ(im2.at(0, 1), 12);
+		EXPECT_EQ(im2.at(0, 1, 1), 13);
+		EXPECT_EQ(im2.at(Point(1, 1)), 15);
+		EXPECT_EQ(im2.at(Point(1, 1), 2), 17);
+		EXPECT_THROW(im2.at(w, h), std::out_of_range);
+		EXPECT_THROW(im2.at(w, h, c), std::out_of_range);
+		EXPECT_THROW(im2.at(Point(w, h)), std::out_of_range);
+		EXPECT_THROW(im2.at(Point(w, h), c), std::out_of_range);
+	}
+
+	// bool try_get_value(...)
+	{
+		int val = -1;
+		EXPECT_TRUE(im2.try_get_value(3, 0, val));
+		EXPECT_EQ(val, 9);
+		EXPECT_TRUE(im2.try_get_value(3, 0, 1, val));
+		EXPECT_EQ(val, 10);
+		EXPECT_TRUE(im2.try_get_value(Point(3, 1), val));
+		EXPECT_EQ(val, 21);
+		EXPECT_TRUE(im2.try_get_value(Point(3, 1), 2, val));
+		EXPECT_EQ(val, 23);
+		EXPECT_FALSE(im2.try_get_value(w, h, val));
+		EXPECT_FALSE(im2.try_get_value(w, h, c, val));
+		EXPECT_FALSE(im2.try_get_value(Point(w, h), val));
+		EXPECT_FALSE(im2.try_get_value(Point(w, h), c, val));
+	}
+}
+
+
+TEST(Image, Image_access) {
+	const int w = 4;
+	const int h = 2;
+	const int c = 3;
+	Image<int> im(w, h, c, 1);
+
+	// T& operator() (...)
+	{
+		im(0, 0) = 3;
+		EXPECT_EQ(im(0, 0), 3);
+		im(1, 0, 2) = 4;
+		EXPECT_EQ(im(1, 0, 2), 4);
+		im(Point(2, 0)) = 5;
+		EXPECT_EQ(im(Point(2, 0)), 5);
+		im(Point(3, 0), 1) = 6;
+		EXPECT_EQ(im(Point(3, 0), 1), 6);
+		EXPECT_NO_THROW(im(w, h));
+		EXPECT_NO_THROW(im(w, h, c));
+		EXPECT_NO_THROW(im(Point(w, h)));
+		EXPECT_NO_THROW(im(Point(w, h), c));
+	}
+
+	// T& at(...)
+	{
+		im.at(0, 1) = 7;
+		EXPECT_EQ(im.at(0, 1), 7);
+		im.at(0, 1, 1) = 8;
+		EXPECT_EQ(im.at(0, 1, 1), 8);
+		im.at(Point(2, 1)) = 9;
+		EXPECT_EQ(im.at(Point(2, 1)), 9);
+		im.at(Point(3, 1), 2) = 10;
+		EXPECT_EQ(im.at(Point(3, 1), 2), 10);
+		EXPECT_THROW(im.at(w, h), std::out_of_range);
+		EXPECT_THROW(im.at(w, h, c), std::out_of_range);
+		EXPECT_THROW(im.at(Point(w, h)), std::out_of_range);
+		EXPECT_THROW(im.at(Point(w, h), c), std::out_of_range);
+	}
+}
+
+
+TEST(Image, empty_access) {
+	ImageFx<int> imfx;
+
+	// const T& operator() (...)
+	{
+		EXPECT_NO_THROW(imfx(0, 0));
+		EXPECT_NO_THROW(imfx(0, 0, 0));
+		EXPECT_NO_THROW(imfx(Point(0, 0)));
+		EXPECT_NO_THROW(imfx(Point(0, 0), 0));
+	}
+
+	// const T& at(...)
+	{
+		EXPECT_THROW(imfx.at(0, 0), std::out_of_range);
+		EXPECT_THROW(imfx.at(0, 0, 0), std::out_of_range);
+		EXPECT_THROW(imfx.at(Point(0, 0)), std::out_of_range);
+		EXPECT_THROW(imfx.at(Point(0, 0), 0), std::out_of_range);
+	}
+
+	// bool try_get_value(...)
+	{
+		int val = -1;
+		EXPECT_FALSE(imfx.try_get_value(0, 0, val));
+		EXPECT_FALSE(imfx.try_get_value(0, 0, 0, val));
+		EXPECT_FALSE(imfx.try_get_value(Point(0, 0), val));
+		EXPECT_FALSE(imfx.try_get_value(Point(0, 0), 0, val));
+	}
+
+	Image<int> im;
+
+	// T& operator() (...)
+	{
+		EXPECT_NO_THROW(im(0, 0));
+		EXPECT_NO_THROW(im(0, 0, 0));
+		EXPECT_NO_THROW(im(Point(0, 0)));
+		EXPECT_NO_THROW(im(Point(0, 0), 0));
+	}
+
+	// T& at(...)
+	{
+		EXPECT_THROW(im.at(0, 0), std::out_of_range);
+		EXPECT_THROW(im.at(0, 0, 0), std::out_of_range);
+		EXPECT_THROW(im.at(Point(0, 0)), std::out_of_range);
+		EXPECT_THROW(im.at(Point(0, 0), 0), std::out_of_range);
+	}
+}
+

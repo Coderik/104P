@@ -18,7 +18,7 @@ MaskFx::iterator MaskFx::empty_iterator()
 }
 
 MaskFx::MaskFx()
- : ImageFx<bool>(), _internal(0)
+ : ImageFx<bool>(), _internal()
 {
 
 }
@@ -64,7 +64,7 @@ MaskFx::MaskFx(Shape size, bool default_value)
  * Deep copy
  */
 MaskFx::MaskFx(const Image<bool> &source)
- : ImageFx<bool>(source.clone())	// we have to invoke deep copying explicitly, because Image to FixedImage cast leads to the data sharing
+ : ImageFx<bool>(source.clone())	// we have to invoke deep copying explicitly, because Image to ImageFx cast leads to the data sharing
 {
 	init_internal(Point(0, 0), Point(0, 0), false);
 }
@@ -74,7 +74,7 @@ MaskFx::MaskFx(const Image<bool> &source)
  * Deep copy
  */
 MaskFx::MaskFx(const ImageFx<bool> &source)
- : ImageFx<bool>(source.clone())	// we have to invoke deep copying explicitly, because FixedImage to FixedImage cast leads to the data sharing
+ : ImageFx<bool>(source.clone())	// we have to invoke deep copying explicitly, because ImageFx to ImageFx cast leads to the data sharing
 {
 	init_internal(Point(0, 0), Point(0, 0), false);
 }
@@ -84,7 +84,7 @@ MaskFx::MaskFx(const ImageFx<bool> &source)
  * Ref++
  */
 MaskFx::MaskFx(const Mask &source)
- : ImageFx<bool>(source)	// Mask is casted to FixedImage implicitly, then FixedImage to FixedImage cast leads to the data sharing
+ : ImageFx<bool>(source)	// Mask is casted to ImageFx implicitly, then ImageFx to ImageFx cast leads to the data sharing
 {
 	_internal = source._internal;
 }
@@ -94,7 +94,7 @@ MaskFx::MaskFx(const Mask &source)
  * Ref++
  */
 MaskFx::MaskFx(const MaskFx &source)
- : ImageFx<bool>(source)	// FixedMask is casted to FixedImage implicitly, then FixedImage to FixedImage cast leads to the data sharing
+ : ImageFx<bool>(source)	// MaskFx is casted to ImageFx implicitly, then ImageFx to ImageFx cast leads to the data sharing
 {
 	_internal = source._internal;
 }
@@ -102,7 +102,7 @@ MaskFx::MaskFx(const MaskFx &source)
 
 MaskFx::~MaskFx()
 {
-	// NOTE: _internal will be released in the destroy(), if needed
+
 }
 
 
@@ -113,20 +113,11 @@ MaskFx& MaskFx::operator= (const Mask &other)
 		return *this;
 	}
 
-	// finish all deals with the previous data
-	release();
-	delete _internal;
-
-	// increase counter
-	if (other._ref) {
-		other._ref->counter++;
-	}
-
 	// assign new data
-	this->_ref = other._ref;
 	this->_size_x = other._size_x;
 	this->_size_y = other._size_y;
 	this->_number_of_channels = other._number_of_channels;
+	this->_color_space = other._color_space;
 	this->_data = other._data;
 	this->_internal = other._internal;
 
@@ -141,20 +132,11 @@ MaskFx& MaskFx::operator= (const MaskFx &other)
 		return *this;
 	}
 
-	// finish all deals with the previous data
-	release();
-	delete _internal;
-
-	// increase counter
-	if (other._ref) {
-		other._ref->counter++;
-	}
-
 	// assign new data
-	this->_ref = other._ref;
 	this->_size_x = other._size_x;
 	this->_size_y = other._size_y;
 	this->_number_of_channels = other._number_of_channels;
+	this->_color_space = other._color_space;
 	this->_data = other._data;
 	this->_internal = other._internal;
 
@@ -191,7 +173,7 @@ MaskFx::iterator MaskFx::rend() const
  */
 bool MaskFx::get(uint x, uint y) const
 {
-	return _data[index(x, y, 0)];
+	return _data.get()[index(x, y, 0)];
 }
 
 
@@ -201,7 +183,7 @@ bool MaskFx::get(uint x, uint y) const
 bool MaskFx::get(uint x, uint y, uint channel) const
 {
 
-	return _data[index(x, y, channel)];
+	return _data.get()[index(x, y, channel)];
 }
 
 
@@ -210,7 +192,7 @@ bool MaskFx::get(uint x, uint y, uint channel) const
  */
 bool MaskFx::get(Point p) const
 {
-	return _data[index(p.x, p.y, 0)];
+	return _data.get()[index(p.x, p.y, 0)];
 }
 
 
@@ -219,7 +201,7 @@ bool MaskFx::get(Point p) const
  */
 bool MaskFx::get(Point p, uint channel) const
 {
-	return _data[index(p.x, p.y, channel)];
+	return _data.get()[index(p.x, p.y, channel)];
 }
 
 
@@ -233,7 +215,7 @@ bool MaskFx::test(uint x, uint y) const
 		return false;
 	}
 
-	return _data[index(x, y, 0)];
+	return _data.get()[index(x, y, 0)];
 }
 
 
@@ -247,7 +229,7 @@ bool MaskFx::test(uint x, uint y, uint channel) const
 		return false;
 	}
 
-	return _data[index(x, y, channel)];
+	return _data.get()[index(x, y, channel)];
 }
 
 
@@ -261,7 +243,7 @@ bool MaskFx::test(Point p) const
 		return false;
 	}
 
-	return _data[index(p.x, p.y, 0)];
+	return _data.get()[index(p.x, p.y, 0)];
 }
 
 
@@ -275,7 +257,7 @@ bool MaskFx::test(Point p, uint channel) const
 		return false;
 	}
 
-	return _data[index(p.x, p.y, channel)];
+	return _data.get()[index(p.x, p.y, channel)];
 }
 
 
@@ -288,10 +270,11 @@ MaskFx MaskFx::clone() const
 	clone._size_x = this->_size_x;
 	clone._size_y = this->_size_y;
 	clone._number_of_channels = this->_number_of_channels;
+	clone._color_space = this->color_space();
 
-	if (this->_ref) {
+	if (this->_data) {
 		clone.init(this->_size_x, this->_size_y, this->_number_of_channels);
-		memcpy(clone._data, this->_data,  this->_number_of_channels * this->_size_y * this->_size_x * sizeof(bool));
+		memcpy(clone._data.get(), this->_data.get(),  this->_number_of_channels * this->_size_y * this->_size_x * sizeof(bool));
 		clone.init_internal(_internal->first, _internal->last, _internal->is_first_last_valid);
 	}
 
@@ -308,11 +291,14 @@ MaskFx MaskFx::clone_invert() const
 	clone._size_x = this->_size_x;
 	clone._size_y = this->_size_y;
 	clone._number_of_channels = this->_number_of_channels;
+	clone._color_space = this->color_space();
 
-	if (this->_ref) {
+	if (this->_data) {
 		clone.init(this->_size_x, this->_size_y, this->_number_of_channels);
+		bool *clone_data = clone._data.get();
+		bool *data = this->_data.get();
 		for (uint i = 0; i < _size_x * _size_y * _number_of_channels; i++) {
-			clone._data[i] = !this->_data[i];
+			clone_data[i] = !data[i];
 		}
 
 		clone.init_internal(_internal->first, _internal->last, false);
@@ -365,9 +351,10 @@ Point MaskFx::last() const
 Point MaskFx::next(const Point &current) const
 {
 	int from_x = current.x + 1;
+	bool *data = _data.get();
 	for (uint y = current.y; y < _size_y; y++) {
 		for (uint x = from_x; x < _size_x; x++) {
-			if (_data[index(x, y, 0)]) {
+			if (data[index(x, y, 0)]) {
 				return Point(x, y);
 			}
 		}
@@ -381,9 +368,10 @@ Point MaskFx::next(const Point &current) const
 Point MaskFx::prev(const Point &current) const
 {
 	int from_x = current.x - 1;
+	bool *data = _data.get();
 	for (int y = current.y; y >= 0; y--) {
 		for (int x = from_x; x >= 0; x--) {
-			if (_data[index(x, y, 0)]) {
+			if (data[index(x, y, 0)]) {
 				return Point(x, y);
 			}
 		}
@@ -396,19 +384,9 @@ Point MaskFx::prev(const Point &current) const
 
 /* Protected */
 
-void MaskFx::destroy() const
-{
-	delete _internal;
-	ImageFx<bool>::destroy();
-}
-
 inline void MaskFx::init_internal(Point first, Point last, bool is_first_last_valid)
 {
-	_internal = new __Internal();
-	_internal->first = first;
-	_internal->last = last;
-	_internal->is_first_last_valid = is_first_last_valid;
-	_internal->is_points_cache_valid = false;
+	_internal = std::make_shared<__Internal>(first, last, is_first_last_valid);
 }
 
 
@@ -417,10 +395,12 @@ inline void MaskFx::actualize_first_last() const
 	_internal->first = Point(_size_x, _size_y);
 	_internal->last = Point(-1, -1);
 
+	bool *data = _data.get();
+
 	bool is_last_found = false;
 	for (int y = _size_y - 1; (!is_last_found) && (y >= 0); y--) {
 		for (int x = _size_x - 1; (!is_last_found) && (x >= 0); x--) {
-			if (_data[index(x, y, 0)]) {
+			if (data[index(x, y, 0)]) {
 				_internal->last = Point(x, y);
 				is_last_found = true;
 			}
@@ -431,7 +411,7 @@ inline void MaskFx::actualize_first_last() const
 		bool _is_first_found = false;
 		for (uint y = 0; (!_is_first_found) && (y < _size_y); y++) {
 			for (uint x = 0; (!_is_first_found) && (x < _size_x); x++) {
-				if (_data[index(x, y, 0)]) {
+				if (data[index(x, y, 0)]) {
 					_internal->first = Point(x, y);
 					_is_first_found = true;
 				}
@@ -504,7 +484,7 @@ Mask::Mask(const ImageFx<bool> &source)
  * Ref++
  */
 Mask::Mask(const Mask &source)
-	: MaskFx(source)	// Mask to FixedMask cast leads to the data sharing
+	: MaskFx(source)	// Mask to MaskFx cast leads to the data sharing
 {
 
 }
@@ -514,7 +494,7 @@ Mask::Mask(const Mask &source)
  * Deep copy
  */
 Mask::Mask(const MaskFx &source)
-	: MaskFx(source.clone())	// we have to invoke deep copying explicitly, because FixedImage to FixedImage cast leads to the data sharing
+	: MaskFx(source.clone())	// we have to invoke deep copying explicitly, because ImageFx to ImageFx cast leads to the data sharing
 {
 
 }
@@ -533,19 +513,11 @@ Mask& Mask::operator= (const Mask &other)
 		return *this;
 	}
 
-	// finish all deals with the previous data
-	release();
-
-	// increase counter
-	if (other._ref) {
-		other._ref->counter++;
-	}
-
 	// assign new data
-	this->_ref = other._ref;
 	this->_size_x = other._size_x;
 	this->_size_y = other._size_y;
 	this->_number_of_channels = other._number_of_channels;
+	this->_color_space = other._color_space;
 	this->_data = other._data;
 	this->_internal = other._internal;
 
@@ -560,23 +532,21 @@ Mask& Mask::operator= (const MaskFx &other)
 		return *this;
 	}
 
-	// finish all deals with the previous data
-	release();
-
-	if (other._ref) {
+	if (other._data) {
 		this->_size_x = other._size_x;
 		this->_size_y = other._size_y;
 		this->_number_of_channels = other._number_of_channels;
+		this->_color_space = other._color_space;
 		init(other._size_x, other._size_y, other._number_of_channels);
-		memcpy(this->_data, other._data,  other._number_of_channels * other._size_y * other._size_x * sizeof(bool));
+		memcpy(this->_data.get(), other._data.get(),  other._number_of_channels * other._size_y * other._size_x * sizeof(bool));
 		init_internal(other._internal->first, other._internal->last, other._internal->is_first_last_valid);
 	} else {
 		this->_size_x = 0;
 		this->_size_y = 0;
 		this->_number_of_channels = 0;
-		this->_ref = 0;
-		this->_data = 0;
-		this->_internal = 0;
+		this->_color_space = ColorSpaces::unknown;
+		this->_data.reset();
+		this->_internal.reset();
 	}
 
 	return *this;
@@ -591,7 +561,7 @@ bool& Mask::operator() (uint x, uint y)
 	_internal->is_first_last_valid = false;
 	_internal->is_points_cache_valid = false;
 
-	return _data[index(x, y, 0)];
+	return _data.get()[index(x, y, 0)];
 }
 
 
@@ -603,7 +573,7 @@ bool& Mask::operator() (uint x, uint y, uint channel)
 	_internal->is_first_last_valid = false;
 	_internal->is_points_cache_valid = false;
 
-	return _data[index(x, y, channel)];
+	return _data.get()[index(x, y, channel)];
 }
 
 
@@ -615,7 +585,7 @@ bool& Mask::operator() (Point p)
 	_internal->is_first_last_valid = false;
 	_internal->is_points_cache_valid = false;
 
-	return _data[index(p.x, p.y, 0)];
+	return _data.get()[index(p.x, p.y, 0)];
 }
 
 
@@ -627,7 +597,7 @@ bool& Mask::operator() (Point p, uint channel)
 	_internal->is_first_last_valid = false;
 	_internal->is_points_cache_valid = false;
 
-	return _data[index(p.x, p.y, channel)];
+	return _data.get()[index(p.x, p.y, channel)];
 }
 
 
@@ -644,7 +614,7 @@ bool& Mask::at(uint x, uint y)
 	_internal->is_first_last_valid = false;
 	_internal->is_points_cache_valid = false;
 
-	return _data[index(x, y, 0)];
+	return _data.get()[index(x, y, 0)];
 }
 
 
@@ -661,7 +631,7 @@ bool& Mask::at(uint x, uint y, uint channel)
 	_internal->is_first_last_valid = false;
 	_internal->is_points_cache_valid = false;
 
-	return _data[index(x, y, channel)];
+	return _data.get()[index(x, y, channel)];
 }
 
 
@@ -678,7 +648,7 @@ bool& Mask::at(Point p)
 	_internal->is_first_last_valid = false;
 	_internal->is_points_cache_valid = false;
 
-	return _data[index(p.x, p.y, 0)];
+	return _data.get()[index(p.x, p.y, 0)];
 }
 
 
@@ -695,7 +665,7 @@ bool& Mask::at(Point p, uint channel)
 	_internal->is_first_last_valid = false;
 	_internal->is_points_cache_valid = false;
 
-	return _data[index(p.x, p.y, channel)];
+	return _data.get()[index(p.x, p.y, channel)];
 }
 
 
@@ -712,7 +682,7 @@ void Mask::mask(uint x, uint y)
 	_internal->is_first_last_valid = false;
 	_internal->is_points_cache_valid = false;
 
-	_data[index(x, y, 0)] = true;
+	_data.get()[index(x, y, 0)] = true;
 }
 
 
@@ -729,7 +699,7 @@ void Mask::mask(uint x, uint y, uint channel)
 	_internal->is_first_last_valid = false;
 	_internal->is_points_cache_valid = false;
 
-	_data[index(x, y, channel)] = true;
+	_data.get()[index(x, y, channel)] = true;
 }
 
 
@@ -746,7 +716,7 @@ void Mask::mask(Point p)
 	_internal->is_first_last_valid = false;
 	_internal->is_points_cache_valid = false;
 
-	_data[index(p.x, p.y, 0)] = true;
+	_data.get()[index(p.x, p.y, 0)] = true;
 }
 
 
@@ -763,7 +733,7 @@ void Mask::mask(Point p, uint channel)
 	_internal->is_first_last_valid = false;
 	_internal->is_points_cache_valid = false;
 
-	_data[index(p.x, p.y, channel)] = true;
+	_data.get()[index(p.x, p.y, channel)] = true;
 }
 
 
@@ -780,7 +750,7 @@ void Mask::unmask(uint x, uint y)
 	_internal->is_first_last_valid = false;
 	_internal->is_points_cache_valid = false;
 
-	_data[index(x, y, 0)] = false;
+	_data.get()[index(x, y, 0)] = false;
 }
 
 
@@ -797,7 +767,7 @@ void Mask::unmask(uint x, uint y, uint channel)
 	_internal->is_first_last_valid = false;
 	_internal->is_points_cache_valid = false;
 
-	_data[index(x, y, channel)] = true;
+	_data.get()[index(x, y, channel)] = true;
 }
 
 
@@ -814,7 +784,7 @@ void Mask::unmask(Point p)
 	_internal->is_first_last_valid = false;
 	_internal->is_points_cache_valid = false;
 
-	_data[index(p.x, p.y, 0)] = true;
+	_data.get()[index(p.x, p.y, 0)] = true;
 }
 
 
@@ -831,7 +801,7 @@ void Mask::unmask(Point p, uint channel)
 	_internal->is_first_last_valid = false;
 	_internal->is_points_cache_valid = false;
 
-	_data[index(p.x, p.y, channel)] = true;
+	_data.get()[index(p.x, p.y, channel)] = true;
 }
 
 
@@ -844,10 +814,11 @@ Mask Mask::clone() const
 	clone._size_x = this->_size_x;
 	clone._size_y = this->_size_y;
 	clone._number_of_channels = this->_number_of_channels;
+	clone._color_space = this->_color_space;
 
-	if (this->_ref) {
+	if (this->_data) {
 		clone.init(this->_size_x, this->_size_y, this->_number_of_channels);
-		memcpy(clone._data, this->_data,  this->_number_of_channels * this->_size_y * this->_size_x * sizeof(bool));
+		memcpy(clone._data.get(), this->_data.get(),  this->_number_of_channels * this->_size_y * this->_size_x * sizeof(bool));
 		clone.init_internal(_internal->first, _internal->last, _internal->is_first_last_valid);
 	}
 
@@ -865,11 +836,14 @@ Mask Mask::clone_invert() const
 	clone._size_x = this->_size_x;
 	clone._size_y = this->_size_y;
 	clone._number_of_channels = this->_number_of_channels;
+	clone._color_space = this->_color_space;
 
-	if (this->_ref) {
+	if (this->_data) {
 		clone.init(this->_size_x, this->_size_y, this->_number_of_channels);
+		bool *clone_data = clone._data.get();
+		bool *data = this->_data.get();
 		for (uint i = 0; i < _size_x * _size_y * _number_of_channels; i++) {
-			clone._data[i] = !this->_data[i];
+			clone_data[i] = !data[i];
 		}
 
 		clone.init_internal(_internal->first, _internal->last, false);
@@ -884,18 +858,11 @@ Mask Mask::clone_invert() const
  */
 void Mask::invert()
 {
+	bool *data = _data.get();
 	for (uint i = 0; i < _size_x * _size_y * _number_of_channels; i++) {
-		_data[i] = !_data[i];
+		data[i] = !data[i];
 	}
 
 	_internal->is_first_last_valid = false;
 	_internal->is_points_cache_valid = false;
-}
-
-/* Protected */
-
-void Mask::destroy() const
-{
-	// no additional data
-	MaskFx::destroy();
 }

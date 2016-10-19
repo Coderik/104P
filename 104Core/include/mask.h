@@ -27,12 +27,13 @@ class Mask;
 class MaskIterator;
 
 /**
- * Container for a 2d binary mask based on the FixedImage<bool> class.
+ * Container for a 2d binary mask based on the ImageFx<bool> class.
  * Provides capabilities for iterating through the masked points and
  * retrieving masked points as a vector.
  *
  * @note By design class provides no capabilities for changing its data,
- * therefore, 'Fixed' here should be considered as 'Immutable'.
+ * therefore, 'Fx' suffix here should be considered as 'Fixed', 'Immutable'.
+ * The main intended use case for MaskFx<T> is a read-only parameter of a function.
  */
 class MaskFx : public ImageFx<bool>, public IIterableMask
 {
@@ -53,8 +54,8 @@ public:
 	MaskFx(const MaskFx &source);				// without data copying, ref++
 	virtual ~MaskFx();
 
-	MaskFx& operator= (const Mask &other);			// without data copying, ref++
-	MaskFx& operator= (const MaskFx &other);		// without data copying, ref++
+	MaskFx& operator= (const Mask &other);		// without data copying, ref++
+	MaskFx& operator= (const MaskFx &other);	// without data copying, ref++
 
 	/// Return iterators to the begin/end of the masked region
 	iterator begin() const;
@@ -97,11 +98,12 @@ protected:
 		bool is_first_last_valid;
 		bool is_points_cache_valid;
 		vector<Point> points_cache;
+
+		__Internal(Point first, Point last, bool is_first_last_valid)
+				: first(first), last(last), is_first_last_valid(is_first_last_valid), is_points_cache_valid(false) {}
 	};
 
-	mutable __Internal *_internal;
-
-	virtual void destroy() const;
+	mutable std::shared_ptr<__Internal> _internal;
 
 	inline void init_internal(Point first, Point last, bool is_first_last_valid);
 	inline void actualize_first_last() const;
@@ -113,7 +115,7 @@ protected:
  * Provides capabilities for iterating through the masked points and
  * retrieving masked points as a vector.
  *
- * @note Extends the FixedMask class with the data modification capabilities.
+ * @note Extends the MaskFx class with the data modification capabilities.
  */
 class Mask : public MaskFx
 {
@@ -127,13 +129,13 @@ public:
 	Mask(Shape size);
 	Mask(Shape size, bool default_value);
 	Mask(const Image<bool> &source);			// deep copy
-	Mask(const ImageFx<bool> &source);		// deep copy
+	Mask(const ImageFx<bool> &source);			// deep copy
 	Mask(const Mask &source);					// without data copying, ref++
-	Mask(const MaskFx &source);				// deep copy
+	Mask(const MaskFx &source);					// deep copy
 	virtual ~Mask();
 
 	Mask& operator= (const Mask &other);		// without data copying, ref++
-	Mask& operator= (const MaskFx &other);	// deep copy
+	Mask& operator= (const MaskFx &other);		// deep copy
 
 	// prevent hiding of const versions of these methods
 	using ImageFx<bool>::operator();
@@ -174,10 +176,6 @@ public:
 
 	/// Invert current mask.
     void invert();
-
-protected:
-
-    virtual void destroy() const;
 };
 
 #endif /* MASK_H_ */

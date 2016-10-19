@@ -15,6 +15,7 @@
 
 #include <cstring>
 #include <algorithm>
+#include <memory>
 #include <stdexcept>
 #include "point.h"
 #include "shape.h"
@@ -36,7 +37,8 @@ class Image;	// forward declaration
  * used for explicit deep copy invocation.
  *
  * @note By design class provides no capabilities for changing its data,
- * therefore, 'Fixed' here should be considered as 'Immutable'.
+ * therefore, 'Fx' suffix here should be considered as 'Fixed', 'Immutable'.
+ * The main intended use case for ImageFx<T> is a read-only parameter of a function.
  */
 template <class T = float>
 class ImageFx
@@ -52,9 +54,9 @@ public:
 	ImageFx(Shape size, uint number_of_channels);
 	ImageFx(Shape size, T default_value);
 	ImageFx(Shape size, uint number_of_channels, T default_value);
-	ImageFx(const ImageFx<T> &source);				// without data copying, ref++
-	ImageFx(const Image<T> &source);				// without data copying, ref++
-	virtual ~ImageFx();
+	ImageFx(const ImageFx<T> &source);						// without data copying, ref++
+	ImageFx(const Image<T> &source);						// without data copying, ref++
+	~ImageFx() = default;
 
 	ImageFx<T>& operator= (const ImageFx<T> &other);		// without data copying, ref++
 	ImageFx<T>& operator= (const Image<T> &other);			// without data copying, ref++
@@ -97,21 +99,13 @@ public:
 	ImageFx<T> clone() const;
 
 protected:
-	struct __Ref {
-		int counter;
-	};
-
+	std::shared_ptr<T> _data;
 	uint _size_x, _size_y;
 	uint _number_of_channels;
-    ColorSpaces::ColorSpace _color_space;
-	T* _data;
-	__Ref *_ref;
+	ColorSpaces::ColorSpace _color_space;
 
 	inline void init(uint size_x, uint size_y, uint number_of_channels);
 	void fill_internal(const T &value);
-
-	void release() const;
-	virtual void destroy() const;
 
 	inline uint index(uint x, uint y, uint channel) const;
 };
@@ -123,7 +117,7 @@ protected:
  * a value of the same type lead to a data sharing. Method clone() should be
  * used for explicit deep copy invocation.
  *
- * @note Extends the FixedImage<T> class with the data modification capabilities.
+ * @note Extends the ImageFx<T> class with the data modification capabilities.
  */
 template <class T>
 class Image : public ImageFx<T>
@@ -138,16 +132,15 @@ public:
 	Image(Shape size, uint number_of_channels);
 	Image(Shape size, T default_value);
 	Image(Shape size, uint number_of_channels, T default_value);
-	Image(const Image<T> &source);				// without data copying, ref++
-	Image(const ImageFx<T> &source);			// deep copy
-	virtual ~Image();
+	Image(const Image<T> &source);						// without data copying, ref++
+	Image(const ImageFx<T> &source);					// deep copy
 
-	Image<T>& operator= (const Image<T> &other);			// without data copying, ref++
-	Image<T>& operator= (const ImageFx<T> &other);			// deep copy
+	Image<T>& operator= (const Image<T> &other);		// without data copying, ref++
+	Image<T>& operator= (const ImageFx<T> &other);		// deep copy
 
     void set_color_space(ColorSpaces::ColorSpace value);
 
-	// prevent hiding of const versions of these methods
+	// Prevent hiding of const versions of these methods
 	using ImageFx<T>::operator();
 	using ImageFx<T>::at;
 	using ImageFx<T>::raw;
@@ -173,9 +166,6 @@ public:
 
 	/// Invokes deep copy.
 	Image<T> clone() const;
-
-protected:
-	virtual void destroy() const;
 };
 
 // NOTE: include implementation, because Image is a template

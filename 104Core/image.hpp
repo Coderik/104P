@@ -17,7 +17,7 @@
 
 template <class T>
 ImageFx<T>::ImageFx()
- : _size_x(0), _size_y(0), _number_of_channels(0), _color_space(ColorSpaces::unknown), _data(0), _ref(0)
+ : _size_x(0), _size_y(0), _number_of_channels(0), _color_space(ColorSpaces::unknown), _data()
 {
 
 }
@@ -94,31 +94,18 @@ ImageFx<T>::ImageFx(Shape size, uint number_of_channels, T default_value)
 template <class T>
 ImageFx<T>::ImageFx(const ImageFx<T> &source)
  : _size_x(source._size_x), _size_y(source._size_y), _number_of_channels(source._number_of_channels),
-   _color_space(source._color_space), _data(source._data), _ref(source._ref)
+   _color_space(source._color_space), _data(source._data)
 {
-	if (_ref) {
-		#pragma omp critical
-		_ref->counter++;
-	}
+
 }
 
 
 template <class T>
 ImageFx<T>::ImageFx(const Image<T> &source)
  : _size_x(source._size_x), _size_y(source._size_y), _number_of_channels(source._number_of_channels),
-   _color_space(source._color_space), _data(source._data), _ref(source._ref)
+   _color_space(source._color_space), _data(source._data)
 {
-	if (_ref) {
-		#pragma omp critical
-		_ref->counter++;
-	}
-}
 
-
-template <class T>
-ImageFx<T>::~ImageFx()
-{
-	release();
 }
 
 
@@ -130,17 +117,7 @@ ImageFx<T>& ImageFx<T>::operator= (const ImageFx<T> &other)
 		return *this;
 	}
 
-	// finish all deals with the previous data
-	ImageFx<T>::release();
-
-	// increase counter
-	if (other._ref) {
-		#pragma omp critical
-		other._ref->counter++;
-	}
-
 	// assign new data
-	this->_ref = other._ref;
 	this->_size_x = other._size_x;
 	this->_size_y = other._size_y;
 	this->_number_of_channels = other._number_of_channels;
@@ -154,17 +131,7 @@ ImageFx<T>& ImageFx<T>::operator= (const ImageFx<T> &other)
 template <class T>
 ImageFx<T>& ImageFx<T>::operator= (const Image<T> &other)
 {
-	// finish all deals with the previous data
-	ImageFx<T>::release();
-
-	// increase counter
-	if (other._ref) {
-		#pragma omp critical
-		other._ref->counter++;
-	}
-
 	// assign new data
-	this->_ref = other._ref;
 	this->_size_x = other._size_x;
 	this->_size_y = other._size_y;
 	this->_number_of_channels = other._number_of_channels;
@@ -182,14 +149,14 @@ ImageFx<T>& ImageFx<T>::operator= (const Image<T> &other)
 template <class T>
 ImageFx<T>::operator bool() const
 {
-	return _ref != 0;
+	return (bool)_data;
 }
 
 
 template <class T>
 bool ImageFx<T>::is_empty() const
 {
-	return _ref == 0;
+	return !_data;
 }
 
 
@@ -234,7 +201,7 @@ ColorSpaces::ColorSpace ImageFx<T>::color_space() const
 template <class T>
 const T& ImageFx<T>::operator() (uint x, uint y) const
 {
-	return _data[index(x, y, 0)];
+	return _data.get()[index(x, y, 0)];
 }
 
 
@@ -244,7 +211,7 @@ const T& ImageFx<T>::operator() (uint x, uint y) const
 template <class T>
 const T& ImageFx<T>::operator() (uint x, uint y, uint channel) const
 {
-	return _data[index(x, y, channel)];
+	return _data.get()[index(x, y, channel)];
 }
 
 
@@ -254,7 +221,7 @@ const T& ImageFx<T>::operator() (uint x, uint y, uint channel) const
 template <class T>
 const T& ImageFx<T>::operator() (const Point &p) const
 {
-	return _data[index(p.x, p.y, 0)];
+	return _data.get()[index(p.x, p.y, 0)];
 }
 
 
@@ -264,7 +231,7 @@ const T& ImageFx<T>::operator() (const Point &p) const
 template <class T>
 const T& ImageFx<T>::operator() (const Point &p, uint channel) const
 {
-	return _data[index(p.x, p.y, channel)];
+	return _data.get()[index(p.x, p.y, channel)];
 }
 
 
@@ -279,7 +246,7 @@ const T& ImageFx<T>::at(uint x, uint y) const
 		throw std::out_of_range("x or y coordinate is out of range");
 	}
 
-	return _data[index(x, y, 0)];
+	return _data.get()[index(x, y, 0)];
 }
 
 
@@ -294,7 +261,7 @@ const T& ImageFx<T>::at(uint x, uint y, uint channel) const
 		throw std::out_of_range("channel, x or y coordinate is out of range");
 	}
 
-	return _data[index(x, y, channel)];
+	return _data.get()[index(x, y, channel)];
 }
 
 
@@ -309,7 +276,7 @@ const T& ImageFx<T>::at(const Point &p) const
 		throw std::out_of_range("x or y coordinate is out of range");
 	}
 
-	return _data[index(p.x, p.y, 0)];
+	return _data.get()[index(p.x, p.y, 0)];
 }
 
 
@@ -324,7 +291,7 @@ const T& ImageFx<T>::at(const Point &p, uint channel) const
 		throw std::out_of_range("channel, x or y coordinate is out of range");
 	}
 
-	return _data[index(p.x, p.y, channel)];
+	return _data.get()[index(p.x, p.y, channel)];
 }
 
 
@@ -336,11 +303,11 @@ const T& ImageFx<T>::at(const Point &p, uint channel) const
 template <class T>
 bool ImageFx<T>::try_get_value(uint x, uint y, T& value) const
 {
-	if (x >= this->_size_x || y >= this->_size_y || !this->_data) {
+	if (x >= this->_size_x || y >= this->_size_y) {
 		return false;
 	}
 
-	value = this->_data[index(x, y, 0)];
+	value = this->_data.get()[index(x, y, 0)];
 
 	return true;
 }
@@ -354,11 +321,11 @@ bool ImageFx<T>::try_get_value(uint x, uint y, T& value) const
 template <class T>
 bool ImageFx<T>::try_get_value(uint x, uint y, uint channel, T& value) const
 {
-	if (x >= _size_x || y >= _size_y || channel >= _number_of_channels || !_data) {
+	if (x >= _size_x || y >= _size_y || channel >= _number_of_channels) {
 		return false;
 	}
 
-	value = _data[index(x, y, channel)];
+	value = _data.get()[index(x, y, channel)];
 
 	return true;
 }
@@ -372,11 +339,11 @@ bool ImageFx<T>::try_get_value(uint x, uint y, uint channel, T& value) const
 template <class T>
 bool ImageFx<T>::try_get_value(const Point &p, T& value) const
 {
-	if (p.x >= _size_x || p.y >= _size_y || !_data) {
+	if (p.x >= _size_x || p.y >= _size_y) {
 		return false;
 	}
 
-	value = _data[index(p.x, p.y, 0)];
+	value = _data.get()[index(p.x, p.y, 0)];
 
 	return true;
 }
@@ -390,11 +357,11 @@ bool ImageFx<T>::try_get_value(const Point &p, T& value) const
 template <class T>
 bool ImageFx<T>::try_get_value(const Point &p, uint channel, T& value) const
 {
-	if (p.x >= _size_x || p.y >= _size_y || channel >= _number_of_channels || !_data) {
+	if (p.x >= _size_x || p.y >= _size_y || channel >= _number_of_channels) {
 		return false;
 	}
 
-	value = _data[index(p.x, p.y, channel)];
+	value = _data.get()[index(p.x, p.y, channel)];
 
 	return true;
 }
@@ -406,7 +373,7 @@ bool ImageFx<T>::try_get_value(const Point &p, uint channel, T& value) const
 template <class T>
 const T* ImageFx<T>::raw() const
 {
-	return _data;
+	return _data.get();
 }
 
 
@@ -434,11 +401,11 @@ ImageFx<T> ImageFx<T>::clone() const
 	clone._size_x = this->_size_x;
 	clone._size_y = this->_size_y;
 	clone._number_of_channels = this->_number_of_channels;
+	clone._color_space = this->_color_space;
 
-	if (this->_ref) {
+	if (this->_data) {
 		clone.init(this->_size_x, this->_size_y, this->_number_of_channels);
-        clone._color_space = this->_color_space;
-		memcpy(clone._data, this->_data,  this->_number_of_channels * this->_size_y * this->_size_x * sizeof(T));
+		memcpy(clone._data.get(), this->_data.get(),  this->_number_of_channels * this->_size_y * this->_size_x * sizeof(T));
 	}
 
 	return clone;
@@ -449,39 +416,14 @@ ImageFx<T> ImageFx<T>::clone() const
 template <class T>
 inline void ImageFx<T>::init(uint size_x, uint size_y, uint number_of_channels)
 {
-	_data = new T[size_x * size_y * number_of_channels]();
-	_ref = new __Ref();
-	_ref->counter = 1;
+	_data = std::shared_ptr<T>(new T[size_x * size_y * number_of_channels](), std::default_delete<T[]>());
 }
 
 
 template <class T>
 void ImageFx<T>::fill_internal(const T &value)
 {
-	std::fill_n(_data, _number_of_channels * _size_y * _size_x, value);
-}
-
-
-template <class T>
-void ImageFx<T>::release() const
-{
-	if (_ref) {
-		#pragma omp critical
-		{
-			_ref->counter--;
-			if (_ref->counter == 0) {
-				destroy();
-			}
-		}
-	}
-}
-
-
-template <class T>
-void ImageFx<T>::destroy() const
-{
-	delete _ref;
-	delete[] _data;
+	std::fill_n(_data.get(), _number_of_channels * _size_y * _size_x, value);
 }
 
 
@@ -579,28 +521,20 @@ Image<T>::Image(const Image<T> &source)
 template <class T>
 Image<T>::Image(const ImageFx<T> &source)
 {
-	if (source._ref) {
+	if (source._data) {
 		this->_size_x = source._size_x;
 		this->_size_y = source._size_y;
 		this->_number_of_channels = source._number_of_channels;
         this->_color_space = source._color_space;
 		ImageFx<T>::init(source._size_x, source._size_y, source._number_of_channels);
-		memcpy(this->_data, source._data,  source._number_of_channels * source._size_y * source._size_x * sizeof(T));
+		memcpy(this->_data.get(), source._data.get(),  source._number_of_channels * source._size_y * source._size_x * sizeof(T));
 	} else {
 		this->_size_x = 0;
 		this->_size_y = 0;
 		this->_number_of_channels = 0;
         this->_color_space = ColorSpaces::unknown;
-		this->_ref = 0;
-		this->_data = 0;
+		this->_data.reset();
 	}
-}
-
-
-template <class T>
-Image<T>::~Image()
-{
-
 }
 
 
@@ -613,15 +547,9 @@ Image<T>& Image<T>::operator= (const Image<T> &other)
 	}
 
 	// finish all deals with the previous data
-	Image<T>::release();
-
-	// increase counter
-	if (other._ref) {
-		other._ref->counter++;
-	}
+	this->_data.reset();
 
 	// assign new data
-	this->_ref = other._ref;
 	this->_size_x = other._size_x;
 	this->_size_y = other._size_y;
 	this->_number_of_channels = other._number_of_channels;
@@ -635,23 +563,19 @@ Image<T>& Image<T>::operator= (const Image<T> &other)
 template <class T>
 Image<T>& Image<T>::operator= (const ImageFx<T> &other)
 {
-	// finish all deals with the previous data
-	Image<T>::release();
-
-	if (other._ref) {
+	if (other._data) {
 		this->_size_x = other._size_x;
 		this->_size_y = other._size_y;
 		this->_number_of_channels = other._number_of_channels;
         this->_color_space = other._color_space;
 		Image<T>::init(other._size_x, other._size_y, other._number_of_channels);
-		memcpy(this->_data, other._data,  other._number_of_channels * other._size_y * other._size_x * sizeof(T));
+		memcpy(this->_data.get(), other._data.get(),  other._number_of_channels * other._size_y * other._size_x * sizeof(T));
 	} else {
 		this->_size_x = 0;
 		this->_size_y = 0;
 		this->_number_of_channels = 0;
         this->_color_space = ColorSpaces::unknown;
-		this->_ref = 0;
-		this->_data = 0;
+		this->_data.reset();
 	}
 
 	return *this;
@@ -671,7 +595,7 @@ void Image<T>::set_color_space(ColorSpaces::ColorSpace value)
 template <class T>
 T& Image<T>::operator() (uint x, uint y)
 {
-	return this->_data[Image<T>::index(x, y, 0)];
+	return this->_data.get()[Image<T>::index(x, y, 0)];
 }
 
 
@@ -681,7 +605,7 @@ T& Image<T>::operator() (uint x, uint y)
 template <class T>
 T& Image<T>::operator() (uint x, uint y, uint channel)
 {
-	return this->_data[Image<T>::index(x, y, channel)];
+	return this->_data.get()[Image<T>::index(x, y, channel)];
 }
 
 
@@ -691,7 +615,7 @@ T& Image<T>::operator() (uint x, uint y, uint channel)
 template <class T>
 T& Image<T>::operator() (const Point &p)
 {
-	return this->_data[Image<T>::index(p.x, p.y, 0)];
+	return this->_data.get()[Image<T>::index(p.x, p.y, 0)];
 }
 
 
@@ -701,7 +625,7 @@ T& Image<T>::operator() (const Point &p)
 template <class T>
 T& Image<T>::operator() (const Point &p, uint channel)
 {
-	return this->_data[Image<T>::index(p.x, p.y, channel)];
+	return this->_data.get()[Image<T>::index(p.x, p.y, channel)];
 }
 
 
@@ -716,7 +640,7 @@ T& Image<T>::at(uint x, uint y)
 		throw std::out_of_range("x or y coordinate is out of range");
 	}
 
-	return this->_data[Image<T>::index(x, y, 0)];
+	return this->_data.get()[Image<T>::index(x, y, 0)];
 }
 
 
@@ -731,7 +655,7 @@ T& Image<T>::at(uint x, uint y, uint channel)
 		throw std::out_of_range("channel, x or y coordinate is out of range");
 	}
 
-	return this->_data[Image<T>::index(x, y, channel)];
+	return this->_data.get()[Image<T>::index(x, y, channel)];
 }
 
 
@@ -746,7 +670,7 @@ T& Image<T>::at(const Point &p)
 		throw std::out_of_range("x or y coordinate is out of range");
 	}
 
-	return this->_data[Image<T>::index(p.x, p.y, 0)];
+	return this->_data.get()[Image<T>::index(p.x, p.y, 0)];
 }
 
 
@@ -761,7 +685,7 @@ T& Image<T>::at(const Point &p, uint channel)
 		throw std::out_of_range("channel, x or y coordinate is out of range");
 	}
 
-	return this->_data[Image<T>::index(p.x, p.y, channel)];
+	return this->_data.get()[Image<T>::index(p.x, p.y, channel)];
 }
 
 
@@ -781,7 +705,7 @@ void Image<T>::fill(const T &value)
 template <class T>
 T* Image<T>::raw()
 {
-	return this->_data;
+	return this->_data.get();
 }
 
 
@@ -795,21 +719,12 @@ Image<T> Image<T>::clone() const
 	clone._size_x = this->_size_x;
 	clone._size_y = this->_size_y;
 	clone._number_of_channels = this->_number_of_channels;
+	clone._color_space = this->_color_space;
 
-	if (this->_ref) {
+	if (this->_data) {
 		clone.init(this->_size_x, this->_size_y, this->_number_of_channels);
-        clone._color_space = this->_color_space;
-		memcpy(clone._data, this->_data,  this->_number_of_channels * this->_size_y * this->_size_x * sizeof(T));
+		memcpy(clone._data.get(), this->_data.get(),  this->_number_of_channels * this->_size_y * this->_size_x * sizeof(T));
 	}
 
 	return clone;
-}
-
-/* Protected */
-
-template <class T>
-void Image<T>::destroy() const
-{
-	// no additional data
-	ImageFx<T>::destroy();
 }
