@@ -18,19 +18,19 @@ void Painter::set_canvas(const Sequence<float> &sequence)
 }
 
 
-void Painter::add_layer(Layer *layer, string id)
+void Painter::add_layer(Layer *layer, std::string id)
 {
 
 }
 
 
-Layer* Painter::remove_layer(string id)
+Layer* Painter::remove_layer(std::string id)
 {
 
 }
 
 
-void Painter::draw(string file_name)
+void Painter::draw(std::string file_name)
 {
 
 }

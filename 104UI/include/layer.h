@@ -17,16 +17,14 @@
 #include <cairomm/context.h>
 #include <sigc++/sigc++.h>
 
-using namespace std;
-
 class Layer
 {
 public:
-	Layer(string id, string display_name);
+	Layer(std::string id, std::string display_name);
 	virtual ~Layer() {}
 
-	string get_display_name();
-	string get_id();
+	std::string get_display_name();
+	std::string get_id();
 	void set_drawing_size(int width, int height);
 	bool set_visibitity(bool is_visible);
 	void set_current_time(int time);
@@ -40,8 +38,8 @@ public:
 	}
 protected:
 	Layer() { }
-	string _display_name;
-	string _id;
+	std::string _display_name;
+	std::string _id;
 	bool _is_visible;
 	int _current_time;
 	int _drawing_width, _drawing_height;

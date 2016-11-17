@@ -20,8 +20,6 @@
 #include "image.h"
 #include "mask.h"
 
-using namespace std;
-
 namespace Distance {
 	enum Enum {
 		Euclidean,	// sqrt( (x2 - x1)^2 + (y2 - y1)^2 )

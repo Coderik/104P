@@ -17,8 +17,6 @@
 
 #include "image.h"
 
-using namespace std;
-
 namespace BoundaryCondition {
 	enum Enum {
 		neumann,

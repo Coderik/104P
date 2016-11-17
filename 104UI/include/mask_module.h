@@ -41,7 +41,7 @@ private:
 	IModulable *_modulable;
 	MaskSequence _mask;
 	Descriptor _mask_view;
-	string _mask_file_name;
+	std::string _mask_file_name;
 	sigc::signal<void, bool> _signal_enable_mask_actions_menu_items;
 
 	// slots

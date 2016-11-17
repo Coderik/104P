@@ -16,15 +16,13 @@
 #include "sequence.h"
 #include "layer.h"
 
-using namespace std;
-
 class Painter
 {
 public:
 	void set_canvas(const Sequence<float> &sequence);
-	void add_layer(Layer *layer, string id);
-	Layer* remove_layer(string id);
-	void draw(string file_name);
+	void add_layer(Layer *layer, std::string id);
+	Layer* remove_layer(std::string id);
+	void draw(std::string file_name);
 };
 
 

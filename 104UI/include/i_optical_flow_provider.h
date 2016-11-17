@@ -16,15 +16,13 @@
 #include <vector>
 #include "image.h"
 
-using namespace std;
-
 class IOpticalFlowProvider
 {
 public:
 	virtual ~IOpticalFlowProvider() {}
 
-	virtual vector<Image<float> > request_forward_optical_flow() = 0;
-	virtual vector<Image<float> > request_backward_optical_flow() = 0;
+	virtual std::vector<Image<float> > request_forward_optical_flow() = 0;
+	virtual std::vector<Image<float> > request_backward_optical_flow() = 0;
 	virtual bool request_has_optical_flow_data() = 0;
 };
 

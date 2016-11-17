@@ -17,8 +17,6 @@
 #include "image.h"
 #include "sequence.h"
 
-using namespace std;
-
 /**
  * Contains methods for calculating discrete Gaussian kernel.
  */

@@ -50,14 +50,14 @@ void OpticalFlowModule::initialize(IModulable *modulable)
 }
 
 
-vector<Image<float> > OpticalFlowModule::request_forward_optical_flow()
+std::vector<Image<float> > OpticalFlowModule::request_forward_optical_flow()
 {
 	// TODO: check if absent
 	return _forward_optical_flow_list;
 }
 
 
-vector<Image<float> > OpticalFlowModule::request_backward_optical_flow()
+std::vector<Image<float> > OpticalFlowModule::request_backward_optical_flow()
 {
 	// TODO: check if absent
 	return _backward_optical_flow_list;
@@ -92,7 +92,7 @@ void OpticalFlowModule::sequence_changed()
 
 		// ?TODO: cancel background work if any
 
-		string optical_flow_file_name = _modulable->request_sequence_path();
+		std::string optical_flow_file_name = _modulable->request_sequence_path();
 		optical_flow_file_name.append("optical_flow_data");
 
 		OpticalFlowIO::OFStatus status = OpticalFlowIO::check_optical_flow(optical_flow_file_name, sequence.size_x(), sequence.size_y(), 2 * (sequence.size_t() - 1));
@@ -102,8 +102,8 @@ void OpticalFlowModule::sequence_changed()
 		// NOTE: no auto restore, so menu item could be shaded
 		_proceed_menu_item->set_sensitive(false);
 
-		_forward_optical_flow_list = vector<Image<float> >(_frames_amount - 1);
-		_backward_optical_flow_list = vector<Image<float> >(_frames_amount - 1);
+		_forward_optical_flow_list = std::vector<Image<float> >(_frames_amount - 1);
+		_backward_optical_flow_list = std::vector<Image<float> >(_frames_amount - 1);
 	} else {
 		_menu->set_sensitive(false);
 	}
@@ -115,13 +115,13 @@ void OpticalFlowModule::sequence_changed()
  */
 void OpticalFlowModule::restore_optical_flow()
 {
-	string sequence_folder = _modulable->request_sequence_path();
+	std::string sequence_folder = _modulable->request_sequence_path();
 
 	if (sequence_folder.empty()) {
 		return;
 	}
 
-	string file_name = sequence_folder;
+	std::string file_name = sequence_folder;
 	file_name.append("optical_flow_data");
 
 	_forward_optical_flow_list = OpticalFlowIO::read_whole_direction_data(file_name, true);
@@ -154,14 +154,14 @@ void OpticalFlowModule::load_optical_flow()
 		return;
 	}
 
-	string flow_folder = _modulable->request_open_dialog_result("Load Optical Flows", true);
+	std::string flow_folder = _modulable->request_open_dialog_result("Load Optical Flows", true);
 
-	vector<Image<float> > fwd_flows = IOUtility::read_all_flows(flow_folder, "fwd");
+	std::vector<Image<float> > fwd_flows = IOUtility::read_all_flows(flow_folder, "fwd");
 	if (fwd_flows.size() != _frames_amount && fwd_flows.size() != _frames_amount - 1) {
 		return;
 	}
 
-	vector<Image<float> > bwd_flows = IOUtility::read_all_flows(flow_folder, "bwd");
+	std::vector<Image<float> > bwd_flows = IOUtility::read_all_flows(flow_folder, "bwd");
 	if (bwd_flows.size() != _frames_amount && bwd_flows.size() != _frames_amount - 1) {
 		return;
 	}
@@ -198,7 +198,7 @@ void OpticalFlowModule::load_optical_flow()
 void OpticalFlowModule::begin_full_optical_flow_calculation()
 {
 	// NOTE: if specify no tasks, optical flow for all frame pairs will be computed
-	vector<int> empty_task_list;
+	std::vector<int> empty_task_list;
 	begin_optical_flow_calculation_internal(empty_task_list);
 }
 
@@ -275,13 +275,13 @@ Glib::RefPtr<Gdk::Pixbuf> OpticalFlowModule::provide_backward_optical_flow_magni
 }
 
 
-void OpticalFlowModule::begin_optical_flow_calculation_internal(vector<int> task_list)
+void OpticalFlowModule::begin_optical_flow_calculation_internal(std::vector<int> task_list)
 {
 	_progress_counter = 0;
 	_progress_total = task_list.size() != 0 ? task_list.size() : 2 * (_frames_amount - 1);
 
 	// Encapsulate entry point function and required parameters into slot object
-	sigc::slot1<void, IBackgroundInsider*> work = sigc::bind<vector<int> >( sigc::mem_fun(*this, &OpticalFlowModule::calculate_optical_flow), task_list);
+	sigc::slot1<void, IBackgroundInsider*> work = sigc::bind<std::vector<int> >( sigc::mem_fun(*this, &OpticalFlowModule::calculate_optical_flow), task_list);
 
 	// Run background processing
 	_background_worker->start(work);
@@ -298,7 +298,7 @@ void OpticalFlowModule::begin_optical_flow_calculation_internal(vector<int> task
  * In task list absolute value defines from what frame to compute flow, and sign defines direction.
  * Example: '0' - forward flow from frame 0 to frame 1; '-2' - backward flow from frame 2 to frame 1.
  */
-void OpticalFlowModule::calculate_optical_flow(IBackgroundInsider *insider, vector<int> task_list)
+void OpticalFlowModule::calculate_optical_flow(IBackgroundInsider *insider, std::vector<int> task_list)
 {
 	SequenceFx<float> sequence = _modulable->request_sequence();	// ?TODO: is this thread-safe?
 
@@ -327,7 +327,7 @@ void OpticalFlowModule::calculate_optical_flow(IBackgroundInsider *insider, vect
 			task_list.push_back(i);
 	}
 
-	vector<int>::iterator it;
+	std::vector<int>::iterator it;
 	for (it = task_list.begin(); it != task_list.end(); ++it) {
 		// Get frames data
 		int first_index = abs(*it);
@@ -426,13 +426,13 @@ void OpticalFlowModule::end_calculate_optical_flow()
 
 void OpticalFlowModule::store_optical_flow(const ImageFx<float> &flow, int index)
 {
-	string sequence_folder = _modulable->request_sequence_path();
+	std::string sequence_folder = _modulable->request_sequence_path();
 
 	if (sequence_folder.empty()) {
 		return;
 	}
 
-	string file_name = sequence_folder;
+	std::string file_name = sequence_folder;
 	file_name.append("optical_flow_data");
 
 	int chunks_count = 2 * (_frames_amount - 1);
@@ -451,19 +451,18 @@ void OpticalFlowModule::cancel_calculate_optical_flow()
 /******************************************************
  * Fills the list of tasks for optical flow computation
  */
-void OpticalFlowModule::fill_task_list(const vector<Image<float> > &forward_flow, const vector<Image<float> > &backward_flow, vector<int> &task_list)
+void OpticalFlowModule::fill_task_list(const std::vector<Image<float> > &forward_flow, const std::vector<Image<float> > &backward_flow, std::vector<int> &task_list)
 {
 	task_list.clear();
 	task_list.reserve(2 * forward_flow.size());
 	int i = 0;
-	vector<Image<float> >::const_iterator it;
-	for(it = forward_flow.begin(); it != forward_flow.end(); ++it, i++) {
+	for(auto it = forward_flow.begin(); it != forward_flow.end(); ++it, i++) {
 		if (it->is_empty()) {
 			task_list.push_back(i);
 		}
 	}
 	i = -1;
-	for(it = backward_flow.begin(); it != backward_flow.end(); ++it, i--) {
+	for(auto it = backward_flow.begin(); it != backward_flow.end(); ++it, i--) {
 		if (it->is_empty()) {
 			task_list.push_back(i);
 		}

@@ -16,15 +16,13 @@
 #include <string>
 #include "descriptor.h"
 
-using namespace std;
-
 struct ViewInfo
 {
 public:
-	string title;
+	std::string title;
 	Descriptor descriptor;
 
-	ViewInfo(string title, Descriptor descriptor, int position) : title(title), descriptor(descriptor), _position(position) { }
+	ViewInfo(std::string title, Descriptor descriptor, int position) : title(title), descriptor(descriptor), _position(position) { }
 
 	inline bool operator< (const ViewInfo& other) const
 	{

@@ -24,8 +24,6 @@
 #include "filtering.h"
 #include "gaussian_weights.h"
 
-using namespace std;
-
 typedef unsigned int uint;
 
 // TODO: handle different kinds of interpolation (bicubic)

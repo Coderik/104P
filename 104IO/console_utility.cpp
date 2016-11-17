@@ -12,17 +12,17 @@
 
 #include "console_utility.h"
 
-vector<float> ConsoleUtility::parse_float_list(string str)
+std::vector<float> ConsoleUtility::parse_float_list(std::string str)
 {
-	vector<float> float_list;
-	vector<string> tokens;
-	stringstream stream(str);
-    string item;
+	std::vector<float> float_list;
+	std::vector<std::string> tokens;
+	std::stringstream stream(str);
+	std::string item;
 
     while (getline(stream, item, ':')) {
         if (item.size() > 0) {
         	float value = 0.0;
-    		stringstream stream(item);
+			std::stringstream stream(item);
     		stream >> value;
     		if (value > 0) {
     			float_list.push_back(value);

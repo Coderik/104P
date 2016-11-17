@@ -18,8 +18,6 @@
 
 #include "i_optical_flow_code.h"
 
-using namespace std;
-
 /**
  * Color encoding of flow vectors
  * adapted from the color circle idea described at
@@ -35,7 +33,7 @@ public:
 
 private:
 	int _colors_count;
-	vector<vector<int> > _color_wheel;
+	std::vector<std::vector<int> > _color_wheel;
 
 	void set_color(int r, int g, int b, int index);
 	void make_color_wheel();

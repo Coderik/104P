@@ -22,8 +22,6 @@
 
 #include "image.h"
 
-using namespace std;
-
 /**
  * Contains methods for reading and writings [optical] flow.
  */
@@ -38,16 +36,16 @@ public:
 		STATUS_LEGACY_FORMAT
 	};
 
-	static OFStatus check_optical_flow(const string &file_name, int size_x, int size_y, int chunks_count);
-	static void update_or_overwrite_flow(const string &file_name, const float *flow, int size_x, int size_y, int chunk_id, int chunks_count);
-	static void update_or_overwrite_flow(const string &file_name, const ImageFx<float> &flow, int chunk_id, int chunks_count);
-	static bool read_flow(const string &file_name, float *&flow, int &size_x, int &size_y, int chunk_id);
-	static Image<float> read_flow(const string &file_name, int chunk_id);
+	static OFStatus check_optical_flow(const std::string &file_name, int size_x, int size_y, int chunks_count);
+	static void update_or_overwrite_flow(const std::string &file_name, const float *flow, int size_x, int size_y, int chunk_id, int chunks_count);
+	static void update_or_overwrite_flow(const std::string &file_name, const ImageFx<float> &flow, int chunk_id, int chunks_count);
+	static bool read_flow(const std::string &file_name, float *&flow, int &size_x, int &size_y, int chunk_id);
+	static Image<float> read_flow(const std::string &file_name, int chunk_id);
 	// TODO: add method for reading all chunks at a time. To do so, it might be necessary
 	// to move OpticalFlow class inside the library and use vector<OpticalFlow> to return all flows.
 	// In that case it could be a good idea to inherit from the OpticalFlow in UI project and
 	// put all methods for drawing views of optical flow in that child class.
-	static vector<Image<float> > read_whole_direction_data(const string &file_name, bool forward_direction);
+	static std::vector<Image<float> > read_whole_direction_data(const std::string &file_name, bool forward_direction);
 private:
 	struct OFHeader
 	{
@@ -56,8 +54,8 @@ private:
 	};
 
 	static bool check_header(OFHeader header);
-	static void update_flow(fstream &file, const float *flow, int size_x, int size_y, int chunk_id, int chunks_count);
-	static void overwrite_flow(const string &file_name, const float *flow, int size_x, int size_y, int chunk_id, int chunks_count);
+	static void update_flow(std::fstream &file, const float *flow, int size_x, int size_y, int chunk_id, int chunks_count);
+	static void overwrite_flow(const std::string &file_name, const float *flow, int size_x, int size_y, int chunk_id, int chunks_count);
 };
 
 

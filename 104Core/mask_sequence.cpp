@@ -81,7 +81,7 @@ MaskSequence::MaskSequence(const MaskFx &frame, uint size_t)
 MaskSequence::MaskSequence(const MaskSequence &other)	// copy constructor
 {
 
-	vector<Mask> aux(other._frames.begin(), other._frames.end());
+	std::vector<Mask> aux(other._frames.begin(), other._frames.end());
 	_frames.swap(aux);
 	_size = other._size;
 }
@@ -89,7 +89,7 @@ MaskSequence::MaskSequence(const MaskSequence &other)	// copy constructor
 
 MaskSequence::MaskSequence(const MaskSequenceFx &other)	// copy constructor
 {
-	vector<Mask> aux(other._frames.begin(), other._frames.end());
+	std::vector<Mask> aux(other._frames.begin(), other._frames.end());
 	_frames.swap(aux);
 	_size = other._size;
 
@@ -360,7 +360,7 @@ MaskSequenceFx::MaskSequenceFx(const Mask &frame, uint size_t)
 
 MaskSequenceFx::MaskSequenceFx(const MaskSequenceFx &other)	// copy constructor
 {
-	vector<MaskFx > aux(other._frames.begin(), other._frames.end());
+	std::vector<MaskFx > aux(other._frames.begin(), other._frames.end());
 	_frames.swap(aux);
 	_size = other._size;
 }
@@ -368,7 +368,7 @@ MaskSequenceFx::MaskSequenceFx(const MaskSequenceFx &other)	// copy constructor
 
 MaskSequenceFx::MaskSequenceFx(const MaskSequence &other)	// copy constructor
 {
-	vector<MaskFx > aux(other._frames.begin(), other._frames.end());
+	std::vector<MaskFx > aux(other._frames.begin(), other._frames.end());
 	_frames.swap(aux);
 	_size = other._size;
 }

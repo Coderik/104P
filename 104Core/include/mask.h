@@ -20,8 +20,6 @@
 #include "mask_iterator.h"
 #include "i_iterable_mask.h"
 
-using namespace std;
-
 /// forward declaration
 class Mask;
 class MaskIterator;
@@ -82,7 +80,7 @@ public:
 	MaskFx clone_invert() const;
 
 	/// Returns masked points as a vector.
-    vector<Point> masked_points() const;
+	std::vector<Point> masked_points() const;
 
 	/// Methods used by MaskIterator
 	virtual Point first() const;
@@ -97,7 +95,7 @@ protected:
 		Point last;
 		bool is_first_last_valid;
 		bool is_points_cache_valid;
-		vector<Point> points_cache;
+		std::vector<Point> points_cache;
 
 		__Internal(Point first, Point last, bool is_first_last_valid)
 				: first(first), last(last), is_first_last_valid(is_first_last_valid), is_points_cache_valid(false) {}

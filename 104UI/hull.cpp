@@ -14,7 +14,7 @@
 
 /* Public */
 
-Hull::Hull(string application_id)
+Hull::Hull(std::string application_id)
 {
 	_ui.setup_ui(this, application_id);
 
@@ -72,8 +72,7 @@ void Hull::add_rig(Rig* rig, std::string display_name)
 
 void Hull::initialize_rigs()
 {
-	vector<Fitting* >::iterator it;
-	for (it = _fittings.begin(); it != _fittings.end(); ++it) {
+	for (auto it = _fittings.begin(); it != _fittings.end(); ++it) {
 		HullProxy *proxy = new HullProxy(this);
 		(*it)->rig->initialize(proxy);
 		(*it)->proxy = proxy;
@@ -114,7 +113,7 @@ void Hull::open_image()
 }
 
 
-void Hull::load_image(string filename)
+void Hull::load_image(std::string filename)
 {
 	Image<float> image = IOUtility::read_rgb_image(filename);   // TODO: deduce the number of channels from format
 
@@ -175,7 +174,7 @@ void Hull::open_sequence()
 }
 
 
-void Hull::load_sequence(string path)
+void Hull::load_sequence(std::string path)
 {
 	path = path.append("/");	//TODO: check if it is needed
 
@@ -212,7 +211,7 @@ void Hull::load_sequence(string path)
 
 	// Load the rest frames.
 	for (unsigned int i = 1; i < file_names.size(); i++) {
-		string frame_path = path;
+		std::string frame_path = path;
 		frame_path.append(file_names[i]);
 		Image<float> frame = IOUtility::read_rgb_image(frame_path);
 		_sequence.add(frame);
@@ -252,9 +251,9 @@ void Hull::load_sequence(string path)
 void Hull::open_recent()
 {
 	Glib::RefPtr<Gtk::RecentInfo> current = _ui.open_recent_action->get_current_item();
-	string mime_type = current->get_mime_type();
-	string uri = current->get_uri();
-	string path = Glib::filename_from_uri(uri);
+	std::string mime_type = current->get_mime_type();
+	std::string uri = current->get_uri();
+	std::string path = Glib::filename_from_uri(uri);
 
 	if (mime_type.compare("application/x-ext-pgm") == 0 ||
         mime_type.compare("image/x-portable-graymap") == 0 ||
@@ -343,19 +342,19 @@ sigc::signal<void> Hull::signal_sequence_changed()
 }
 
 
-void Hull::assign_menu(Gtk::Menu *menu, string title)
+void Hull::assign_menu(Gtk::Menu *menu, std::string title)
 {
 	_ui.assign_menu(menu, title);
 }
 
 
-string Hull::request_sequence_path()
+std::string Hull::request_sequence_path()
 {
 	return _sequence_folder;
 }
 
 
-string Hull::request_open_dialog_result(string dialog_title, bool folder, Glib::RefPtr<Gtk::FileFilter> filter)
+std::string Hull::request_open_dialog_result(std::string dialog_title, bool folder, Glib::RefPtr<Gtk::FileFilter> filter)
 {
 	Gtk::FileChooserDialog dialog(dialog_title, (folder) ? Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER : Gtk::FILE_CHOOSER_ACTION_OPEN);
 	dialog.set_transient_for(*this);
@@ -373,7 +372,7 @@ string Hull::request_open_dialog_result(string dialog_title, bool folder, Glib::
 	// show the dialog and wait for a user response:
 	int result = dialog.run();
 
-	string filename;
+	std::string filename;
 	if (result == Gtk::RESPONSE_OK) {
 		filename = dialog.get_filename();
 	}
@@ -382,7 +381,7 @@ string Hull::request_open_dialog_result(string dialog_title, bool folder, Glib::
 }
 
 
-string Hull::request_save_dialog_result(string dialog_title, Glib::RefPtr<Gtk::FileFilter> filter)
+std::string Hull::request_save_dialog_result(std::string dialog_title, Glib::RefPtr<Gtk::FileFilter> filter)
 {
 	Gtk::FileChooserDialog dialog(dialog_title, Gtk::FILE_CHOOSER_ACTION_SAVE);
 	dialog.set_transient_for(*this);
@@ -400,7 +399,7 @@ string Hull::request_save_dialog_result(string dialog_title, Glib::RefPtr<Gtk::F
 	// show the dialog and wait for a user response:
 	int result = dialog.run();
 
-	string filename;
+	std::string filename;
 	if (result == Gtk::RESPONSE_OK) {
 		filename = dialog.get_filename();
 	}
@@ -417,7 +416,7 @@ void Hull::request_active_rig(RequestBase<IRig> &request)
 }
 
 
-Descriptor Hull::add_view(string title, sigc::slot1<Glib::RefPtr<Gdk::Pixbuf>, int> provider)
+Descriptor Hull::add_view(std::string title, sigc::slot1<Glib::RefPtr<Gdk::Pixbuf>, int> provider)
 {
 	Descriptor descriptor = Descriptor::create();
 	_view_map[descriptor] = new View(title, provider);
@@ -428,7 +427,7 @@ Descriptor Hull::add_view(string title, sigc::slot1<Glib::RefPtr<Gdk::Pixbuf>, i
 }
 
 
-bool Hull::alter_view(Descriptor view_descriptor, string title, sigc::slot1<Glib::RefPtr<Gdk::Pixbuf>, int> provider)
+bool Hull::alter_view(Descriptor view_descriptor, std::string title, sigc::slot1<Glib::RefPtr<Gdk::Pixbuf>, int> provider)
 {
 	if (_view_map.find(view_descriptor) == _view_map.end()) {
 		return false;
@@ -470,7 +469,7 @@ bool Hull::queue_view_draw(Descriptor view_descriptor)
 }
 
 
-Descriptor Hull::add_background_work_info(sigc::slot0<void> cancel_slot, string message)
+Descriptor Hull::add_background_work_info(sigc::slot0<void> cancel_slot, std::string message)
 {
 	_background_work_info = Descriptor::create();
 
@@ -482,7 +481,7 @@ Descriptor Hull::add_background_work_info(sigc::slot0<void> cancel_slot, string 
 }
 
 
-bool Hull::alter_background_work_info(Descriptor descriptor, string message)
+bool Hull::alter_background_work_info(Descriptor descriptor, std::string message)
 {
 	if (descriptor == _background_work_info) {
 		_ui.background_work_infobar_message->set_text(message);
@@ -652,9 +651,8 @@ void Hull::update_toolbar()
 {
 	if (_current_fitting->interaction_manager) {
 		// clear placeholder
-		vector<Gtk::Widget* > children = _ui.left_side_layout->get_children();
-		vector<Gtk::Widget* >::iterator it;
-		for(it = children.begin(); it != children.end(); ++it) {
+		std::vector<Gtk::Widget* > children = _ui.left_side_layout->get_children();
+		for(auto it = children.begin(); it != children.end(); ++it) {
 			_ui.left_side_layout->remove(**it);
 		}
 
@@ -668,7 +666,7 @@ void Hull::update_toolbar()
 /* private */
 void Hull::refresh_view_menu()
 {
-	vector<ViewInfo> view_infos;
+	std::vector<ViewInfo> view_infos;
 	std::map<Descriptor, View* >::iterator it;
 	for (it = _view_map.begin(); it != _view_map.end(); ++it) {
 		view_infos.push_back(ViewInfo(it->second->get_title(), it->first, it->second->get_position()));

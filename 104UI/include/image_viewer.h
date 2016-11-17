@@ -110,7 +110,7 @@ private:
 	float _scale;
 
 	void draw_mouse_coordinates(const Cairo::RefPtr<Cairo::Context>& cr, int width, int height, int margin, int mouse_x, int mouse_y);
-	void save_content_internal(const string& filename);
+	void save_content_internal(const std::string& filename);
 
 	inline bool is_pan_allowed(int x, int y, int margin);
 };

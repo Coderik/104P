@@ -21,7 +21,7 @@ class IParameterizable
 public:
 	virtual ~IParameterizable() {}
 
-	virtual vector<IParameter *> get_parameters() = 0;
+	virtual std::vector<IParameter *> get_parameters() = 0;
 };
 
 

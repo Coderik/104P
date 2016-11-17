@@ -17,15 +17,13 @@
 #include <gdkmm/pixbuf.h>
 #include <sigc++/sigc++.h>
 
-using namespace std;
-
 class View
 {
 public:
-	View(string title, sigc::slot1<Glib::RefPtr<Gdk::Pixbuf>, int> provider);
+	View(std::string title, sigc::slot1<Glib::RefPtr<Gdk::Pixbuf>, int> provider);
 
-	string get_title();
-	void set_title(string value);
+	std::string get_title();
+	void set_title(std::string value);
 
 	void set_provider(sigc::slot1<Glib::RefPtr<Gdk::Pixbuf>, int> provider);
 
@@ -36,7 +34,7 @@ public:
 private:
 	static unsigned long __next_position__;	// NOTE: this helps to sort list of views in the order of their creation.
 	unsigned long _position;
-	string _title;
+	std::string _title;
 	sigc::slot1<Glib::RefPtr<Gdk::Pixbuf>, int> _provider;
 };
 

@@ -217,10 +217,10 @@ void ImageViewer::set_mouse_coordinates_enabled(bool enabled)
 
 void ImageViewer::set_text_color(float r, float g, float b, float a)
 {
-	_text_color_r = max(0.0f, min(1.0f, r));
-	_text_color_g = max(0.0f, min(1.0f, g));
-	_text_color_b = max(0.0f, min(1.0f, b));
-	_text_color_a = max(0.0f, min(1.0f, a));
+	_text_color_r = std::max(0.0f, std::min(1.0f, r));
+	_text_color_g = std::max(0.0f, std::min(1.0f, g));
+	_text_color_b = std::max(0.0f, std::min(1.0f, b));
+	_text_color_a = std::max(0.0f, std::min(1.0f, a));
 }
 
 
@@ -300,9 +300,8 @@ bool ImageViewer::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 	cr->scale(_scale, _scale);
 
 	if (_layer_manager) {
-		vector<Layer* > layers = _layer_manager->get_all_layers();
-		vector<Layer* >::iterator it;
-		for (it = layers.begin(); it != layers.end(); ++it) {
+		std::vector<Layer* > layers = _layer_manager->get_all_layers();
+		for (auto it = layers.begin(); it != layers.end(); ++it) {
 			(*it)->set_drawing_size(_content_width, _content_height);
 			(*it)->draw(cr);
 		}
@@ -470,9 +469,9 @@ bool ImageViewer::on_scroll_event (GdkEventScroll* event)
 
 void ImageViewer::draw_mouse_coordinates(const Cairo::RefPtr<Cairo::Context>& cr, int width, int height, int margin, int mouse_x, int mouse_y)
 {
-	stringstream stream;
+	std::stringstream stream;
 	stream << mouse_x << " " << mouse_y;
-	string coordinates = stream.str();
+	std::string coordinates = stream.str();
 
 	Pango::FontDescription font;	// http://developer.gnome.org/pangomm/unstable/classPango_1_1FontDescription.html
 
@@ -495,7 +494,7 @@ void ImageViewer::draw_mouse_coordinates(const Cairo::RefPtr<Cairo::Context>& cr
 }
 
 
-void ImageViewer::save_content_internal(const string& filename)
+void ImageViewer::save_content_internal(const std::string& filename)
 {
 	// TODO: add '.png' extension if absent
 	// TODO: crop to the actually used area

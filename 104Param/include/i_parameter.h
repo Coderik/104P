@@ -15,14 +15,12 @@
 
 #include <string>
 
-using namespace std;
-
 class IParameter
 {
 public:
 	virtual ~IParameter() {}
 
-	virtual string get_display_name() = 0;
+	virtual std::string get_display_name() = 0;
 };
 
 

@@ -24,8 +24,6 @@
 #include <sigc++/sigc++.h>
 #include "interaction.h"
 
-using namespace std;
-
 class InteractionManager
 {
 public:
@@ -42,10 +40,10 @@ public:
 	}
 
 private:
-	static const string DEFAULT_ICON_NAME;
+	static const std::string DEFAULT_ICON_NAME;
 	Gtk::Box *_ui;
 	Interaction *_active;
-	vector<Interaction* > _interactions;
+	std::vector<Interaction* > _interactions;
 	type_signal_ui_updated _signal_ui_updated;
 
 	Gtk::Box* build_ui();

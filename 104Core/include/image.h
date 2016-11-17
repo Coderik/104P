@@ -20,8 +20,6 @@
 #include "point.h"
 #include "shape.h"
 
-using namespace std;
-
 namespace ColorSpaces
 {
     enum ColorSpace {mono, RGB, Lab, HSV, YUV, unknown};

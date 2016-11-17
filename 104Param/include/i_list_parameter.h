@@ -16,15 +16,13 @@
 #include <vector>
 #include "i_parameter.h"
 
-using namespace std;
-
 class IListParameter : public IParameter
 {
 public:
 	virtual ~IListParameter() {}
 
-	virtual string get_display_name() = 0;
-	virtual vector<string> get_items() = 0;
+	virtual std::string get_display_name() = 0;
+	virtual std::vector<std::string> get_items() = 0;
 	virtual bool set(unsigned int item_id) = 0;
 	virtual int get() = 0;
 };

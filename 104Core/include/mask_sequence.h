@@ -17,8 +17,6 @@
 #include "mask.h"
 #include "i_iterable_mask.h"
 
-using namespace std;
-
 // forward declaration
 class MaskSequenceFx;
 
@@ -80,7 +78,7 @@ public:
 	virtual Point prev(const Point &current) const;
 
 private:
-	vector<Mask > _frames;
+	std::vector<Mask > _frames;
 	Shape _size;
 };
 
@@ -141,7 +139,7 @@ public:
 	virtual Point prev(const Point &current) const;
 
 private:
-	vector<MaskFx > _frames;
+	std::vector<MaskFx > _frames;
 	Shape _size;
 };
 

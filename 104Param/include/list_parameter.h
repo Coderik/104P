@@ -16,8 +16,6 @@
 #include <sigc++/sigc++.h>
 #include "i_list_parameter.h"
 
-using namespace std;
-
 template <class T>
 class ListParameter : public IListParameter
 {

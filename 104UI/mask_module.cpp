@@ -109,7 +109,7 @@ void MaskModule::open_mask()
 	}
 
 	// TODO: add filters
-	string file_name = _modulable->request_open_dialog_result("Open Mask File");
+	std::string file_name = _modulable->request_open_dialog_result("Open Mask File");
 
 	if (!file_name.empty()) {
 		// read mask file
@@ -184,7 +184,7 @@ void MaskModule::save_mask()
 	if (_mask_file_name.empty()) {
 		_mask_file_name = _modulable->request_save_dialog_result("Save Mask As");
 	}
-	string file_name = _mask_file_name;
+	std::string file_name = _mask_file_name;
 
 	// set that mask as current
 	_mask = mask;
@@ -225,7 +225,7 @@ void MaskModule::save_mask_as()
 	}
 
 	// TODO: add filters
-	string file_name = _modulable->request_save_dialog_result("Save Mask As");
+	std::string file_name = _modulable->request_save_dialog_result("Save Mask As");
 
 	// write mask
 	// TODO: deal also with 3D masks

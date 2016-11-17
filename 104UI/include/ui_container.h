@@ -40,8 +40,6 @@
 #include "fitting.h"
 #include "view_info.h"
 
-using namespace std;
-
 class UI_Container
 {
 public:
@@ -73,23 +71,23 @@ public:
 		return _signal_active_view_changed;
 	}
 
-	void setup_ui(Gtk::Window* window, string application_id);
+	void setup_ui(Gtk::Window* window, std::string application_id);
 
-	void add_recent_file(string filename);
-	void add_recent_folder(string path);
+	void add_recent_file(std::string filename);
+	void add_recent_folder(std::string path);
 
 	void refresh_placeholders();
 	void clear_placeholders();
 
-	void assign_menu(Gtk::Menu *menu, string title);
+	void assign_menu(Gtk::Menu *menu, std::string title);
 
-	void update_veiw_menu(const vector<ViewInfo> &view_infos, Descriptor active);
+	void update_veiw_menu(const std::vector<ViewInfo> &view_infos, Descriptor active);
 
 	void set_fittings(std::vector<Fitting* > fittings);
 	Fitting* get_fitting();
 
 private:
-	string _application_id;
+	std::string _application_id;
 	Glib::RefPtr<Gtk::UIManager> _menu_manager;
 	Gtk::MenuBar *_menu_bar;
 	Gtk::MenuItem *_view_menu_item;
@@ -100,7 +98,7 @@ private:
 	Fitting *_current_fitting;
 
 
-	void add_recent_document_internal(string path, string mime_type);
+	void add_recent_document_internal(std::string path, std::string mime_type);
 
 	void view_changed_internal(const Descriptor& current, Gtk::RadioMenuItem* item);
 

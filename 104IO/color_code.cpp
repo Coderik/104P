@@ -73,7 +73,7 @@ void ColorCode::make_color_wheel()
 	int MR = 6;
 
 	_colors_count = RY + YG + GC + CB + BM + MR;
-	_color_wheel = vector<vector<int> >(3, vector<int>(_colors_count, 0));
+	_color_wheel = std::vector<std::vector<int> >(3, std::vector<int>(_colors_count, 0));
 
 	int i;
 	int k = 0;

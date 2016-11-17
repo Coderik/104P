@@ -12,7 +12,7 @@
 
 #include "interaction_manager.h"
 
-const string InteractionManager::DEFAULT_ICON_NAME = "help-about";
+const std::string InteractionManager::DEFAULT_ICON_NAME = "help-about";
 
 InteractionManager::InteractionManager()
 {
@@ -75,12 +75,11 @@ Gtk::Box* InteractionManager::build_ui()
 
 	Gtk::RadioButtonGroup group = Gtk::RadioButtonGroup();
 
-	vector<Interaction* >::iterator it;
-	for (it = _interactions.begin(); it != _interactions.end(); ++it) {
+	for (auto it = _interactions.begin(); it != _interactions.end(); ++it) {
 		Gtk::RadioToolButton *button = new Gtk::RadioToolButton(group, (*it)->get_display_name());
 		button->set_tooltip_text((*it)->get_tooltip_text());
 
-		string icon_name = (*it)->get_icon_name();
+		std::string icon_name = (*it)->get_icon_name();
 		if (icon_name.empty()) {
 			icon_name = DEFAULT_ICON_NAME;
 		}
@@ -110,9 +109,8 @@ void InteractionManager::destroy_ui(Gtk::Box* ui)
 		return;
 	}
 
-	vector<Gtk::Widget* > children = ui->get_children();
-	vector<Gtk::Widget* >::iterator it;
-	for(it = children.begin(); it != children.end(); ++it) {
+	std::vector<Gtk::Widget* > children = ui->get_children();
+	for(auto it = children.begin(); it != children.end(); ++it) {
 		ui->remove(**it);
 		delete *it;
 	}

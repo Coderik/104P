@@ -23,8 +23,6 @@
 #include "i_rig.h"
 #include "descriptor.h"
 
-using namespace std;
-
 class IModulable
 {
 public:
@@ -32,12 +30,12 @@ public:
 
 	virtual sigc::signal<void> signal_sequence_changed() = 0;
 
-	virtual void assign_menu(Gtk::Menu *menu, string title) = 0;
+	virtual void assign_menu(Gtk::Menu *menu, std::string title) = 0;
 
 	virtual SequenceFx<float> request_sequence() = 0;
-	virtual string request_sequence_path() = 0;
-	virtual string request_open_dialog_result(string dialog_title, bool folder = false, Glib::RefPtr<Gtk::FileFilter> filter = Glib::RefPtr<Gtk::FileFilter>()) = 0;
-	virtual string request_save_dialog_result(string dialog_title, Glib::RefPtr<Gtk::FileFilter> filter = Glib::RefPtr<Gtk::FileFilter>()) = 0;
+	virtual std::string request_sequence_path() = 0;
+	virtual std::string request_open_dialog_result(std::string dialog_title, bool folder = false, Glib::RefPtr<Gtk::FileFilter> filter = Glib::RefPtr<Gtk::FileFilter>()) = 0;
+	virtual std::string request_save_dialog_result(std::string dialog_title, Glib::RefPtr<Gtk::FileFilter> filter = Glib::RefPtr<Gtk::FileFilter>()) = 0;
 
 	// NOTE: This is one possible way to notify an active rig about something from a module. Rig should implement some interface which is known by a module.
 	//       For example, mask providing module can request for a rig which implement IMaskAware interface with a single mask_changed() method.
@@ -45,14 +43,14 @@ public:
 	//TODO: Another way should be based on module's proxy and signals
 	virtual void request_active_rig(RequestBase<IRig> &request) = 0;
 
-	virtual Descriptor add_view(string title, sigc::slot1<Glib::RefPtr<Gdk::Pixbuf>, int> provider) = 0;
-	virtual bool alter_view(Descriptor view_descriptor, string title, sigc::slot1<Glib::RefPtr<Gdk::Pixbuf>, int> provider) = 0;
+	virtual Descriptor add_view(std::string title, sigc::slot1<Glib::RefPtr<Gdk::Pixbuf>, int> provider) = 0;
+	virtual bool alter_view(Descriptor view_descriptor, std::string title, sigc::slot1<Glib::RefPtr<Gdk::Pixbuf>, int> provider) = 0;
 	virtual bool remove_view(Descriptor view_descriptor) = 0;
 	virtual bool queue_view_draw(Descriptor view_descriptor) = 0;
 
 	// TODO: think about the better api for this (but note, that encapsulating message stuff in IBackgroundWorker is not an option)
-	virtual Descriptor add_background_work_info(sigc::slot0<void> cancel_slot, string message = "") = 0;
-	virtual bool alter_background_work_info(Descriptor descriptor, string message) = 0;
+	virtual Descriptor add_background_work_info(sigc::slot0<void> cancel_slot, std::string message = "") = 0;
+	virtual bool alter_background_work_info(Descriptor descriptor, std::string message) = 0;
 	virtual bool remove_background_work_info(Descriptor descriptor) = 0;
 };
 

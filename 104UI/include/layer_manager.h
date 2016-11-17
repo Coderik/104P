@@ -20,21 +20,19 @@
 
 #include "layer.h"
 
-using namespace std;
-
 class LayerManager
 {
 public:
 	LayerManager();
 
-	string add_layer(Layer* layer);
-	Layer* find_layer(string key);
-	vector<Layer* > get_all_layers();
+	std::string add_layer(Layer* layer);
+	Layer* find_layer(std::string key);
+	std::vector<Layer* > get_all_layers();
 	void set_visibility(bool is_visible);
 	void set_current_time(int time);
 
 	template<class T>
-	T* find_or_create_layer(string key, string display_name);
+	T* find_or_create_layer(std::string key, std::string display_name);
 
 	typedef sigc::signal<void> type_signal_layer_changed;
 	type_signal_layer_changed signal_layer_changed()
@@ -43,9 +41,9 @@ public:
 	}
 
 private:
-	typedef pair<Layer*, sigc::connection > type_layer_and_connection;
-	map<string, type_layer_and_connection > _layers_map;
-	vector<Layer* > _layers_cache;
+	typedef std::pair<Layer*, sigc::connection > type_layer_and_connection;
+	std::map<std::string, type_layer_and_connection > _layers_map;
+	std::vector<Layer* > _layers_cache;
 	bool _is_layers_cache_valid;
 	type_signal_layer_changed _signal_layer_changed;
 	bool _is_notification_allowed;

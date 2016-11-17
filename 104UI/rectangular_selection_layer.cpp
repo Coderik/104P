@@ -12,7 +12,7 @@
 
 #include "rectangular_selection_layer.h"
 
-RectangularSelectionLayer::RectangularSelectionLayer(string id, string display_name)
+RectangularSelectionLayer::RectangularSelectionLayer(std::string id, std::string display_name)
 {
 	_id = id;
 	_display_name = display_name;

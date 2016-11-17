@@ -28,10 +28,6 @@ extern "C" {
 #include "../iio/iio.h"
 }
 
-using std::string;
-using std::vector;
-using std::fstream;
-
 /**
  * Contains methods for reading and writings images as well as
  * some auxiliary methods. Acts as a proxy for IIO library.
@@ -40,23 +36,23 @@ class IOUtility
 {
 public:
 	/// Reading and writing of a grayscale image without IIO.
-	static Image<float> read_pgm_image(const string &name);
-	static void write_pgm_image(const string &name, const ImageFx<float> &image);
+	static Image<float> read_pgm_image(const std::string &name);
+	static void write_pgm_image(const std::string &name, const ImageFx<float> &image);
 
 	/// Reading and writing of a grayscale image using IIO.
-	static Image<float> read_mono_image(const string &name);
-	static void write_mono_image(const string &name, const ImageFx<float> &image);
+	static Image<float> read_mono_image(const std::string &name);
+	static void write_mono_image(const std::string &name, const ImageFx<float> &image);
 
 	/// Reading and writing for a colored image using IIO.
-	static Image<float> read_rgb_image(const string &name);
-	static void write_rgb_image(const string &name, const ImageFx<float> &image);
+	static Image<float> read_rgb_image(const std::string &name);
+	static void write_rgb_image(const std::string &name, const ImageFx<float> &image);
 
-	static void write_float_image(const string &name, const ImageFx<float> &image);
+	static void write_float_image(const std::string &name, const ImageFx<float> &image);
 
-	static Image<float> read_optical_flow(const string &name);
-	static void write_optical_flow(const string &name, Image<float> flow);
+	static Image<float> read_optical_flow(const std::string &name);
+	static void write_optical_flow(const std::string &name, Image<float> flow);
 
-	static vector<Image<float> > read_all_flows(const string &folder, const string &prefix = string());
+	static std::vector<Image<float> > read_all_flows(const std::string &folder, const std::string &prefix = std::string());
 
 	static Image<float> rgb_to_lab(ImageFx<float> image);
 	static Image<float> lab_to_rgb(ImageFx<float> image);
@@ -71,16 +67,16 @@ public:
 	static Image<float> take_channel(ImageFx<float> image, unsigned int channel_id);
 	static Image<float> average_channels(ImageFx<float> image);
 
-	static string compose_file_name(const string &name);
-	static string compose_file_name(const string &name, int index, const string &extension);
-	static string compose_file_name(const string &name, int index, int index2, const string &extension);
-	static void set_prefix(const string &prefix);
+	static std::string compose_file_name(const std::string &name);
+	static std::string compose_file_name(const std::string &name, int index, const std::string &extension);
+	static std::string compose_file_name(const std::string &name, int index, int index2, const std::string &extension);
+	static void set_prefix(const std::string &prefix);
 
 private:
     static const float EPS;
 	static const float TAG_FLOAT;
-	static const string TAG_STRING;
-	static string _prefix;
+	static const std::string TAG_STRING;
+	static std::string _prefix;
 
 	static void skip_spaces_and_comments(FILE * f);
 	static int get_number(FILE * f);

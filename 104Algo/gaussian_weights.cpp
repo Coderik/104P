@@ -22,7 +22,7 @@ Sequence<float> calculate_anisotropic_3d(unsigned int size_x, unsigned int size_
 {
 	Sequence<float> weights(size_x, size_y, size_z, 0.0);
 
-	vector<float*> values = vector<float*>(size_z);
+	std::vector<float*> values(size_z);
 	for (unsigned int i = 0; i < size_z; i++) {
 		values[i] = weights.frame(i).raw();
 	}

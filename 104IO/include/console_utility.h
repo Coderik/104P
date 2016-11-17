@@ -17,12 +17,10 @@
 #include <sstream>
 #include <vector>
 
-using namespace std;
-
 class ConsoleUtility
 {
 public:
-	static vector<float> parse_float_list(string str);
+	static std::vector<float> parse_float_list(std::string str);
 };
 
 

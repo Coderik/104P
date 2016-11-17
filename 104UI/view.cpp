@@ -14,7 +14,7 @@
 
 unsigned long View::__next_position__ = 0;
 
-View::View(string title, sigc::slot1<Glib::RefPtr<Gdk::Pixbuf>, int> provider)
+View::View(std::string title, sigc::slot1<Glib::RefPtr<Gdk::Pixbuf>, int> provider)
 : _title(title)
 {
 	_provider = provider;
@@ -22,13 +22,13 @@ View::View(string title, sigc::slot1<Glib::RefPtr<Gdk::Pixbuf>, int> provider)
 }
 
 
-string View::get_title()
+std::string View::get_title()
 {
 	return _title;
 }
 
 
-void View::set_title(string value)
+void View::set_title(std::string value)
 {
 	_title = value;
 }

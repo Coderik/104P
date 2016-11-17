@@ -14,9 +14,9 @@
 
 int MIN_VALUE = -32768;
 
-OpticalFlowIO::OFStatus OpticalFlowIO::check_optical_flow(const string &file_name, int size_x, int size_y, int chunks_count)
+OpticalFlowIO::OFStatus OpticalFlowIO::check_optical_flow(const std::string &file_name, int size_x, int size_y, int chunks_count)
 {
-	ifstream file(file_name.data(), std::ios::in | std::ios::binary);
+	std::ifstream file(file_name.data(), std::ios::in | std::ios::binary);
 	if (!file)
 		return STATUS_NO_FILE;
 
@@ -37,9 +37,9 @@ OpticalFlowIO::OFStatus OpticalFlowIO::check_optical_flow(const string &file_nam
 }
 
 
-void OpticalFlowIO::update_or_overwrite_flow(const string &file_name, const float *flow, int size_x, int size_y, int chunk_id, int chunks_count)
+void OpticalFlowIO::update_or_overwrite_flow(const std::string &file_name, const float *flow, int size_x, int size_y, int chunk_id, int chunks_count)
 {
-	fstream file(file_name.data(), std::ios::in | std::ios::out | std::ios::binary);
+	std::fstream file(file_name.data(), std::ios::in | std::ios::out | std::ios::binary);
 
 	// If file is valid, update it. Otherwise, rewrite it.
 	if (file) {
@@ -63,7 +63,7 @@ void OpticalFlowIO::update_or_overwrite_flow(const string &file_name, const floa
 }
 
 
-void OpticalFlowIO::update_or_overwrite_flow(const string &file_name, const ImageFx<float> &flow, int chunk_id, int chunks_count)
+void OpticalFlowIO::update_or_overwrite_flow(const std::string &file_name, const ImageFx<float> &flow, int chunk_id, int chunks_count)
 {
 	if (flow.number_of_channels() == 2) {
 		update_or_overwrite_flow(file_name, flow.raw(), flow.size_x(), flow.size_y(), chunk_id, chunks_count);
@@ -71,9 +71,9 @@ void OpticalFlowIO::update_or_overwrite_flow(const string &file_name, const Imag
 }
 
 
-bool OpticalFlowIO::read_flow(const string &file_name, float *&flow, int &size_x, int &size_y, int chunk_id)
+bool OpticalFlowIO::read_flow(const std::string &file_name, float *&flow, int &size_x, int &size_y, int chunk_id)
 {
-	ifstream file(file_name.data(), std::ios::in | std::ios::binary);
+	std::ifstream file(file_name.data(), std::ios::in | std::ios::binary);
 	if (!file)
 		return false;
 
@@ -119,9 +119,9 @@ bool OpticalFlowIO::read_flow(const string &file_name, float *&flow, int &size_x
 }
 
 
-Image<float> OpticalFlowIO::read_flow(const string &file_name, int chunk_id)
+Image<float> OpticalFlowIO::read_flow(const std::string &file_name, int chunk_id)
 {
-	ifstream file(file_name.data(), std::ios::in | std::ios::binary);
+	std::ifstream file(file_name.data(), std::ios::in | std::ios::binary);
 	if (!file)
 		return Image<float>();
 
@@ -177,11 +177,11 @@ Image<float> OpticalFlowIO::read_flow(const string &file_name, int chunk_id)
  * are not overwritten and are used to store readed flow data.
  * Missing elements are initialized as objects of class OpticalFlowContainer.
  */
-vector<Image<float> > OpticalFlowIO::read_whole_direction_data(const string &file_name, bool forward_direction)
+std::vector<Image<float> > OpticalFlowIO::read_whole_direction_data(const std::string &file_name, bool forward_direction)
 {
 	std::ifstream file(file_name.data(), std::ios::in | std::ios::binary);
 	if (!file) {
-		return vector<Image<float> >();
+		return std::vector<Image<float> >();
 	}
 
 	OFHeader header;
@@ -194,10 +194,10 @@ vector<Image<float> > OpticalFlowIO::read_whole_direction_data(const string &fil
 
 	if (!check_header(header)) {
 		file.close();
-		return vector<Image<float> >();
+		return std::vector<Image<float> >();
 	}
 
-	vector<Image<float> > optical_flow_list(chunks_count / 2);
+	std::vector<Image<float> > optical_flow_list(chunks_count / 2);
 
 	// Read description array
 	int description[chunks_count];

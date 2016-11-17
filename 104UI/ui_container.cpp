@@ -12,7 +12,7 @@
 
 #include "ui_container.h"
 
-void UI_Container::setup_ui(Gtk::Window* window, string application_id)
+void UI_Container::setup_ui(Gtk::Window* window, std::string application_id)
 {
 	_application_id = application_id;
 
@@ -138,13 +138,13 @@ void UI_Container::setup_ui(Gtk::Window* window, string application_id)
 }
 
 
-void UI_Container::add_recent_file(string filename)
+void UI_Container::add_recent_file(std::string filename)
 {
 	add_recent_document_internal(filename, "");
 }
 
 
-void UI_Container::add_recent_folder(string path)
+void UI_Container::add_recent_folder(std::string path)
 {
 	add_recent_document_internal(path, "inode/directory");
 }
@@ -159,20 +159,19 @@ void UI_Container::refresh_placeholders()
 
 void UI_Container::clear_placeholders()
 {
-	vector<Gtk::Widget* > children = right_side_layout->get_children();
-	vector<Gtk::Widget* >::iterator it;
-	for(it = children.begin(); it != children.end(); ++it) {
+	std::vector<Gtk::Widget* > children = right_side_layout->get_children();
+	for(auto it = children.begin(); it != children.end(); ++it) {
 		right_side_layout->remove(**it);
 	}
 
 	children = left_side_layout->get_children();
-	for(it = children.begin(); it != children.end(); ++it) {
+	for(auto it = children.begin(); it != children.end(); ++it) {
 		left_side_layout->remove(**it);
 	}
 }
 
 
-void UI_Container::assign_menu(Gtk::Menu *menu, string title)
+void UI_Container::assign_menu(Gtk::Menu *menu, std::string title)
 {
 	Gtk::MenuItem *main_menu_item = Gtk::manage(new Gtk::MenuItem(title));
 	main_menu_item->set_submenu(*menu);
@@ -182,13 +181,12 @@ void UI_Container::assign_menu(Gtk::Menu *menu, string title)
 }
 
 
-void UI_Container::update_veiw_menu(const vector<ViewInfo> &view_infos, Descriptor active)
+void UI_Container::update_veiw_menu(const std::vector<ViewInfo> &view_infos, Descriptor active)
 {
 	Gtk::Menu *menu = Gtk::manage(new Gtk::Menu());
 
 	Gtk::RadioAction::Group group = Gtk::RadioAction::Group();
-	vector<ViewInfo>::const_iterator it;
-	for (it = view_infos.begin(); it != view_infos.end(); ++it) {
+	for (auto it = view_infos.begin(); it != view_infos.end(); ++it) {
 		Gtk::RadioMenuItem *item = Gtk::manage(new Gtk::RadioMenuItem(group, it->title));
 		if (it->descriptor == active) {
 			item->activate();
@@ -253,12 +251,12 @@ Fitting* UI_Container::get_fitting()
 
 /* Private */
 
-void UI_Container::add_recent_document_internal(string path, string mime_type)
+void UI_Container::add_recent_document_internal(std::string path, std::string mime_type)
 {
 	Glib::RefPtr<Gtk::RecentManager> recent_manager = Gtk::RecentManager::get_default();
 	Gtk::RecentManager::Data metadata;
 
-	string uri = Glib::filename_to_uri(path);
+	std::string uri = Glib::filename_to_uri(path);
 
 	metadata.display_name = Glib::filename_display_basename(path);
 	metadata.mime_type = mime_type;		// NOTE: it seems that on Windows this mime type is ignored

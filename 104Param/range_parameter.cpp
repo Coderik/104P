@@ -21,7 +21,7 @@ RangeParameter::RangeParameter()
 }
 
 
-RangeParameter::RangeParameter(string display_name, float lower_boundary, float upper_boundary, float digits)
+RangeParameter::RangeParameter(std::string display_name, float lower_boundary, float upper_boundary, float digits)
 {
 	_display_name = display_name;
 	_lower_boundary = lower_boundary;
@@ -30,7 +30,7 @@ RangeParameter::RangeParameter(string display_name, float lower_boundary, float 
 }
 
 
-RangeParameter::RangeParameter(string display_name, float lower_boundary, float upper_boundary, float digits, sigc::slot1<void, float> setter, sigc::slot0<float> getter)
+RangeParameter::RangeParameter(std::string display_name, float lower_boundary, float upper_boundary, float digits, sigc::slot1<void, float> setter, sigc::slot0<float> getter)
 {
 	_display_name = display_name;
 	_lower_boundary = lower_boundary;
@@ -41,7 +41,7 @@ RangeParameter::RangeParameter(string display_name, float lower_boundary, float 
 }
 
 
-string RangeParameter::get_display_name()
+std::string RangeParameter::get_display_name()
 {
 	return _display_name;
 }
@@ -90,7 +90,7 @@ float RangeParameter::get()
 }
 
 
-void RangeParameter::set_display_name(string display_name)
+void RangeParameter::set_display_name(std::string display_name)
 {
 	_display_name = display_name;
 }

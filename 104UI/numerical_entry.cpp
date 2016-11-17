@@ -64,16 +64,16 @@ void NumericalEntry::get_preferred_width_vfunc(int &minimum_width, int &natural_
 	Glib::RefPtr<Pango::Layout> layout_copy = Pango::Layout::create(layout->get_context());
 
 	// measure width of a string containing the upper value
-	string upper_str = format_for_value(_adjustment->get_upper());
+	std::string upper_str = format_for_value(_adjustment->get_upper());
 	int upper_width = measure_string_width(layout_copy, upper_str);
 
-	int width = max(upper_width, MIN_WIDTH);
+	int width = std::max(upper_width, MIN_WIDTH);
 
 	// measure width of a string containing the lower value
-	string lower_str = format_for_value(_adjustment->get_lower());
+	std::string lower_str = format_for_value(_adjustment->get_lower());
 	int lower_width = measure_string_width(layout_copy, lower_str);
 
-	width = max(width, lower_width);
+	width = std::max(width, lower_width);
 
 	// add borders
 	Gtk::Border border = style_context->get_border();
@@ -163,7 +163,7 @@ double NumericalEntry::get_value()
 void NumericalEntry::default_output()
 {
 	double value = _adjustment->get_value();
-	string str_value = format_for_value(value);
+	std::string str_value = format_for_value(value);
 
 	if (str_value.compare(get_text()) != 0) {
 		set_text(str_value);
@@ -171,11 +171,11 @@ void NumericalEntry::default_output()
 }
 
 
-string NumericalEntry::format_for_value(double value) const
+std::string NumericalEntry::format_for_value(double value) const
 {
-	stringstream s;
+	std::stringstream s;
 
-	s << fixed << setprecision(_digits) << value;
+	s << std::fixed << std::setprecision(_digits) << value;
 
 	return s.str();
 }
@@ -184,14 +184,14 @@ string NumericalEntry::format_for_value(double value) const
 void NumericalEntry::update()
 {
 	// get value as double
-	string str = get_text();
-	stringstream s(get_text());
+	std::string str = get_text();
+	std::stringstream s(get_text());
 	double value;
 	bool is_valid = s >> value;
 
 	if (is_valid) {
 		// restrict value between lower and upper limits
-		value = max(_adjustment->get_lower(), min(_adjustment->get_upper(), value));
+		value = std::max(_adjustment->get_lower(), std::min(_adjustment->get_upper(), value));
 		set_value(value);
 	} else {
 		// revert to the previous text
@@ -202,7 +202,7 @@ void NumericalEntry::update()
 }
 
 
-inline int NumericalEntry::measure_string_width(Glib::RefPtr<Pango::Layout> &layout, string &str) const
+inline int NumericalEntry::measure_string_width(Glib::RefPtr<Pango::Layout> &layout, std::string &str) const
 {
 	int width, heights;
 	layout->set_text(str);

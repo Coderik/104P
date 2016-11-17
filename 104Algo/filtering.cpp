@@ -190,7 +190,7 @@ void Filtering::median(const float *in, float *out, int size_x, int size_y, int 
 				}
 			}
 
-			sort(window, window + window_size * window_size);
+			std::sort(window, window + window_size * window_size);
 			out[y * size_y + x] = window[window_id / 2];
 		}
 	}

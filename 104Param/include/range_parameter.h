@@ -20,18 +20,18 @@ class RangeParameter : public IRangeParameter
 {
 public:
 	RangeParameter();
-	RangeParameter(string display_name, float lower_boundary, float upper_boundary, float digits);
-	RangeParameter(string display_name, float lower_boundary, float upper_boundary, float digits, sigc::slot1<void, float> setter, sigc::slot0<float> getter);
+	RangeParameter(std::string display_name, float lower_boundary, float upper_boundary, float digits);
+	RangeParameter(std::string display_name, float lower_boundary, float upper_boundary, float digits, sigc::slot1<void, float> setter, sigc::slot0<float> getter);
 	virtual ~RangeParameter() {}
 
-	virtual string get_display_name();
+	virtual std::string get_display_name();
 	virtual float get_lower_boundary();
 	virtual float get_upper_boundary();
 	virtual int get_digits();
 	virtual bool set(float value);
 	virtual float get();
 
-	void set_display_name(string display_name);
+	void set_display_name(std::string display_name);
 	void set_lower_boundary(float lower_boundary);
 	void set_upper_boundary(float upper_boundary);
 	void set_digits(int digits);
@@ -39,7 +39,7 @@ public:
 	void attach_getter(sigc::slot0<float> getter);
 
 private:
-	string _display_name;
+	std::string _display_name;
 	float _lower_boundary;
 	float _upper_boundary;
 	int _digits;

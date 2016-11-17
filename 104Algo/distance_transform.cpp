@@ -65,8 +65,8 @@ Image<float> DistanceTransform::calculate_internal(const MaskFx &mask, DistanceE
 	}
 
 	// second phase
-	vector<int> s(mask.size_x());
-	vector<int> t(mask.size_x());
+	std::vector<int> s(mask.size_x());
+	std::vector<int> t(mask.size_x());
 	for (int y = 0; y < mask.size_y(); y++) {
 		int q = 0;
 		s[0] = 0;
@@ -118,7 +118,7 @@ inline float DistanceTransform::f(int x, int x_i, float g_i, DistanceEnum distan
 			result = abs(x - x_i) + g_i;
 			break;
 		case Distance::chessboard :
-			result = max((float)abs(x - x_i), g_i);
+			result = std::max((float)abs(x - x_i), g_i);
 			break;
 	}
 
@@ -145,9 +145,9 @@ inline int DistanceTransform::sep(int i, int u, float g_i, float g_u, int inf, D
 			break;
 		case Distance::chessboard :
 			if (g_i <= g_u) {
-				result = max((int)(i + g_u), (i + u) / 2);
+				result = std::max((int)(i + g_u), (i + u) / 2);
 			} else {
-				result = min((int)(u - g_i), (i + u) / 2);
+				result = std::min((int)(u - g_i), (i + u) / 2);
 			}
 			break;
 	}

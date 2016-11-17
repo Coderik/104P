@@ -15,15 +15,15 @@
 
 const float IOUtility::EPS = 0.00001f;
 const float IOUtility::TAG_FLOAT = 202021.25f;
-const string IOUtility::TAG_STRING = "PIEH";
+const std::string IOUtility::TAG_STRING = "PIEH";
 
-string IOUtility::_prefix = "";
+std::string IOUtility::_prefix = "";
 
 /**
  * Reads image in PGM format from file with provided path\name
  * to the object of 'Image' class
  */
-Image<float> IOUtility::read_pgm_image(const string &name)
+Image<float> IOUtility::read_pgm_image(const std::string &name)
 {
 	/* open file */
 	// COMPATIBILITY: for win 'rb' file mode instead of just 'r'
@@ -82,7 +82,7 @@ Image<float> IOUtility::read_pgm_image(const string &name)
  * Writes image in PGM format to file with provided path\name
  * from the object of 'Image' class
  */
-void IOUtility::write_pgm_image(const string &name, const ImageFx<float> &image)
+void IOUtility::write_pgm_image(const std::string &name, const ImageFx<float> &image)
 {
 	/* open file */
 	FILE *f = fopen(name.data(),"wb");
@@ -110,7 +110,7 @@ void IOUtility::write_pgm_image(const string &name, const ImageFx<float> &image)
 }
 
 
-Image<float> IOUtility::read_mono_image(const string &name)
+Image<float> IOUtility::read_mono_image(const std::string &name)
 {
 	int width, height;
 
@@ -139,7 +139,7 @@ Image<float> IOUtility::read_mono_image(const string &name)
 }
 
 
-void IOUtility::write_mono_image(const string &name, const ImageFx<float> &image)
+void IOUtility::write_mono_image(const std::string &name, const ImageFx<float> &image)
 {
 	int width = image.size_x();
 	int height = image.size_y();
@@ -159,7 +159,7 @@ void IOUtility::write_mono_image(const string &name, const ImageFx<float> &image
 }
 
 
-Image<float> IOUtility::read_rgb_image(const string &name)
+Image<float> IOUtility::read_rgb_image(const std::string &name)
 {
 	int width, height;
 
@@ -189,7 +189,7 @@ Image<float> IOUtility::read_rgb_image(const string &name)
 }
 
 
-void IOUtility::write_rgb_image(const string &name, const ImageFx<float> &image)
+void IOUtility::write_rgb_image(const std::string &name, const ImageFx<float> &image)
 {
 	int width = image.size_x();
 	int height = image.size_y();
@@ -214,25 +214,25 @@ void IOUtility::write_rgb_image(const string &name, const ImageFx<float> &image)
 }
 
 
-void IOUtility::write_float_image(const string &name, const ImageFx<float> &image)
+void IOUtility::write_float_image(const std::string &name, const ImageFx<float> &image)
 {
 	iio_save_image_float_split(const_cast<char*>(name.data()), const_cast<float*>(image.raw()), image.size_x(), image.size_y(), 1);
 }
 
 
-Image<float> IOUtility::read_optical_flow(const string &name)
+Image<float> IOUtility::read_optical_flow(const std::string &name)
 {
 	if (name.empty()) {
 		return Image<float>();
 	}
 
-	if (name.find_last_of(".flo") == string::npos) {
+	if (name.find_last_of(".flo") == std::string::npos) {
 		// .flo extension is expected
 		return Image<float>();
 	}
 
 	// Try to open the flo file
-	fstream flo_file(name, ios_base::in | ios_base::binary);
+	std::fstream flo_file(name, std::ios_base::in | std::ios_base::binary);
 	if (!flo_file.is_open()) {
 		return Image<float>();
 	}
@@ -271,18 +271,18 @@ Image<float> IOUtility::read_optical_flow(const string &name)
 }
 
 
-void IOUtility::write_optical_flow(const string &name, Image<float> flow)
+void IOUtility::write_optical_flow(const std::string &name, Image<float> flow)
 {
 	if (name.empty() || flow.number_of_channels() != 2) {
 		return;
 	}
 
-	if (name.find_last_of(".flo") == string::npos) {
+	if (name.find_last_of(".flo") == std::string::npos) {
 		// .flo extension is expected
 		return;
 	}
 
-	fstream flo_file(name, ios_base::out | ios_base::binary);
+	std::fstream flo_file(name, std::ios_base::out | std::ios_base::binary);
 	if (!flo_file.is_open()) {
 		return;
 	}
@@ -312,20 +312,20 @@ void IOUtility::write_optical_flow(const string &name, Image<float> flow)
 }
 
 
-vector<Image<float> > IOUtility::read_all_flows(const string &folder, const string &prefix)
+std::vector<Image<float> > IOUtility::read_all_flows(const std::string &folder, const std::string &prefix)
 {
 	tinydir_dir dir;
 	tinydir_open(&dir, folder.c_str());
 
 	// Get all file names beginning with prefix
-	vector<string> filenames;
+	std::vector<std::string> filenames;
 	filenames.reserve(dir.n_files);
 	while (dir.has_next) {
 		tinydir_file file;
 		tinydir_readfile(&dir, &file);
 
 		if (file.is_dir == 0 && (prefix.empty() || strncmp(file.name, prefix.c_str(), prefix.length()) == 0)) {
-			filenames.push_back(string(file.name));
+			filenames.push_back(std::string(file.name));
 		}
 
 		tinydir_next(&dir);
@@ -337,7 +337,7 @@ vector<Image<float> > IOUtility::read_all_flows(const string &folder, const stri
 	std::sort(filenames.begin(), filenames.end());
 
 	// Read flows
-	vector<Image<float> > flows;
+	std::vector<Image<float> > flows;
 	flows.reserve(filenames.size());
 	for (auto it = filenames.begin(); it != filenames.end(); ++it) {
 		Image<float> flow = read_optical_flow(folder + '/' + *it);
@@ -639,31 +639,31 @@ Image<float> IOUtility::average_channels(ImageFx<float> image)
 }
 
 
-string IOUtility::compose_file_name(const string &name)
+std::string IOUtility::compose_file_name(const std::string &name)
 {
 	return _prefix + name;
 }
 
 
-string IOUtility::compose_file_name(const string &name, int index, const string &extension)
+std::string IOUtility::compose_file_name(const std::string &name, int index, const std::string &extension)
 {
-	stringstream stream;
-	stream << _prefix << name << "_" << setfill('0') << setw(3) << index << "." << extension;
-	string file_name = stream.str();
+	std::stringstream stream;
+	stream << _prefix << name << "_" << std::setfill('0') << std::setw(3) << index << "." << extension;
+	std::string file_name = stream.str();
 	return file_name;
 }
 
 
-string IOUtility::compose_file_name(const string &name, int index, int index2, const string &extension)
+std::string IOUtility::compose_file_name(const std::string &name, int index, int index2, const std::string &extension)
 {
-	stringstream stream;
-	stream << _prefix << name << "_" << index << "_" << setw(3) << setfill('0') << index2 << "." << extension;
-	string file_name = stream.str();
+	std::stringstream stream;
+	stream << _prefix << name << "_" << index << "_" << std::setw(3) << std::setfill('0') << index2 << "." << extension;
+	std::string file_name = stream.str();
 	return file_name;
 }
 
 
-void IOUtility::set_prefix(const string &prefix)
+void IOUtility::set_prefix(const std::string &prefix)
 {
 	_prefix = prefix;
 }

@@ -25,8 +25,6 @@
 #include "i_list_parameter.h"
 #include "numerical_entry.h"
 
-using std::vector;
-
 class ParametersUIBuilder
 {
 public:
@@ -44,7 +42,7 @@ public:
 
 private:
 	type_signal_changed _signal_changed;
-    vector<IParameter*> _parameters;
+	std::vector<IParameter*> _parameters;
 	Gtk::VBox *_ui;
 
 	Gtk::VBox* build_ui();

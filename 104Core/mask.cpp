@@ -311,7 +311,7 @@ MaskFx MaskFx::clone_invert() const
 /**
  * Returns masked points as a vector.
  */
-vector<Point> MaskFx::masked_points() const
+std::vector<Point> MaskFx::masked_points() const
 {
 	if (!_internal->is_points_cache_valid) {
 		_internal->points_cache.clear();

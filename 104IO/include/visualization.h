@@ -19,8 +19,6 @@
 #include "mask.h"
 #include "shape.h"
 
-using namespace std;
-
 class Visualization
 {
 public:

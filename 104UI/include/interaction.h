@@ -17,8 +17,6 @@
 #include <gdk/gdk.h>
 #include "mouse_event.h"
 
-using namespace std;
-
 class Interaction
 {
 public:
@@ -29,25 +27,25 @@ public:
 	virtual void left_button_released(MouseEvent event) {};
 	virtual void key_pressed(GdkEventKey* event) {};
 
-	string get_display_name()
+	std::string get_display_name()
 	{
 		return _display_name;
 	}
 
-	string get_tooltip_text()
+	std::string get_tooltip_text()
 	{
 		return _tooltip_text;
 	}
 
-	string get_icon_name()
+	std::string get_icon_name()
 	{
 		return _icon_name;
 	}
 
 protected:
-	string _display_name;
-	string _tooltip_text;
-	string _icon_name;
+	std::string _display_name;
+	std::string _tooltip_text;
+	std::string _icon_name;
 
 };
 

@@ -84,9 +84,8 @@ Gtk::VBox* ParametersUIBuilder::build_ui()
 			parameters_box->pack_start(*frame, Gtk::PACK_SHRINK);
 
 			// initialize combo box
-			vector<string> items = parameter->get_items();
-			vector<string>::iterator it;
-			for (it = items.begin(); it != items.end(); ++it) {
+			std::vector<std::string> items = parameter->get_items();
+			for (auto it = items.begin(); it != items.end(); ++it) {
 				combo_box->append(*it);
 			}
 			combo_box->set_active(parameter->get());

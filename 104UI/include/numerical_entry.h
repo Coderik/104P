@@ -20,8 +20,6 @@
 #include <gtkmm/entry.h>
 #include <gtkmm/spinbutton.h>
 
-using namespace std;
-
 class NumericalEntry : public Gtk::Entry
 {
 public:
@@ -49,9 +47,9 @@ private:
 	sigc::connection _connection_adjustment_signal_changed;
 
 	void default_output();
-	string format_for_value(double value) const;
+	std::string format_for_value(double value) const;
 	void update();
-	inline int measure_string_width(Glib::RefPtr<Pango::Layout> &layout, string &str) const;
+	inline int measure_string_width(Glib::RefPtr<Pango::Layout> &layout, std::string &str) const;
 
 	// slots
 	void value_changed();

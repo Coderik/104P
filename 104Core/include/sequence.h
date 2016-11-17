@@ -17,8 +17,6 @@
 #include "image.h"
 #include "mask.h"
 
-using namespace std;
-
 // TODO: there is no big meaning to create *Fx directly. So maybe keep only copy constructors for them?
 
 template<class T = float>
@@ -81,7 +79,7 @@ public:
 	Image<T>& frame(uint t);
 
 private:
-	vector<Image<T> > _frames;
+	std::vector<Image<T> > _frames;
 	Shape _size;
 };
 
@@ -133,7 +131,7 @@ public:
 	ImageFx<T>& frame(uint t);
 
 private:
-	vector<ImageFx<T> > _frames;
+	std::vector<ImageFx<T> > _frames;
 	Shape _size;
 };
 

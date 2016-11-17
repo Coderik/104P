@@ -32,7 +32,7 @@ Patch::Patch(Point center, Shape size)
 
 	_origin = _center - _relative_center;
 
-	_slice_origins = vector<Point>(size.size_t);
+	_slice_origins = std::vector<Point>(size.size_t);
 	for (unsigned int i = 0; i < _slice_origins.size(); i++) {
 		_slice_origins[i] = Point(_origin.x, _origin.y, _origin.t + i);
 	}
@@ -71,9 +71,9 @@ Point Patch::absolute(Point relative) const
 		return relative;
 	} else {
 		// ensure 'relative' point lies within the patch
-		relative.x = max(0, min((int)_size.size_x - 1, relative.x));
-		relative.y = max(0, min((int)_size.size_y - 1, relative.y));
-		relative.t = max(0, min((int)_size.size_t - 1, relative.t));
+		relative.x = std::max(0, std::min((int)_size.size_x - 1, relative.x));
+		relative.y = std::max(0, std::min((int)_size.size_y - 1, relative.y));
+		relative.t = std::max(0, std::min((int)_size.size_t - 1, relative.t));
 
 		if (!_is_shifted) {
 			return _origin + relative;

@@ -101,7 +101,7 @@ template<class T>
 Sequence<T>::Sequence(const Sequence<T> &other)	// copy constructor
 {
 
-	vector<Image<T> > aux(other._frames.begin(), other._frames.end());
+	std::vector<Image<T> > aux(other._frames.begin(), other._frames.end());
 	_frames.swap(aux);
 	_size = other._size;
 }
@@ -110,7 +110,7 @@ Sequence<T>::Sequence(const Sequence<T> &other)	// copy constructor
 template<class T>
 Sequence<T>::Sequence(const SequenceFx<T> &other)	// copy constructor
 {
-	vector<Image<T> > aux(other._frames.begin(), other._frames.end());
+	std::vector<Image<T> > aux(other._frames.begin(), other._frames.end());
 	_frames.swap(aux);
 	_size = other._size;
 }
@@ -124,7 +124,7 @@ Sequence<T>& Sequence<T>::operator= (const Sequence<T> &other)
 		return *this;
 	}
 
-	vector<Image<T> > aux(other._frames.begin(), other._frames.end());
+	std::vector<Image<T> > aux(other._frames.begin(), other._frames.end());
 	_frames.swap(aux);
 	_size = other._size;
 
@@ -135,7 +135,7 @@ Sequence<T>& Sequence<T>::operator= (const Sequence<T> &other)
 template <class T>
 Sequence<T>& Sequence<T>::operator= (const SequenceFx<T> &other)
 {
-	vector<Image<T> > aux(other._frames.begin(), other._frames.end());
+	std::vector<Image<T> > aux(other._frames.begin(), other._frames.end());
 	_frames.swap(aux);
 	_size = other._size;
 
@@ -387,7 +387,7 @@ SequenceFx<T>::SequenceFx(const Image<T> &frame, uint size_t)
 template<class T>
 SequenceFx<T>::SequenceFx(const SequenceFx<T> &other)	// copy constructor
 {
-	vector<ImageFx<T> > aux(other._frames.begin(), other._frames.end());
+	std::vector<ImageFx<T> > aux(other._frames.begin(), other._frames.end());
 	_frames.swap(aux);
 	_size = other._size;
 }
@@ -396,7 +396,7 @@ SequenceFx<T>::SequenceFx(const SequenceFx<T> &other)	// copy constructor
 template<class T>
 SequenceFx<T>::SequenceFx(const Sequence<T> &other)	// copy constructor
 {
-	vector<ImageFx<T> > aux(other._frames.begin(), other._frames.end());
+	std::vector<ImageFx<T> > aux(other._frames.begin(), other._frames.end());
 	_frames.swap(aux);
 	_size = other._size;
 }
@@ -410,7 +410,7 @@ SequenceFx<T>& SequenceFx<T>::operator= (const SequenceFx<T> &other)
 		return *this;
 	}
 
-	vector<ImageFx<T> > aux(other._frames.begin(), other._frames.end());
+	std::vector<ImageFx<T> > aux(other._frames.begin(), other._frames.end());
 	_frames.swap(aux);
 	_size = other._size;
 
@@ -421,7 +421,7 @@ SequenceFx<T>& SequenceFx<T>::operator= (const SequenceFx<T> &other)
 template <class T>
 SequenceFx<T>& SequenceFx<T>::operator= (const Sequence<T> &other)
 {
-	vector<ImageFx<T> > aux(other._frames.begin(), other._frames.end());
+	std::vector<ImageFx<T> > aux(other._frames.begin(), other._frames.end());
 	_frames.swap(aux);
 	_size = other._size;
 

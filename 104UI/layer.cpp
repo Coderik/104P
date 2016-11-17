@@ -12,7 +12,7 @@
 
 #include "layer.h"
 
-Layer::Layer(string id, string display_name)
+Layer::Layer(std::string id, std::string display_name)
 {
 	_id = id;
 	_display_name = display_name;
@@ -21,13 +21,13 @@ Layer::Layer(string id, string display_name)
 }
 
 
-string Layer::get_display_name()
+std::string Layer::get_display_name()
 {
 	return _display_name;
 }
 
 
-string Layer::get_id()
+std::string Layer::get_id()
 {
 	return _id;
 }

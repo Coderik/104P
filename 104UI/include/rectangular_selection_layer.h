@@ -15,12 +15,10 @@
 
 #include "layer.h"
 
-using namespace std;
-
 class RectangularSelectionLayer : public Layer
 {
 public:
-	RectangularSelectionLayer(string id, string display_name);
+	RectangularSelectionLayer(std::string id, std::string display_name);
 	virtual ~RectangularSelectionLayer();
 
 	void set_data(int x, int y, int width, int height, int timestamp);

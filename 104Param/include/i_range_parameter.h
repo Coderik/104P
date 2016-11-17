@@ -19,7 +19,7 @@ class IRangeParameter : public IParameter
 {
 public:
 	virtual ~IRangeParameter() {}
-	virtual string get_display_name() = 0;
+	virtual std::string get_display_name() = 0;
 	virtual float get_lower_boundary() = 0;
 	virtual float get_upper_boundary() = 0;
 	virtual int get_digits() = 0;

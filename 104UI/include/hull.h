@@ -51,12 +51,10 @@
 #include "mouse_event.h"
 #include "view.h"
 
-using namespace std;
-
 class Hull : public Gtk::Window, public IHull, public IRigManager, public IModulable, public IModuleManager
 {
 public:
-	Hull(string application_id);
+	Hull(std::string application_id);
 	virtual ~Hull();
 
 	// IRigManager members:
@@ -76,17 +74,17 @@ public:
 
 	// IModulable members:
 	virtual sigc::signal<void> signal_sequence_changed();
-	virtual void assign_menu(Gtk::Menu *menu, string title);
-	virtual string request_sequence_path();
-	virtual string request_open_dialog_result(string dialog_title, bool folder = false, Glib::RefPtr<Gtk::FileFilter> filter = Glib::RefPtr<Gtk::FileFilter>());
-	virtual string request_save_dialog_result(string dialog_title, Glib::RefPtr<Gtk::FileFilter> filter = Glib::RefPtr<Gtk::FileFilter>());
+	virtual void assign_menu(Gtk::Menu *menu, std::string title);
+	virtual std::string request_sequence_path();
+	virtual std::string request_open_dialog_result(std::string dialog_title, bool folder = false, Glib::RefPtr<Gtk::FileFilter> filter = Glib::RefPtr<Gtk::FileFilter>());
+	virtual std::string request_save_dialog_result(std::string dialog_title, Glib::RefPtr<Gtk::FileFilter> filter = Glib::RefPtr<Gtk::FileFilter>());
 	virtual void request_active_rig(RequestBase<IRig> &request);
-	virtual Descriptor add_view(string title, sigc::slot1<Glib::RefPtr<Gdk::Pixbuf>, int> provider);
-	virtual bool alter_view(Descriptor view_descriptor, string title, sigc::slot1<Glib::RefPtr<Gdk::Pixbuf>, int> provider);
+	virtual Descriptor add_view(std::string title, sigc::slot1<Glib::RefPtr<Gdk::Pixbuf>, int> provider);
+	virtual bool alter_view(Descriptor view_descriptor, std::string title, sigc::slot1<Glib::RefPtr<Gdk::Pixbuf>, int> provider);
 	virtual bool remove_view(Descriptor view_descriptor);
 	virtual bool queue_view_draw(Descriptor view_descriptor);
-	virtual Descriptor add_background_work_info(sigc::slot0<void> cancel_slot, string message = "");
-	virtual bool alter_background_work_info(Descriptor descriptor, string message);
+	virtual Descriptor add_background_work_info(sigc::slot0<void> cancel_slot, std::string message = "");
+	virtual bool alter_background_work_info(Descriptor descriptor, std::string message);
 	virtual bool remove_background_work_info(Descriptor descriptor);
 
 protected:
@@ -110,8 +108,8 @@ protected:
 
 private:
 	sigc::signal<void> _signal_sequence_changed;
-	vector<IModule* > _modules;
-	vector<Fitting* > _fittings;
+	std::vector<IModule* > _modules;
+	std::vector<Fitting* > _fittings;
 	Fitting *_current_fitting;
 	SequenceFx<float> _sequence;
 	std::map<Descriptor, View* > _view_map;
@@ -126,8 +124,8 @@ private:
 
 	UI_Container _ui;
 
-	void load_sequence(string path);
-	void load_image(string filename);
+	void load_sequence(std::string path);
+	void load_image(std::string filename);
 
 	void refresh_view_menu();
 

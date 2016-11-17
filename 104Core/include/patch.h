@@ -17,8 +17,6 @@
 #include "point.h"
 #include "shape.h"
 
-using namespace std;
-
 class Patch
 {
 public:
@@ -35,7 +33,7 @@ public:
 	Point get_slice_origin(unsigned int slice) const;
 
 private:
-	vector<Point> _slice_origins;
+	std::vector<Point> _slice_origins;
 	Point _center, _origin, _relative_center;
 	Shape _size;
 	bool _is_shifted;

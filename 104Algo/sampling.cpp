@@ -165,11 +165,11 @@ void Sampling::upsample(const float* in, float* out, uint size_x, uint size_y, u
 	// set samples in output image
 	for(uint i = 0; i < sample_size_y; i++) {
 		float y = (i - min_y) / factor_y;
-		y = max<float>(0.0, min<float>(size_y - 1, y));
+		y = std::max<float>(0.0, std::min<float>(size_y - 1, y));
 
 		for(uint j = 0; j < sample_size_x; j++) {
 			float x = (j - min_x) / factor_x;
-			x = max<float>(0.0, min<float>(size_x - 1, x));
+			x = std::max<float>(0.0, std::min<float>(size_x - 1, x));
 
 			float value = Interpolation::bilinear(in, size_x, size_y, x, y);
 			out[i * sample_size_x + j] = value;
