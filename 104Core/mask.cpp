@@ -168,18 +168,12 @@ MaskFx::iterator MaskFx::rend() const
 }
 
 
-/**
- * Returns the element without range checking. Does not affect internal cache.
- */
 bool MaskFx::get(uint x, uint y) const
 {
 	return _data.get()[index(x, y, 0)];
 }
 
 
-/**
- * Returns the element without range checking. Does not affect internal cache.
- */
 bool MaskFx::get(uint x, uint y, uint channel) const
 {
 
@@ -187,28 +181,18 @@ bool MaskFx::get(uint x, uint y, uint channel) const
 }
 
 
-/**
- * Returns the element without range checking. Does not affect internal cache.
- */
 bool MaskFx::get(Point p) const
 {
 	return _data.get()[index(p.x, p.y, 0)];
 }
 
 
-/**
- * Returns the element without range checking. Does not affect internal cache.
- */
 bool MaskFx::get(Point p, uint channel) const
 {
 	return _data.get()[index(p.x, p.y, channel)];
 }
 
 
-/**
- * Returns the element with range checking. Does not affect internal cache.
- * @return Value at a given coordinates or 'false', if out of range.
- */
 bool MaskFx::test(uint x, uint y) const
 {
 	if (x >= _size_x || y >= _size_y) {
@@ -219,10 +203,6 @@ bool MaskFx::test(uint x, uint y) const
 }
 
 
-/**
- * Returns the element with range checking. Does not affect internal cache.
- * @return Value at a given coordinates or 'false', if out of range.
- */
 bool MaskFx::test(uint x, uint y, uint channel) const
 {
 	if (x >= _size_x || y >= _size_y || channel >= _number_of_channels) {
@@ -233,10 +213,6 @@ bool MaskFx::test(uint x, uint y, uint channel) const
 }
 
 
-/**
- * Returns the element with range checking. Does not affect internal cache.
- * @return Value at a given coordinates or 'false', if out of range.
- */
 bool MaskFx::test(Point p) const
 {
 	if (p.x < 0 || (uint)p.x >= _size_x || p.y < 0 || (uint)p.y >= _size_y) {
@@ -247,10 +223,6 @@ bool MaskFx::test(Point p) const
 }
 
 
-/**
- * Returns the element with range checking. Does not affect internal cache.
- * @return Value at a given coordinates or 'false', if out of range.
- */
 bool MaskFx::test(Point p, uint channel) const
 {
 	if (p.x < 0 || (uint)p.x >= _size_x || p.x < 0 || (uint)p.y >= _size_y || channel >= _number_of_channels) {
@@ -261,9 +233,6 @@ bool MaskFx::test(Point p, uint channel) const
 }
 
 
-/**
- * Invokes deep copy.
- */
 MaskFx MaskFx::clone() const
 {
 	MaskFx clone;
@@ -282,9 +251,6 @@ MaskFx MaskFx::clone() const
 }
 
 
-/**
- * Invokes deep copy and then invert the cloned mask.
- */
 MaskFx MaskFx::clone_invert() const
 {
 	MaskFx clone;
@@ -308,9 +274,6 @@ MaskFx MaskFx::clone_invert() const
 }
 
 
-/**
- * Returns masked points as a vector.
- */
 std::vector<Point> MaskFx::masked_points() const
 {
 	if (!_internal->is_points_cache_valid) {
@@ -553,9 +516,6 @@ Mask& Mask::operator= (const MaskFx &other)
 }
 
 
-/**
- * Returns a reference to the element without range checking. Invalidates internal cache.
- */
 bool& Mask::operator() (uint x, uint y)
 {
 	_internal->is_first_last_valid = false;
@@ -565,9 +525,6 @@ bool& Mask::operator() (uint x, uint y)
 }
 
 
-/**
- * Returns a reference to the element without range checking. Invalidates internal cache.
- */
 bool& Mask::operator() (uint x, uint y, uint channel)
 {
 	_internal->is_first_last_valid = false;
@@ -577,9 +534,6 @@ bool& Mask::operator() (uint x, uint y, uint channel)
 }
 
 
-/**
- * Returns a reference to the element without range checking. Invalidates internal cache.
- */
 bool& Mask::operator() (Point p)
 {
 	_internal->is_first_last_valid = false;
@@ -589,9 +543,6 @@ bool& Mask::operator() (Point p)
 }
 
 
-/**
- * Returns a reference to the element without range checking. Invalidates internal cache.
- */
 bool& Mask::operator() (Point p, uint channel)
 {
 	_internal->is_first_last_valid = false;
@@ -601,10 +552,6 @@ bool& Mask::operator() (Point p, uint channel)
 }
 
 
-/**
- * Returns a reference to the element with range checking. Invalidates internal cache.
- * @note Throws std::out_of_range exception, if out of range.
- */
 bool& Mask::at(uint x, uint y)
 {
 	if (x >= _size_x || y >= _size_y) {
@@ -618,10 +565,6 @@ bool& Mask::at(uint x, uint y)
 }
 
 
-/**
- * Returns a reference to the element with range checking. Invalidates internal cache.
- * @note Throws std::out_of_range exception, if out of range.
- */
 bool& Mask::at(uint x, uint y, uint channel)
 {
 	if (x >= _size_x || y >= _size_y || channel >= _number_of_channels) {
@@ -635,10 +578,6 @@ bool& Mask::at(uint x, uint y, uint channel)
 }
 
 
-/**
- * Returns a reference to the element with range checking. Invalidates internal cache.
- * @note Throws std::out_of_range exception, if out of range.
- */
 bool& Mask::at(Point p)
 {
 	if (p.x < 0 || (uint)p.x >= _size_x || p.y < 0 || (uint)p.y >= _size_y) {
@@ -652,10 +591,6 @@ bool& Mask::at(Point p)
 }
 
 
-/**
- * Returns a reference to the element with range checking. Invalidates internal cache.
- * @note Throws std::out_of_range exception, if out of range.
- */
 bool& Mask::at(Point p, uint channel)
 {
 	if (p.x < 0 || (uint)p.x >= _size_x || p.x < 0 || (uint)p.y >= _size_y || channel >= _number_of_channels) {
@@ -669,10 +604,6 @@ bool& Mask::at(Point p, uint channel)
 }
 
 
-/**
- * Sets element to 'true' with range checking (does nothing, if out of range).
- * Invalidates internal cache.
- */
 void Mask::mask(uint x, uint y)
 {
 	if (x >= _size_x || y >= _size_y) {
@@ -686,10 +617,6 @@ void Mask::mask(uint x, uint y)
 }
 
 
-/**
- * Sets element to 'true' with range checking (does nothing, if out of range).
- * Invalidates internal cache.
- */
 void Mask::mask(uint x, uint y, uint channel)
 {
 	if (x >= _size_x || y >= _size_y || channel >= _number_of_channels) {
@@ -703,10 +630,6 @@ void Mask::mask(uint x, uint y, uint channel)
 }
 
 
-/**
- * Sets element to 'true' with range checking (does nothing, if out of range).
- * Invalidates internal cache.
- */
 void Mask::mask(Point p)
 {
 	if (p.x < 0 || (uint)p.x >= _size_x || p.y < 0 || (uint)p.y >= _size_y) {
@@ -720,10 +643,6 @@ void Mask::mask(Point p)
 }
 
 
-/**
- * Sets element to 'true' with range checking (does nothing, if out of range).
- * Invalidates internal cache.
- */
 void Mask::mask(Point p, uint channel)
 {
 	if (p.x < 0 || (uint)p.x >= _size_x || p.x < 0 || (uint)p.y >= _size_y || channel >= _number_of_channels) {
@@ -737,10 +656,6 @@ void Mask::mask(Point p, uint channel)
 }
 
 
-/**
- * Sets element to 'false' with range checking (does nothing, if out of range).
- * Invalidates internal cache.
- */
 void Mask::unmask(uint x, uint y)
 {
 	if (x >= _size_x || y >= _size_y) {
@@ -754,10 +669,6 @@ void Mask::unmask(uint x, uint y)
 }
 
 
-/**
- * Sets element to 'false' with range checking (does nothing, if out of range).
- * Invalidates internal cache.
- */
 void Mask::unmask(uint x, uint y, uint channel)
 {
 	if (x >= _size_x || y >= _size_y || channel >= _number_of_channels) {
@@ -771,10 +682,6 @@ void Mask::unmask(uint x, uint y, uint channel)
 }
 
 
-/**
- * Sets element to 'false' with range checking (does nothing, if out of range).
- * Invalidates internal cache.
- */
 void Mask::unmask(Point p)
 {
 	if (p.x < 0 || (uint)p.x >= _size_x || p.y < 0 || (uint)p.y >= _size_y) {
@@ -788,10 +695,6 @@ void Mask::unmask(Point p)
 }
 
 
-/**
- * Sets element to 'false' with range checking (does nothing, if out of range).
- * Invalidates internal cache.
- */
 void Mask::unmask(Point p, uint channel)
 {
 	if (p.x < 0 || (uint)p.x >= _size_x || p.x < 0 || (uint)p.y >= _size_y || channel >= _number_of_channels) {
@@ -805,9 +708,6 @@ void Mask::unmask(Point p, uint channel)
 }
 
 
-/**
- * Invokes deep copy.
- */
 Mask Mask::clone() const
 {
 	Mask clone;
@@ -826,10 +726,6 @@ Mask Mask::clone() const
 }
 
 
-/**
- * Invokes deep copy and then invert the cloned mask.
- * @return Inverted copy of current mask.
- */
 Mask Mask::clone_invert() const
 {
 	Mask clone;
@@ -853,9 +749,6 @@ Mask Mask::clone_invert() const
 }
 
 
-/**
- * Invert current mask.
- */
 void Mask::invert()
 {
 	bool *data = _data.get();

@@ -61,6 +61,8 @@ public:
 
 	/// Is current image not empty.
 	operator bool() const;
+
+	/// Is current image empty.
 	bool is_empty() const;
 
 	uint size_x() const;
@@ -69,31 +71,36 @@ public:
 	uint number_of_channels() const;
     ColorSpaces::ColorSpace color_space() const;
 
-	/// Returns read-only value without range checking.
+	/// Return read-only value without range checking.
 	const T& operator() (uint x, uint y) const;
 	const T& operator() (uint x, uint y, uint channel) const;
 	const T& operator() (const Point &p) const;
 	const T& operator() (const Point &p, uint channel) const;
 
-	/// Returns read-only value with range checking.
-	/// Throws std::out_of_range exception, if out of range.
+	/// Return read-only value with range checking.
+	/// @note Throws std::out_of_range exception, if out of range.
 	const T& at(uint x, uint y) const;
 	const T& at(uint x, uint y, uint channel) const;
 	const T& at(const Point &p) const;
 	const T& at(const Point &p, uint channel) const;
 
-	/// Checks if all indexes are in range and modifies the value parameter.
+	/// Check if all indexes are in range and modifies the value parameter.
+	/// @param value [out] Value of an element at a given coordinates, if in range.
+ 	/// @return Are given coordinates in range?
 	bool try_get_value(uint x, uint y, T& value) const;
 	bool try_get_value(uint x, uint y, uint channel, T& value) const;
 	bool try_get_value(const Point &p, T& value) const;
 	bool try_get_value(const Point &p, uint channel, T& value) const;
 
-	/// Returns pointer to internal data.
+	/// Return pointer to internal data.
 	const T* raw() const;
+
+	/// Return length of internal data.
 	const uint raw_length() const;
+
 	const uint number_of_pixels() const;
 
-	/// Invokes deep copy.
+	/// Invoke deep copy.
 	ImageFx<T> clone() const;
 
 protected:
@@ -138,31 +145,31 @@ public:
 
     void set_color_space(ColorSpaces::ColorSpace value);
 
-	// Prevent hiding of const versions of these methods
+	// Prevent hiding of const versions of these methods.
 	using ImageFx<T>::operator();
 	using ImageFx<T>::at;
 	using ImageFx<T>::raw;
 
-	/// Returns a reference to the element without range checking.
+	/// Return a reference to the element without range checking.
 	T& operator() (uint x, uint y);
 	T& operator() (uint x, uint y, uint channel);
 	T& operator() (const Point &p);
 	T& operator() (const Point &p, uint channel);
 
-	/// Returns a reference to the element with range checking.
-	/// Throws std::out_of_range exception, if out of range.
+	/// Return a reference to the element with range checking.
+	/// @note Throws std::out_of_range exception, if out of range.
 	T& at(uint x, uint y);
 	T& at(uint x, uint y, uint channel);
 	T& at(const Point &p);
 	T& at(const Point &p, uint channel);
 
-	/// Assigns a given value to all elements.
+	/// Assign a given value to all elements.
 	void fill(const T &value);
 
-	/// Returns pointer to internal data.
+	/// Return pointer to internal data.
 	T* raw();
 
-	/// Invokes deep copy.
+	/// Invoke deep copy.
 	Image<T> clone() const;
 };
 

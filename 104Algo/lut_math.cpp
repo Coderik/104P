@@ -12,11 +12,6 @@
 
 #include "lut_math.h"
 
-/**
- * @brief Look-up table implementation of exponent
- * @note: make sure to use this method only for the range (-709; 709).
- *        For automatic range check use LUT::exp_rc version.
- */
 double LUT::exp(double x)
 {
 	float_long tmp;
@@ -27,9 +22,6 @@ double LUT::exp(double x)
 }
 
 
-/**
- * @brief Look-up table implementation of exponent with range check.
- */
 double LUT::exp_rc(double x)
 {
 	if (x > 709.0) {
@@ -47,10 +39,6 @@ double LUT::exp_rc(double x)
 }
 
 
-
-/**
- * @brief Look-up table implementation of exponent with negative boundary of the range check.
- */
 double LUT::exp_rcn(double x)
 {
 	if (x < -709.0) {
@@ -65,9 +53,6 @@ double LUT::exp_rcn(double x)
 }
 
 
-/**
- * @brief Look-up table implementation of exponent with positive boundary of the range check.
- */
 double LUT::exp_rcp(double x)
 {
 	if (x > 709.0) {

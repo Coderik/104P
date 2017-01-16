@@ -35,7 +35,11 @@ struct Point
 	Point& operator-= (const Point &p);
 	const Point operator+ (const Point &p) const;
 	const Point operator- (const Point &p) const;
+
+	/// Sum only spatial (x and y) components and keeps temporal (t) component.
 	const Point spatial_add (const Point &p) const;
+
+	/// Subtracts only spatial (x and y) components and keeps temporal (t) component.
 	const Point spatial_subtract (const Point &p) const;
 
 	friend inline bool operator< (const Point& lhs, const Point& rhs);

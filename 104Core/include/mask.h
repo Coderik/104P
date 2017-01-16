@@ -61,13 +61,16 @@ public:
 	iterator rbegin() const;
 	iterator rend() const;
 
-	/// Returns the element without range checking. Does not affect internal cache.
+	/// Returns the element without range checking.
+	/// @note Does not affect internal cache.
 	bool get(uint x, uint y) const;
 	bool get(uint x, uint y, uint channel) const;
 	bool get(Point p)  const;
 	bool get(Point p, uint channel)  const;
 
-	/// Returns the element with range checking (returns 'false', if out of range). Does not affect internal cache.
+	/// Returns the element with range checking.
+	/// @note Does not affect internal cache.
+	/// @return Value at a given coordinates or 'false', if out of range.
 	bool test(uint x, uint y)  const;
 	bool test(uint x, uint y, uint channel)  const;
 	bool test(Point p)  const;
@@ -139,40 +142,42 @@ public:
 	using ImageFx<bool>::operator();
 	using ImageFx<bool>::at;
 
-	/// Returns a reference to the element without range checking. Invalidates internal cache.
+	/// Return a reference to the element without range checking.
+	/// @note Invalidates internal cache.
 	bool& operator() (uint x, uint y);
 	bool& operator() (uint x, uint y, uint channel);
 	bool& operator() (Point p);
 	bool& operator() (Point p, uint channel);
 
-	/// Returns a reference to the element with range checking.
-	/// Throws std::out_of_range exception, if out of range. Invalidates internal cache.
+	/// Return a reference to the element with range checking.
+	/// @note Throws std::out_of_range exception, if out of range. Invalidates internal cache.
 	bool& at(uint x, uint y);
 	bool& at(uint x, uint y, uint channel);
 	bool& at(Point p);
 	bool& at(Point p, uint channel);
 
-	/// Sets element to 'true' with range checking (does nothing, if out of range).
-	/// Invalidates internal cache.
+	/// Set element to 'true' with range checking (does nothing, if out of range).
+	/// @note Invalidates internal cache.
 	void mask(uint x, uint y);
 	void mask(uint x, uint y, uint channel);
 	void mask(Point p);
 	void mask(Point p, uint channel);
 
-	/// Sets element to 'false' with range checking (does nothing, if out of range).
-	/// Invalidates internal cache.
+	/// Set element to 'false' with range checking (does nothing, if out of range).
+	/// @note Invalidates internal cache.
 	void unmask(uint x, uint y);
 	void unmask(uint x, uint y, uint channel);
 	void unmask(Point p);
 	void unmask(Point p, uint channel);
 
-	/// Invokes deep copy.
+	/// Invoke deep copy.
 	Mask clone() const;
 
-	/// Invokes deep copy and then invert the cloned mask.
+	/// Invoke deep copy and then invert the cloned mask.
 	Mask clone_invert() const;
 
 	/// Invert current mask.
+	/// @note Invalidates internal cache.
     void invert();
 };
 

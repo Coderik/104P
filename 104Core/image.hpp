@@ -142,10 +142,6 @@ ImageFx<T>& ImageFx<T>::operator= (const Image<T> &other)
 }
 
 
-/**
- * Checks if current image is not empty.
- * @return Is the image not empty?
- */
 template <class T>
 ImageFx<T>::operator bool() const
 {
@@ -195,9 +191,6 @@ ColorSpaces::ColorSpace ImageFx<T>::color_space() const
 }
 
 
-/**
- * Returns read-only value without range checking.
- */
 template <class T>
 const T& ImageFx<T>::operator() (uint x, uint y) const
 {
@@ -205,9 +198,6 @@ const T& ImageFx<T>::operator() (uint x, uint y) const
 }
 
 
-/**
- * Returns read-only value without range checking.
- */
 template <class T>
 const T& ImageFx<T>::operator() (uint x, uint y, uint channel) const
 {
@@ -215,9 +205,6 @@ const T& ImageFx<T>::operator() (uint x, uint y, uint channel) const
 }
 
 
-/**
- * Returns read-only value without range checking.
- */
 template <class T>
 const T& ImageFx<T>::operator() (const Point &p) const
 {
@@ -225,9 +212,6 @@ const T& ImageFx<T>::operator() (const Point &p) const
 }
 
 
-/**
- * Returns read-only value without range checking.
- */
 template <class T>
 const T& ImageFx<T>::operator() (const Point &p, uint channel) const
 {
@@ -235,10 +219,6 @@ const T& ImageFx<T>::operator() (const Point &p, uint channel) const
 }
 
 
-/**
- * Returns read-only value with range checking.
- * @note Throws std::out_of_range exception, if out of range.
- */
 template <class T>
 const T& ImageFx<T>::at(uint x, uint y) const
 {
@@ -250,10 +230,6 @@ const T& ImageFx<T>::at(uint x, uint y) const
 }
 
 
-/**
- * Returns read-only value with range checking.
- * @note Throws std::out_of_range exception, if out of range.
- */
 template <class T>
 const T& ImageFx<T>::at(uint x, uint y, uint channel) const
 {
@@ -265,10 +241,6 @@ const T& ImageFx<T>::at(uint x, uint y, uint channel) const
 }
 
 
-/**
- * Returns read-only value with range checking.
- * @note Throws std::out_of_range exception, if out of range.
- */
 template <class T>
 const T& ImageFx<T>::at(const Point &p) const
 {
@@ -280,10 +252,6 @@ const T& ImageFx<T>::at(const Point &p) const
 }
 
 
-/**
- * Returns read-only value with range checking.
- * @note Throws std::out_of_range exception, if out of range.
- */
 template <class T>
 const T& ImageFx<T>::at(const Point &p, uint channel) const
 {
@@ -295,11 +263,6 @@ const T& ImageFx<T>::at(const Point &p, uint channel) const
 }
 
 
-/**
- * Checks if all indexes are in range and modifies the value parameter.
- * @param value [out] Value of an element at a given coordinates, if in range.
- * @return Are given coordinates in range?
- */
 template <class T>
 bool ImageFx<T>::try_get_value(uint x, uint y, T& value) const
 {
@@ -313,11 +276,6 @@ bool ImageFx<T>::try_get_value(uint x, uint y, T& value) const
 }
 
 
-/**
- * Checks if all indexes are in range and modifies the value parameter.
- * @param value [out] Value of an element at a given coordinates, if in range.
- * @return Are given coordinates in range?
- */
 template <class T>
 bool ImageFx<T>::try_get_value(uint x, uint y, uint channel, T& value) const
 {
@@ -331,11 +289,6 @@ bool ImageFx<T>::try_get_value(uint x, uint y, uint channel, T& value) const
 }
 
 
-/**
- * Checks if all indexes are in range and modifies the value parameter.
- * @param value [out] Value of an element at a given coordinates, if in range.
- * @return Are given coordinates in range?
- */
 template <class T>
 bool ImageFx<T>::try_get_value(const Point &p, T& value) const
 {
@@ -349,11 +302,6 @@ bool ImageFx<T>::try_get_value(const Point &p, T& value) const
 }
 
 
-/**
- * Checks if all indexes are in range and modifies the value parameter.
- * @param value [out] Value of an element at a given coordinates, if in range.
- * @return Are given coordinates in range?
- */
 template <class T>
 bool ImageFx<T>::try_get_value(const Point &p, uint channel, T& value) const
 {
@@ -367,9 +315,6 @@ bool ImageFx<T>::try_get_value(const Point &p, uint channel, T& value) const
 }
 
 
-/**
- * Returns pointer to internal data.
- */
 template <class T>
 const T* ImageFx<T>::raw() const
 {
@@ -589,9 +534,6 @@ void Image<T>::set_color_space(ColorSpaces::ColorSpace value)
 }
 
 
-/**
- * Returns a reference to the element without range checking.
- */
 template <class T>
 T& Image<T>::operator() (uint x, uint y)
 {
@@ -599,9 +541,6 @@ T& Image<T>::operator() (uint x, uint y)
 }
 
 
-/**
- * Returns a reference to the element without range checking.
- */
 template <class T>
 T& Image<T>::operator() (uint x, uint y, uint channel)
 {
@@ -609,9 +548,6 @@ T& Image<T>::operator() (uint x, uint y, uint channel)
 }
 
 
-/**
- * Returns a reference to the element without range checking.
- */
 template <class T>
 T& Image<T>::operator() (const Point &p)
 {
@@ -619,9 +555,6 @@ T& Image<T>::operator() (const Point &p)
 }
 
 
-/**
- * Returns a reference to the element without range checking.
- */
 template <class T>
 T& Image<T>::operator() (const Point &p, uint channel)
 {
@@ -629,10 +562,6 @@ T& Image<T>::operator() (const Point &p, uint channel)
 }
 
 
-/**
- * Returns a reference to the element with range checking.
- * @note Throws std::out_of_range exception, if out of range.
- */
 template <class T>
 T& Image<T>::at(uint x, uint y)
 {
@@ -644,10 +573,6 @@ T& Image<T>::at(uint x, uint y)
 }
 
 
-/**
- * Returns a reference to the element with range checking.
- * @note Throws std::out_of_range exception, if out of range.
- */
 template <class T>
 T& Image<T>::at(uint x, uint y, uint channel)
 {
@@ -659,10 +584,6 @@ T& Image<T>::at(uint x, uint y, uint channel)
 }
 
 
-/**
- * Returns a reference to the element with range checking.
- * @note Throws std::out_of_range exception, if out of range.
- */
 template <class T>
 T& Image<T>::at(const Point &p)
 {
@@ -674,10 +595,6 @@ T& Image<T>::at(const Point &p)
 }
 
 
-/**
- * Returns a reference to the element with range checking.
- * @note Throws std::out_of_range exception, if out of range.
- */
 template <class T>
 T& Image<T>::at(const Point &p, uint channel)
 {
@@ -689,9 +606,6 @@ T& Image<T>::at(const Point &p, uint channel)
 }
 
 
-/**
- * Assigns a given value to all elements.
- */
 template <class T>
 void Image<T>::fill(const T &value)
 {
@@ -699,9 +613,6 @@ void Image<T>::fill(const T &value)
 }
 
 
-/**
- * Returns pointer to internal data.
- */
 template <class T>
 T* Image<T>::raw()
 {
@@ -709,9 +620,6 @@ T* Image<T>::raw()
 }
 
 
-/**
- * Invokes deep copy.
- */
 template <class T>
 Image<T> Image<T>::clone() const
 {

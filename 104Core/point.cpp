@@ -96,9 +96,6 @@ const Point Point::operator- (const Point &p) const
 }
 
 
-/**
- * Sums only spatial (x and y) components and keeps temporal (t) component
- */
 const Point Point::spatial_add (const Point &p) const
 {
 	Point result = *this;
@@ -108,9 +105,6 @@ const Point Point::spatial_add (const Point &p) const
 }
 
 
-/**
- * Subtracts only spatial (x and y) components and keeps temporal (t) component
- */
 const Point Point::spatial_subtract (const Point &p) const
 {
 	Point result = *this;

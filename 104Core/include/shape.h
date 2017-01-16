@@ -39,9 +39,13 @@ struct Shape
 	friend inline bool operator>=(const Shape& lhs, const Shape& rhs);
 
 	bool is_empty() const;
+
+	/// Check if point lies inside the shape (relative to the top left point).
 	bool contains(const Point &p) const;
 	bool contains(int x, int y) const;
 	bool contains(int x, int y, int t) const;
+
+	/// Check if point lies inside the shape (relative to the center point).
 	bool abs_contains(const Point &p) const;
 
 	static Shape empty;

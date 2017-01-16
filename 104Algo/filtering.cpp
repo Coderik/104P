@@ -13,7 +13,7 @@
 #include "filtering.h"
 
 /**
- * Remember that the filters are ﬂipped in convolution
+ * @note Remember that the filters are ﬂipped in convolution
  */
 void Filtering::separate_convolution(const float *in, float *out, int size_x, int size_y, const float *filter_x, const float *filter_y, int filter_x_size, int filter_y_size)
 {
@@ -80,7 +80,7 @@ void Filtering::separate_convolution(const float *in, float *out, int size_x, in
 		}
 	}
 
-	/* free memory */
+	// Free memory
 
 	delete [] buffer;
 }

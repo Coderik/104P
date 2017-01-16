@@ -15,14 +15,24 @@
 
 #include "point.h"
 
+/**
+ * Interface for a mask that allows to iterate through the masked points.
+ */
 class IIterableMask
 {
 public:
 	virtual ~IIterableMask() {}
 
+	/// Get the first masked point
 	virtual Point first() const = 0;
+
+	/// Get the last masked point
 	virtual Point last() const = 0;
+
+	/// Get the next masked point
 	virtual Point next(const Point &current) const = 0;
+
+	/// Get the previous masked point
 	virtual Point prev(const Point &current) const = 0;
 };
 
