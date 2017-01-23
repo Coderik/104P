@@ -820,7 +820,7 @@ void IOUtility::yuv_to_rgb(const float *yuv, float *rgb)
 /**
  * @brief Repeat a single channel given number of times.
  */
-static Image<float> IOUtility::repeat_channel(const ImageFx<float> &image,
+Image<float> IOUtility::repeat_channel(const ImageFx<float> &image,
 											  unsigned int num,
 											  ColorSpaces::ColorSpace color_space)
 {
