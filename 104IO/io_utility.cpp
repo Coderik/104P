@@ -350,6 +350,30 @@ std::vector<Image<float> > IOUtility::read_all_flows(const std::string &folder, 
 }
 
 
+Image<float> IOUtility::rgb_to_gray(ImageFx<float> image)
+{
+	if (image.number_of_channels() != 3) {
+		return image;
+	}
+
+	if (image.color_space() != ColorSpaces::RGB) {
+		std::cerr << "WARNING! Original image is not in RGB color space [IOUtility::rgb_to_gray]." << std::endl;
+	}
+
+	Image<float> image_gray(image.size(), 1, 0.0f);
+	image_gray.set_color_space(ColorSpaces::mono);
+	float* data_gray = image_gray.raw();
+	const float *data_rgb = image.raw();
+	long number_of_pixels = image.size_x() * image.size_y();
+
+	for (int i = 0; i < number_of_pixels; i++) {
+		data_gray[i] = 0.2989f * data_rgb[3 * i] + 0.5870f * data_rgb[3 * i + 1] + 0.1140f * data_rgb[3 * i + 2];
+	}
+
+	return image_gray;
+}
+
+
 Image<float> IOUtility::rgb_to_lab(ImageFx<float> image)
 {
 	if (image.number_of_channels() != 3) {
@@ -405,30 +429,6 @@ Image<float> IOUtility::lab_to_rgb(ImageFx<float> image)
 	delete[] xyz_buffer;
 
 	return image_rgb;
-}
-
-
-Image<float> IOUtility::rgb_to_gray(ImageFx<float> image)
-{
-	if (image.number_of_channels() != 3) {
-		return image;
-	}
-
-    if (image.color_space() != ColorSpaces::RGB) {
-        std::cerr << "WARNING! Original image is not in RGB color space [IOUtility::rgb_to_gray]." << std::endl;
-    }
-
-	Image<float> image_gray(image.size(), 1, 0.0f);
-    image_gray.set_color_space(ColorSpaces::mono);
-	float* data_gray = image_gray.raw();
-	const float *data_rgb = image.raw();
-	long number_of_pixels = image.size_x() * image.size_y();
-
-	for (int i = 0; i < number_of_pixels; i++) {
-		data_gray[i] = 0.2989f * data_rgb[3 * i] + 0.5870f * data_rgb[3 * i + 1] + 0.1140f * data_rgb[3 * i + 2];
-	}
-
-	return image_gray;
 }
 
 
@@ -532,10 +532,6 @@ Image<float> IOUtility::yuv_to_rgb(ImageFx<float> image)
 }
 
 
-/**
- * @brief Convert an image with multiple channels into a mono image that captures most of the geometric details.
- * @note For RGB does RGB -> gray, for YUV and Lab extracts the first channel, for HSV extract the third channel, otherwise averages.
- */
 Image<float> IOUtility::to_mono(ImageFx<float> image)
 {
 	unsigned int number_of_channels = image.number_of_channels();
@@ -555,9 +551,6 @@ Image<float> IOUtility::to_mono(ImageFx<float> image)
 }
 
 
-/**
- * @brief Convert an image into a RGB image
- */
 Image<float> IOUtility::to_rgb(ImageFx<float> image)
 {
 	if (image.color_space() == ColorSpaces::RGB) {
@@ -569,73 +562,16 @@ Image<float> IOUtility::to_rgb(ImageFx<float> image)
 	} else if (image.color_space() == ColorSpaces::YUV) {
 		return IOUtility::yuv_to_rgb(image);
 	} else if (image.color_space() == ColorSpaces::mono || image.number_of_channels() == 1) {
-		// TODO: repeat channels
-		return image;
+		return repeat_channel(image, 3, ColorSpaces::RGB);
 	}
 
 	return Image<float>();
 }
 
 
-/**
- * @brief Extract a single channel from a given image.
- */
-Image<float> IOUtility::take_channel(ImageFx<float> image, unsigned int channel_id)
+void IOUtility::set_prefix(const std::string &prefix)
 {
-	unsigned int number_of_channels = image.number_of_channels();
-	if (channel_id >= number_of_channels) {
-		return Image<float>();
-	}
-
-	Image<float> image_out(image.size(), 1, 0.0f);
-	image_out.set_color_space(ColorSpaces::mono);
-	float *data_out = image_out.raw();
-	const float *data = image.raw();
-	long number_of_pixels = image.size_x() * image.size_y();
-
-	for (int i = 0; i < number_of_pixels; i++) {
-		data_out[i] = data[number_of_channels * i + channel_id];
-	}
-
-	return image_out;
-}
-
-
-/**
- * @brief Create a new image with a single channel which values are averages of multiple channels of an input image.
- */
-Image<float> IOUtility::average_channels(ImageFx<float> image)
-{
-	unsigned int number_of_channels = image.number_of_channels();
-	if (number_of_channels == 1) {
-		return image;
-	}
-
-	Image<float> image_avg(image.size(), 1, 0.0f);
-	image_avg.set_color_space(ColorSpaces::mono);
-	float *data_avg = image_avg.raw();
-	const float *data = image.raw();
-	long number_of_pixels = image.size_x() * image.size_y();
-
-	if (number_of_channels == 3) {
-		for (int i = 0; i < number_of_pixels; i++) {
-			data_avg[i] = (data[3 * i] + data[3 * i + 1] + data[3 * i + 2]) / 3.0f;
-		}
-	} else if (number_of_channels == 2) {
-		for (int i = 0; i < number_of_pixels; i++) {
-			data_avg[i] = (data[2 * i] + data[2 * i + 1]) / 2.0f;
-		}
-	} else {	// general case
-		for (int i = 0; i < number_of_pixels; i++) {
-			float avg = 0.0f;
-			for (int ch = 0; ch < number_of_channels; ch++) {
-				avg += data[number_of_channels * i + ch];
-			}
-			data_avg[i] = avg / (float)number_of_channels;
-		}
-	}
-
-	return image_avg;
+	_prefix = prefix;
 }
 
 
@@ -662,12 +598,6 @@ std::string IOUtility::compose_file_name(const std::string &name, int index, int
 	return file_name;
 }
 
-
-void IOUtility::set_prefix(const std::string &prefix)
-{
-	_prefix = prefix;
-}
-
 /* Private */
 
 void IOUtility::skip_spaces_and_comments(FILE * f)
@@ -684,7 +614,7 @@ void IOUtility::skip_spaces_and_comments(FILE * f)
 
 
 /**
- *  Reads a number digit by digit.
+ *  Read a number digit by digit.
  */
 int IOUtility::get_number(FILE * f)
 	{
@@ -821,7 +751,7 @@ void IOUtility::hsv_to_rgb(const float *hsv, float *rgb)
     }
 
     float h = hsv[0] / 60.0f;
-    int id = (int)h;					// sector 0 to 5
+    int id = (int)h;			// sector 0 to 5
     float f = h - (float)id;	// factorial part of h
 
     float p = hsv[2] * (1.0f - hsv[1]);
@@ -884,4 +814,94 @@ void IOUtility::yuv_to_rgb(const float *yuv, float *rgb)
     rgb[0] = a * yuv[0] + b * yuv[1] + c * 0.5f * yuv[2];
     rgb[1] = a * yuv[0] - c * yuv[2];
     rgb[2] = a * yuv[0] - b * yuv[1] + c * 0.5f * yuv[2];
+}
+
+
+/**
+ * @brief Repeat a single channel given number of times.
+ */
+static Image<float> IOUtility::repeat_channel(const ImageFx<float> &image,
+											  unsigned int num,
+											  ColorSpaces::ColorSpace color_space)
+{
+	unsigned int number_of_channels = image.number_of_channels();
+	if (number_of_channels != 1) {
+		return Image<float>();
+	}
+
+	Image<float> image_out(image.size(), num, 0.0f);
+	image_out.set_color_space(color_space);
+	float *data_out = image_out.raw();
+	const float *data = image.raw();
+	long number_of_pixels = image.size_x() * image.size_y();
+
+	for (int i = 0; i < number_of_pixels; ++i) {
+		for (int j = 0; j < num; ++j) {
+			data_out[num * i + j] = data[i];
+		}
+	}
+
+	return image_out;
+}
+
+
+/**
+ * @brief Extract a single channel from a given image.
+ */
+Image<float> IOUtility::take_channel(const ImageFx<float> &image, unsigned int channel_id)
+{
+	unsigned int number_of_channels = image.number_of_channels();
+	if (channel_id >= number_of_channels) {
+		return Image<float>();
+	}
+
+	Image<float> image_out(image.size(), 1, 0.0f);
+	image_out.set_color_space(ColorSpaces::mono);
+	float *data_out = image_out.raw();
+	const float *data = image.raw();
+	long number_of_pixels = image.size_x() * image.size_y();
+
+	for (int i = 0; i < number_of_pixels; i++) {
+		data_out[i] = data[number_of_channels * i + channel_id];
+	}
+
+	return image_out;
+}
+
+
+/**
+ * @brief Create a new image with a single channel which values are averages of multiple channels of an input image.
+ */
+Image<float> IOUtility::average_channels(const ImageFx<float> &image)
+{
+	unsigned int number_of_channels = image.number_of_channels();
+	if (number_of_channels == 1) {
+		return image;
+	}
+
+	Image<float> image_avg(image.size(), 1, 0.0f);
+	image_avg.set_color_space(ColorSpaces::mono);
+	float *data_avg = image_avg.raw();
+	const float *data = image.raw();
+	long number_of_pixels = image.size_x() * image.size_y();
+
+	if (number_of_channels == 3) {
+		for (int i = 0; i < number_of_pixels; i++) {
+			data_avg[i] = (data[3 * i] + data[3 * i + 1] + data[3 * i + 2]) / 3.0f;
+		}
+	} else if (number_of_channels == 2) {
+		for (int i = 0; i < number_of_pixels; i++) {
+			data_avg[i] = (data[2 * i] + data[2 * i + 1]) / 2.0f;
+		}
+	} else {	// general case
+		for (int i = 0; i < number_of_pixels; i++) {
+			float avg = 0.0f;
+			for (int ch = 0; ch < number_of_channels; ch++) {
+				avg += data[number_of_channels * i + ch];
+			}
+			data_avg[i] = avg / (float)number_of_channels;
+		}
+	}
+
+	return image_avg;
 }
